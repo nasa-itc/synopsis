@@ -7,5 +7,5 @@ extracted onboard the spacecraft to summarize data.
 
 ## Setup
 1. Run `cmake -S . -B build` to set up the build directory
-2. Run `cmake --build build` to buid the code
+2. Run `cmake --build build` to build the code
 3. Run `cd build && ctest` to execute the tests

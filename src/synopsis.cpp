@@ -1,8 +1,9 @@
 /*
  * Public SYNOPSIS functionality
  */
-#include <stdlib.h>
-#include <synopsis.h>
+#include <cstddef>
+
+#include "synopsis.hpp"
 
 namespace Synopsis {
 
@@ -20,7 +21,3 @@ namespace Synopsis {
     }
 
 };
-
-int synopsis_hello_world(void) {
-    return 12345;
-}

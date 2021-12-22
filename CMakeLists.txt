@@ -14,10 +14,11 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_library(synopsis SHARED
-    src/synopsis.cc
+    src/synopsis.cpp
+    src/DpMsg.cpp
 )
 set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
-set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.h)
+set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)
 target_include_directories(synopsis PRIVATE include)
 target_include_directories(synopsis PRIVATE src)
 
@@ -32,7 +33,7 @@ enable_testing()
 
 add_executable(
   synopsis_test
-  test/synopsis_test.cc
+  test/synopsis_test.cpp
 )
 target_include_directories(synopsis_test PRIVATE include)
 target_link_libraries(
