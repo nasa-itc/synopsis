@@ -3,13 +3,40 @@
 #include <synopsis.hpp>
 
 
+class TestASDS : public Synopsis::ASDS {
+
+    public:
+
+        Synopsis::Status init(void) override {
+            return Synopsis::SUCCESS;
+        }
+
+        Synopsis::Status process_data_product(Synopsis::DpMsg msg) override {
+            return Synopsis::SUCCESS;
+        }
+
+        size_t memory_requirement(void) override {
+            return 123;
+        }
+};
+
+
 // Demonstrate some basic assertions.
 TEST(SynopsisTest, TestApplicationInterface) {
     // Test initialization
     Synopsis::Application app;
-    Synopsis::Application::Status status;
+    Synopsis::Status status;
+
+    TestASDS asds;
+    status = app.add_module(&asds);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    size_t mem_req;
+    mem_req = app.memory_requirement();
+    EXPECT_EQ(123, mem_req);
+
     status = app.init();
-    EXPECT_EQ(Synopsis::Application::Status::SUCCESS, status);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
 TEST(SynopsisTest, TestDpMsg) {

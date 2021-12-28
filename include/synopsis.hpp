@@ -5,7 +5,15 @@
 #define JPL_SYNOPSIS_PUBLIC
 #include <string>
 
+#define MAX_SYNOPSIS_APP_MODULES 32
+
 namespace Synopsis {
+
+
+    typedef enum {
+        SUCCESS = 0,
+        FAILURE = 1
+    } Status;
 
     class DpMsg {
 
@@ -34,14 +42,28 @@ namespace Synopsis {
     };
 
 
-    class Application {
+    class ApplicationModule {
 
         public:
 
-            typedef enum {
-                SUCCESS = 0,
-                FAILURE = 1
-            } Status;
+            // Constructor
+            ApplicationModule();
+
+            /*
+             * Performs module initialization
+             */
+            virtual Status init(void) = 0;
+
+            /*
+             * Returns the required memory for the module
+             */
+            virtual size_t memory_requirement(void) = 0;
+    };
+
+
+    class Application {
+
+        public:
 
             /*
              * Constructor
@@ -53,6 +75,13 @@ namespace Synopsis {
              */
             Status init(void);
 
+            Status add_module(ApplicationModule *module);
+
+            /*
+             * Returns the required memory for the application
+             */
+            size_t memory_requirement(void);
+
         private:
 
             /*
@@ -60,25 +89,11 @@ namespace Synopsis {
              */
             void *memory_buffer;
 
+            int n_modules;
+            ApplicationModule *modules[MAX_SYNOPSIS_APP_MODULES];
+
     };
 
-    class ApplicationModule {
-
-        public:
-
-            // Constructor
-            ApplicationModule();
-
-            /*
-             * Performs module initialization
-             */
-            Application::Status init(void);
-
-            /*
-             * Returns the required memory for the module
-             */
-            size_t memory_requirement(void);
-    };
 
     /*
      * Base class for an Autonomous Science Data System (ASDS)
@@ -86,10 +101,20 @@ namespace Synopsis {
     class ASDS : public ApplicationModule {
 
         public:
-            virtual Application::Status process_data_product(DpMsg msg) = 0;
+            virtual Status process_data_product(DpMsg msg) = 0;
 
-        private:
-            Application::Status submit_data_product(DpMsg msg);
+        protected:
+            Status submit_data_product(DpMsg msg);
+    };
+
+
+    class PassthroughASDS : public ASDS {
+
+        public:
+            Status init(void);
+            size_t memory_requirement(void);
+            Status process_data_product(DpMsg msg);
+
     };
 
 };
