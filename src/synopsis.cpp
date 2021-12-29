@@ -43,29 +43,4 @@ namespace Synopsis {
     }
 
 
-    ApplicationModule::ApplicationModule() {}
-
-
-    Status ASDS::submit_data_product(DpMsg msg) {
-        // TODO: Implement submission to ASDP DB
-        return SUCCESS;
-    }
-
-    /*
-     * Implement ASDS initialization
-     */
-    Status PassthroughASDS::init(void) {
-        return SUCCESS;
-    }
-
-
-    size_t PassthroughASDS::memory_requirement(void) {
-        return 0;
-    }
-
-
-    Status PassthroughASDS::process_data_product(DpMsg msg) {
-        return this->submit_data_product(msg);
-    }
-
 };

@@ -15,7 +15,9 @@ FetchContent_MakeAvailable(googletest)
 
 add_library(synopsis SHARED
     src/synopsis.cpp
+    src/ASDS.cpp
     src/DpMsg.cpp
+    src/PassthroughASDS.cpp
 )
 set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)

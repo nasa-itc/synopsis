@@ -31,6 +31,10 @@ TEST(SynopsisTest, TestApplicationInterface) {
     status = app.add_module(&asds);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
+    Synopsis::PassthroughASDS pt_asds;
+    status = app.add_module(&pt_asds);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
     size_t mem_req;
     mem_req = app.memory_requirement();
     EXPECT_EQ(123, mem_req);
