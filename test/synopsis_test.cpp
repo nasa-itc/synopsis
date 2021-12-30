@@ -7,7 +7,7 @@ class TestASDS : public Synopsis::ASDS {
 
     public:
 
-        Synopsis::Status init(void) override {
+        Synopsis::Status init(size_t bytes, void* memory) override {
             return Synopsis::SUCCESS;
         }
 
@@ -28,18 +28,22 @@ TEST(SynopsisTest, TestApplicationInterface) {
     Synopsis::Status status;
 
     TestASDS asds;
-    status = app.add_module(&asds);
+    status = app.add_asds("test_instrument", &asds);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
     Synopsis::PassthroughASDS pt_asds;
-    status = app.add_module(&pt_asds);
+    status = app.add_asds("test_instrument", "type", &pt_asds);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
     size_t mem_req;
     mem_req = app.memory_requirement();
-    EXPECT_EQ(123, mem_req);
+    EXPECT_EQ(128, mem_req);
 
-    status = app.init();
+    status = app.init(0, NULL);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+    void* mem = malloc(128);
+    status = app.init(128, mem);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 

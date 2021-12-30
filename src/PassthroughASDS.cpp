@@ -7,7 +7,7 @@ namespace Synopsis {
     /*
      * Implement ASDS initialization
      */
-    Status PassthroughASDS::init(void) {
+    Status PassthroughASDS::init(size_t bytes, void* memory) {
         return SUCCESS;
     }
 

@@ -10,7 +10,7 @@ namespace Synopsis {
     class PassthroughASDS : public ASDS {
 
         public:
-            Status init(void);
+            Status init(size_t bytes, void* memory);
             size_t memory_requirement(void);
             Status process_data_product(DpMsg msg);
 
