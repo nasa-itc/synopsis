@@ -63,6 +63,22 @@ namespace Synopsis {
     }
 
 
+    /*
+     * Implement library deinitialization
+     */
+    Status Application::deinit(void) {
+        Status status;
+        for (int i = 0; i < this->n_asds; i++) {
+            ASDS *asds = std::get<2>(this->asds[i]);
+            status = asds->deinit();
+            if (status != SUCCESS) {
+                return status;
+            }
+        }
+        return SUCCESS;
+    }
+
+
     size_t Application::memory_requirement(void) {
         size_t base_memory_req = 0;
         size_t mem = 0;

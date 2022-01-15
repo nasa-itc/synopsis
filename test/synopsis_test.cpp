@@ -11,6 +11,10 @@ class TestASDS : public Synopsis::ASDS {
             return Synopsis::SUCCESS;
         }
 
+        Synopsis::Status deinit() override {
+            return Synopsis::SUCCESS;
+        }
+
         Synopsis::Status process_data_product(Synopsis::DpMsg msg) override {
             return Synopsis::SUCCESS;
         }
@@ -44,6 +48,9 @@ TEST(SynopsisTest, TestApplicationInterface) {
 
     void* mem = malloc(128);
     status = app.init(128, mem);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    status = app.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 

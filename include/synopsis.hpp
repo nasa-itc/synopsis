@@ -33,6 +33,7 @@ namespace Synopsis {
              * Performs library initialization
              */
             Status init(size_t bytes, void* memory);
+            Status deinit(void);
 
             Status add_asds(std::string instrument_name, ASDS *asds);
             Status add_asds(std::string instrument_name, std::string dp_type,

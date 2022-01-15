@@ -11,6 +11,7 @@ namespace Synopsis {
 
         public:
             Status init(size_t bytes, void* memory);
+            Status deinit(void);
             size_t memory_requirement(void);
             Status process_data_product(DpMsg msg);
 

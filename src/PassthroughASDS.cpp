@@ -12,6 +12,14 @@ namespace Synopsis {
     }
 
 
+    /*
+     * Implement ASDS de-initialization
+     */
+    Status PassthroughASDS::deinit() {
+        return SUCCESS;
+    }
+
+
     size_t PassthroughASDS::memory_requirement(void) {
         return 0;
     }

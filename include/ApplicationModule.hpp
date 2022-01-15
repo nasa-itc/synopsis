@@ -15,6 +15,7 @@ namespace Synopsis {
              * Performs module initialization
              */
             virtual Status init(size_t bytes, void* memory) = 0;
+            virtual Status deinit() = 0;
 
             /*
              * Returns the required memory for the module
