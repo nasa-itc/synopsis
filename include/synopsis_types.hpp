@@ -12,6 +12,13 @@ namespace Synopsis {
     } Status;
 
 
+    typedef enum {
+        UNTRANSMITTED = 0,
+        TRANSMITTED = 1,
+        DOWNLINKED = 2
+    } DownlinkState;
+
+
 };
 
 #endif
