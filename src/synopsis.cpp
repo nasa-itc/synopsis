@@ -96,5 +96,33 @@ namespace Synopsis {
         return (MEM_ALIGN_SIZE - (block_size % MEM_ALIGN_SIZE)) % MEM_ALIGN_SIZE;
     }
 
+    Status Application::accept_dp(DpMsg msg) {
+
+        std::string iname = msg.get_instrument_name();
+        std::string dp_type = msg.get_type();
+
+        Status status = SUCCESS;
+        Status status_i;
+        for (int i = 0; i < this->n_asds; i++) {
+
+            std::string iname_i = std::get<0>(this->asds[i]);
+            if (iname == iname_i) {
+
+                std::string dp_type_i = std::get<1>(this->asds[i]);
+                if ((dp_type_i == "") || (dp_type_i == dp_type)) {
+
+                    ASDS *asds = std::get<2>(this->asds[i]);
+                    status_i = asds->process_data_product(msg);
+                    if (status_i != SUCCESS) {
+                        // TODO: log status?
+                        status = status_i;
+                    }
+
+                }
+            }
+        }
+        return status;
+    }
+
 
 };

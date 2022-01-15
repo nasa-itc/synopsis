@@ -44,6 +44,8 @@ namespace Synopsis {
              */
             size_t memory_requirement(void);
 
+            Status accept_dp(DpMsg msg);
+
         private:
 
             /*

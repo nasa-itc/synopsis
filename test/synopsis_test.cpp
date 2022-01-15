@@ -7,15 +7,20 @@ class TestASDS : public Synopsis::ASDS {
 
     public:
 
+        int invocations;
+
         Synopsis::Status init(size_t bytes, void* memory) override {
+            this->invocations = 0;
             return Synopsis::SUCCESS;
         }
 
         Synopsis::Status deinit() override {
+            this->invocations = 0;
             return Synopsis::SUCCESS;
         }
 
         Synopsis::Status process_data_product(Synopsis::DpMsg msg) override {
+            this->invocations++;
             return Synopsis::SUCCESS;
         }
 
@@ -50,8 +55,21 @@ TEST(SynopsisTest, TestApplicationInterface) {
     status = app.init(128, mem);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
+    Synopsis::DpMsg msg(
+        "test_instrument", "test_type",
+        "file::///data/file.dat",
+        "file::///data/meta.dat",
+        true
+    );
+
+    EXPECT_EQ(0, asds.invocations);
+    status = app.accept_dp(msg);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    EXPECT_EQ(1, asds.invocations);
+
     status = app.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    EXPECT_EQ(0, asds.invocations);
 }
 
 TEST(SynopsisTest, TestDpMsg) {
