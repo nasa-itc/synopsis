@@ -5,6 +5,7 @@
 #define JPL_SYNOPSIS_PUBLIC
 #include <string>
 #include <tuple>
+#include <vector>
 
 #include "synopsis_types.hpp"
 
@@ -49,6 +50,12 @@ namespace Synopsis {
             Status update_sue(int asdp_id, double sue);
             Status update_priority_bin(int asdp_id, int bin);
             Status update_downlink_state(int asdp_id, DownlinkState state);
+
+            Status prioritize(
+                std::string configuration_id,
+                double max_processing_time_sec,
+                std::vector<int> prioritized_list
+            );
 
         private:
 

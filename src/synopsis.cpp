@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <string>
 #include <tuple>
+#include <vector>
 
 #include "synopsis.hpp"
 
@@ -139,6 +140,20 @@ namespace Synopsis {
 
     Status Application::update_downlink_state(int asdp_id, DownlinkState state) {
         // TODO: set state in ASDP DB
+        return SUCCESS;
+    }
+
+
+    Status Application::prioritize(
+        std::string configuration_id, double max_processing_time_sec,
+        std::vector<int> prioritized_list
+    ) {
+        /*
+         * TODO:
+         * 1. Load configuration
+         * 2. Invoke planner with configuration and max_processing_time_sec
+         * 3. Populate vector with sorted product IDs (do not exceed capacity)
+         */
         return SUCCESS;
     }
 
