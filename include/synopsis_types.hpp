@@ -19,6 +19,13 @@ namespace Synopsis {
     } DownlinkState;
 
 
+    typedef enum {
+        INT = 0,
+        FLOAT = 1,
+        STRING = 2
+    } MetadataType;
+
+
 };
 
 #endif

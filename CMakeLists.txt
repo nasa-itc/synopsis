@@ -14,10 +14,13 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 add_library(synopsis SHARED
+    src/sqlite3.c
     src/synopsis.cpp
     src/ASDS.cpp
     src/DpMsg.cpp
+    src/DpDbMsg.cpp
     src/PassthroughASDS.cpp
+    src/SqliteASDPDB.cpp
 )
 set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)

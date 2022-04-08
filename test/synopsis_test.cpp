@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <synopsis.hpp>
+#include <SqliteASDPDB.hpp>
 
 
 class TestASDS : public Synopsis::ASDS {
@@ -95,3 +96,17 @@ TEST(SynopsisTest, TestDpMsg) {
 
 }
 
+
+TEST(SynopsisTest, TestASDPDB) {
+
+    Synopsis::Status status;
+
+    Synopsis::SqliteASDPDB db(":memory:");
+
+    status = db.init(0, NULL);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    status = db.deinit();
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+}
