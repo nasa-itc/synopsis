@@ -19,7 +19,7 @@ namespace Synopsis {
             Status deinit(void);
             size_t memory_requirement(void);
 
-            Status insert_data_product(DpDbMsg msg);
+            Status insert_data_product(DpDbMsg& msg);
 
         private:
             std::string asdpdb_file;

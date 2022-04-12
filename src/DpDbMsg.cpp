@@ -12,6 +12,33 @@ namespace Synopsis {
 
     }
 
+    DpMetadataValue::DpMetadataValue(int value) :
+        type(INT),
+        int_value(value),
+        float_value(0.0),
+        string_value("")
+    {
+
+    }
+
+    DpMetadataValue::DpMetadataValue(double value) :
+        type(FLOAT),
+        int_value(0),
+        float_value(value),
+        string_value("")
+    {
+
+    }
+
+    DpMetadataValue::DpMetadataValue(std::string value) :
+        type(STRING),
+        int_value(0),
+        float_value(0.0),
+        string_value(value)
+    {
+
+    }
+
     DpMetadataValue::DpMetadataValue(
         MetadataType type,
         int int_value,
@@ -115,6 +142,10 @@ namespace Synopsis {
 
     std::map<std::string, DpMetadataValue> DpDbMsg::get_metadata(void) {
         return this->metadata;
+    }
+
+    void DpDbMsg::set_dp_id(int id) {
+        this->dp_id = id;
     }
 
 };

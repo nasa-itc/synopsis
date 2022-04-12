@@ -101,10 +101,26 @@ TEST(SynopsisTest, TestASDPDB) {
 
     Synopsis::Status status;
 
+    Synopsis::DpDbMsg msg(
+        -1, "test_instr", "test_type", "file:///data/file.dat",
+        101, 0.12345, 7, Synopsis::DownlinkState::UNTRANSMITTED,
+        {
+            {"test_int", Synopsis::DpMetadataValue(123)},
+            {"test_float", Synopsis::DpMetadataValue(123.456)},
+            {"test_string", Synopsis::DpMetadataValue("test")}
+        }
+    );
+
     Synopsis::SqliteASDPDB db(":memory:");
 
     status = db.init(0, NULL);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    status = db.insert_data_product(msg);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    // Check that a nonzero ID was assigned
+    EXPECT_GT(msg.get_dp_id(), 0);
 
     status = db.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);

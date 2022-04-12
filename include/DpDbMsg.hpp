@@ -15,6 +15,10 @@ namespace Synopsis {
 
             DpMetadataValue();
 
+            DpMetadataValue(int value);
+            DpMetadataValue(double float_value);
+            DpMetadataValue(std::string string_value);
+
             DpMetadataValue(MetadataType type,
                 int int_value, double float_value, std::string string_value);
 
@@ -55,6 +59,8 @@ namespace Synopsis {
             int get_priority_bin(void);
             DownlinkState get_downlink_state(void);
             std::map<std::string, DpMetadataValue> get_metadata(void);
+
+            void set_dp_id(int);
 
         private:
             int dp_id;

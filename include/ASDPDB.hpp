@@ -15,7 +15,7 @@ namespace Synopsis {
     class ASDPDB : public ApplicationModule {
 
         public:
-            virtual Status insert_data_product(DpDbMsg msg) = 0;
+            virtual Status insert_data_product(DpDbMsg& msg) = 0;
 
     };
 
