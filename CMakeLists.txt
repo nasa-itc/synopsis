@@ -15,6 +15,7 @@ FetchContent_MakeAvailable(googletest)
 
 add_library(synopsis SHARED
     src/sqlite3.c
+    src/Sqlite3Statement.cpp
     src/synopsis.cpp
     src/ASDS.cpp
     src/DpMsg.cpp
