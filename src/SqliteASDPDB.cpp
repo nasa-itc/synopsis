@@ -1,33 +1,9 @@
 #include "SqliteASDPDB.hpp"
 #include "Sqlite3Statement.hpp"
+#include "synopsis_sql.hpp"
 
 
 namespace Synopsis {
-
-    static constexpr const char* SQL_SCHEMA = R"(
-
-    CREATE TABLE IF NOT EXISTS ASDP (
-        asdp_id INTEGER PRIMARY KEY,
-        instrument_name TEXT,
-        type TEXT,
-        uri TEXT,
-        size INTEGER,
-        science_utility_estimate REAL,
-        priority_bin INTEGER,
-        downlink_state INTEGER
-    );
-
-    CREATE TABLE IF NOT EXISTS METADATA (
-        asdp_id INTEGER,
-        fieldname TEXT NOT NULL,
-        type INTEGER,
-        value_int INTEGER,
-        value_float REAL,
-        value_string TEXT,
-        FOREIGN KEY(asdp_id) REFERENCES ASDP(asdp_id)
-    );
-
-    )";
 
 
     SqliteASDPDB::SqliteASDPDB(std::string asdpdb_file) :
@@ -86,12 +62,7 @@ namespace Synopsis {
         try {
 
             // Insert ASDP
-            Sqlite3Statement stmt(this->_db, std::string(R"(
-                INSERT INTO ASDP (
-                    instrument_name, type, uri, size,
-                    science_utility_estimate, priority_bin, downlink_state)
-                VALUES (?, ?, ?, ?, ?, ?, ?);
-            )"));
+            Sqlite3Statement stmt(this->_db, std::string(SQL_ASDP_INSERT));
             stmt.bind(0, msg.get_instrument_name());
             stmt.bind(1, msg.get_type());
             stmt.bind(2, msg.get_uri());
@@ -109,12 +80,8 @@ namespace Synopsis {
             for (auto const& pair : msg.get_metadata()) {
                 std::string key = pair.first;
                 DpMetadataValue value = pair.second;
-                Sqlite3Statement stmt2(this->_db, std::string(R"(
-                    INSERT INTO METADATA (
-                        asdp_id, fieldname, type, value_int,
-                        value_float, value_string)
-                    VALUES (?, ?, ?, ?, ?, ?);
-                )"));
+                Sqlite3Statement stmt2(
+                    this->_db, std::string(SQL_ASDP_METADATA_INSERT));
                 stmt2.bind(0, dp_id);
                 stmt2.bind(1, key);
                 stmt2.bind(2, (int) value.get_type());
