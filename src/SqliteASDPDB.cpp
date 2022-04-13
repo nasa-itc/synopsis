@@ -62,7 +62,7 @@ namespace Synopsis {
         try {
 
             // Insert ASDP
-            Sqlite3Statement stmt(this->_db, std::string(SQL_ASDP_INSERT));
+            Sqlite3Statement stmt(this->_db, SQL_ASDP_INSERT);
             stmt.bind(0, msg.get_instrument_name());
             stmt.bind(1, msg.get_type());
             stmt.bind(2, msg.get_uri());
@@ -80,8 +80,7 @@ namespace Synopsis {
             for (auto const& pair : msg.get_metadata()) {
                 std::string key = pair.first;
                 DpMetadataValue value = pair.second;
-                Sqlite3Statement stmt2(
-                    this->_db, std::string(SQL_ASDP_METADATA_INSERT));
+                Sqlite3Statement stmt2(this->_db, SQL_ASDP_METADATA_INSERT);
                 stmt2.bind(0, dp_id);
                 stmt2.bind(1, key);
                 stmt2.bind(2, (int) value.get_type());
@@ -104,6 +103,19 @@ namespace Synopsis {
         }
 
         return SUCCESS;
+    }
+
+
+    std::vector<int> SqliteASDPDB::list_data_product_ids(void) {
+
+        Sqlite3Statement stmt(_db, SQL_ASDP_SELECT);
+
+        std::vector<int> result;
+        for (int rc = stmt.step(); rc == SQLITE_ROW; rc = stmt.step()) {
+            result.push_back(stmt.fetch<int>(0));
+        }
+
+        return result;
     }
 
 

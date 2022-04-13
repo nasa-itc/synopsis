@@ -48,6 +48,12 @@ namespace Synopsis {
 
     )";
 
+    static constexpr const char* SQL_ASDP_SELECT = R"(
+
+    SELECT asdp_id FROM ASDP;
+
+    )";
+
 
 };
 

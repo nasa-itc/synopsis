@@ -20,6 +20,7 @@ namespace Synopsis {
             size_t memory_requirement(void);
 
             Status insert_data_product(DpDbMsg& msg);
+            std::vector<int> list_data_product_ids(void);
 
         private:
             std::string asdpdb_file;

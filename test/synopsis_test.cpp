@@ -100,6 +100,7 @@ TEST(SynopsisTest, TestDpMsg) {
 TEST(SynopsisTest, TestASDPDB) {
 
     Synopsis::Status status;
+    std::vector<int> asdp_ids;
 
     Synopsis::DpDbMsg msg(
         -1, "test_instr", "test_type", "file:///data/file.dat",
@@ -121,6 +122,9 @@ TEST(SynopsisTest, TestASDPDB) {
 
     // Check that a nonzero ID was assigned
     EXPECT_GT(msg.get_dp_id(), 0);
+
+    asdp_ids = db.list_data_product_ids();
+    EXPECT_EQ(asdp_ids.size(), 1);
 
     status = db.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
