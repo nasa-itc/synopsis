@@ -17,6 +17,7 @@ namespace Synopsis {
 
         public:
             virtual Status insert_data_product(DpDbMsg& msg) = 0;
+            virtual Status get_data_product(int asdp_id, DpDbMsg& msg) = 0;
             virtual std::vector<int> list_data_product_ids(void) = 0;
 
     };

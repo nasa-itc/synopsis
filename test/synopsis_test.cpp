@@ -112,6 +112,8 @@ TEST(SynopsisTest, TestASDPDB) {
         }
     );
 
+    Synopsis::DpDbMsg msg2;
+
     Synopsis::SqliteASDPDB db(":memory:");
 
     status = db.init(0, NULL);
@@ -125,6 +127,37 @@ TEST(SynopsisTest, TestASDPDB) {
 
     asdp_ids = db.list_data_product_ids();
     EXPECT_EQ(asdp_ids.size(), 1);
+
+    status = db.get_data_product(asdp_ids[0], msg2);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    // Check all fields equal to inserted value
+    EXPECT_EQ(msg.get_dp_id(), msg2.get_dp_id());
+    EXPECT_EQ(msg.get_instrument_name(), msg2.get_instrument_name());
+    EXPECT_EQ(msg.get_type(), msg2.get_type());
+    EXPECT_EQ(msg.get_uri(), msg2.get_uri());
+    EXPECT_EQ(msg.get_dp_size(), msg2.get_dp_size());
+    EXPECT_EQ(msg.get_science_utility_estimate(),
+        msg2.get_science_utility_estimate());
+    EXPECT_EQ(msg.get_priority_bin(), msg2.get_priority_bin());
+    EXPECT_EQ(msg.get_downlink_state(), msg2.get_downlink_state());
+
+    // Check equality of all metadata retrieved
+    auto meta1 = msg.get_metadata();
+    auto meta2 = msg.get_metadata();
+    EXPECT_EQ(meta1.size(), meta2.size());
+    for (auto const& pair : meta1) {
+        std::string key = pair.first;
+        Synopsis::DpMetadataValue value1 = pair.second;
+        Synopsis::DpMetadataValue value2 = meta2[key];
+        EXPECT_EQ(value1.get_type(), value2.get_type());
+        EXPECT_EQ(value1.get_int_value(), value2.get_int_value());
+        EXPECT_EQ(value1.get_float_value(), value2.get_float_value());
+        EXPECT_EQ(value1.get_string_value(), value2.get_string_value());
+    }
+
+    status = db.get_data_product(-1, msg2);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
 
     status = db.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);

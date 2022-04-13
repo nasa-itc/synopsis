@@ -77,7 +77,7 @@ namespace Synopsis {
         dp_uri(""),
         dp_size(0),
         science_utility_estimate(0.0),
-        prioity_bin(0),
+        priority_bin(0),
         downlink_state(DownlinkState::UNTRANSMITTED),
         metadata({})
     {
@@ -91,7 +91,7 @@ namespace Synopsis {
         std::string dp_uri,
         size_t dp_size,
         double science_utility_estimate,
-        int prioity_bin,
+        int priority_bin,
         DownlinkState downlink_state,
         std::map<std::string, DpMetadataValue> metadata
         ) :
@@ -101,7 +101,7 @@ namespace Synopsis {
         dp_uri(dp_uri),
         dp_size(dp_size),
         science_utility_estimate(science_utility_estimate),
-        prioity_bin(prioity_bin),
+        priority_bin(priority_bin),
         downlink_state(downlink_state),
         metadata(metadata)
     {
@@ -133,7 +133,7 @@ namespace Synopsis {
     }
 
     int DpDbMsg::get_priority_bin(void) {
-        return this->prioity_bin;
+        return this->priority_bin;
     }
 
     DownlinkState DpDbMsg::get_downlink_state(void) {
@@ -146,6 +146,38 @@ namespace Synopsis {
 
     void DpDbMsg::set_dp_id(int id) {
         this->dp_id = id;
+    }
+
+    void DpDbMsg::set_instrument_name(std::string name) {
+        this->instrument_name = name;
+    }
+
+    void DpDbMsg::set_type(std::string type) {
+        this->dp_type = type;
+    }
+
+    void DpDbMsg::set_uri(std::string uri) {
+        this->dp_uri = uri;
+    }
+
+    void DpDbMsg::set_dp_size(size_t size) {
+        this->dp_size = size;
+    }
+
+    void DpDbMsg::set_science_utility_estimate(double sue) {
+        this->science_utility_estimate = sue;
+    }
+
+    void DpDbMsg::set_priority_bin(int bin) {
+        this->priority_bin = bin;
+    }
+
+    void DpDbMsg::set_downlink_state(DownlinkState state) {
+        this->downlink_state = state;
+    }
+
+    void DpDbMsg::set_metadata(std::map<std::string, DpMetadataValue> metadata) {
+        this->metadata = metadata;
     }
 
 };

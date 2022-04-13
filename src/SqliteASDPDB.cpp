@@ -106,9 +106,48 @@ namespace Synopsis {
     }
 
 
+    Status SqliteASDPDB::get_data_product(int asdp_id, DpDbMsg& msg) {
+        Sqlite3Statement stmt(this->_db, SQL_ASDP_GET);
+        stmt.bind(0, asdp_id);
+
+        if (stmt.step() == SQLITE_DONE) {
+            // TODO: Log DP not found
+            return FAILURE;
+        }
+
+        // Populate message with database row values
+        msg.set_dp_id(stmt.fetch<int>(0));
+        msg.set_instrument_name(stmt.fetch<std::string>(1));
+        msg.set_type(stmt.fetch<std::string>(2));
+        msg.set_uri(stmt.fetch<std::string>(3));
+        msg.set_dp_size(stmt.fetch<int>(4));
+        msg.set_science_utility_estimate(stmt.fetch<double>(5));
+        msg.set_priority_bin(stmt.fetch<int>(6));
+
+        Sqlite3Statement stmt2(this->_db, SQL_ASDP_METADATA_GET);
+        stmt2.bind(0 , asdp_id);
+
+        std::map<std::string, DpMetadataValue> metadata;
+        for (int rc = stmt.step(); rc == SQLITE_ROW; rc = stmt.step()) {
+            std::string key = stmt2.fetch<std::string>(0);
+            DpMetadataValue value(
+                (MetadataType)stmt2.fetch<int>(1),
+                stmt2.fetch<int>(2),
+                stmt2.fetch<double>(3),
+                stmt2.fetch<std::string>(4)
+            );
+            metadata.insert({key, value});
+        }
+
+        msg.set_metadata(metadata);
+
+        return SUCCESS;
+    }
+
+
     std::vector<int> SqliteASDPDB::list_data_product_ids(void) {
 
-        Sqlite3Statement stmt(_db, SQL_ASDP_SELECT);
+        Sqlite3Statement stmt(this->_db, SQL_ASDP_SELECT);
 
         std::vector<int> result;
         for (int rc = stmt.step(); rc == SQLITE_ROW; rc = stmt.step()) {

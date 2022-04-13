@@ -47,7 +47,7 @@ namespace Synopsis {
 
             DpDbMsg(int dp_id, std::string instrument_name, std::string dp_type,
                 std::string dp_uri, size_t dp_size, double science_utility_estimate,
-                int prioity_bin, DownlinkState downlink_state,
+                int priority_bin, DownlinkState downlink_state,
                 std::map<std::string, DpMetadataValue> metadata);
 
             int get_dp_id(void);
@@ -60,7 +60,15 @@ namespace Synopsis {
             DownlinkState get_downlink_state(void);
             std::map<std::string, DpMetadataValue> get_metadata(void);
 
-            void set_dp_id(int);
+            void set_dp_id(int id);
+            void set_instrument_name(std::string name);
+            void set_type(std::string type);
+            void set_uri(std::string uri);
+            void set_dp_size(size_t size);
+            void set_science_utility_estimate(double sue);
+            void set_priority_bin(int bin);
+            void set_downlink_state(DownlinkState state);
+            void set_metadata(std::map<std::string, DpMetadataValue> metadata);
 
         private:
             int dp_id;
@@ -69,7 +77,7 @@ namespace Synopsis {
             std::string dp_uri;
             size_t dp_size;
             double science_utility_estimate;
-            int prioity_bin;
+            int priority_bin;
             DownlinkState downlink_state;
             std::map<std::string, DpMetadataValue> metadata;
     };

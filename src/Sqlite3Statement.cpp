@@ -93,6 +93,12 @@ namespace Synopsis {
     return sqlite3_column_int(_stmt, pos);
   }
 
+  template <>
+  double Sqlite3Statement::fetch<double>(int pos)
+  {
+    return sqlite3_column_double(_stmt, pos);
+  }
+
   void Sqlite3Statement::throwIfError(sqlite3* db, int rc, const std::string& prefix)
   {
     if (rc != SQLITE_ROW && rc != SQLITE_OK && rc != SQLITE_DONE) {

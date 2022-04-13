@@ -54,6 +54,23 @@ namespace Synopsis {
 
     )";
 
+    static constexpr const char* SQL_ASDP_GET = R"(
+
+    SELECT
+        asdp_id, instrument_name, type, uri, size,
+        science_utility_estimate, priority_bin, downlink_state
+    FROM ASDP WHERE asdp_id=?;
+
+    )";
+
+    static constexpr const char* SQL_ASDP_METADATA_GET = R"(
+
+    SELECT
+        fieldname, type, value_int, value_float, value_string
+    FROM METADATA WHERE asdp_id=?;
+
+    )";
+
 
 };
 
