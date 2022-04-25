@@ -34,7 +34,9 @@ class TestASDS : public Synopsis::ASDS {
 // Demonstrate some basic assertions.
 TEST(SynopsisTest, TestApplicationInterface) {
     // Test initialization
-    Synopsis::Application app;
+    Synopsis::SqliteASDPDB db(":memory:");
+
+    Synopsis::Application app(&db);
     Synopsis::Status status;
 
     TestASDS asds;

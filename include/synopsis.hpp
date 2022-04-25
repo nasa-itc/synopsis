@@ -13,6 +13,7 @@
 
 #include "ApplicationModule.hpp"
 #include "ASDS.hpp"
+#include "ASDPDB.hpp"
 #include "PassthroughASDS.hpp"
 
 #define MAX_SYNOPSIS_APP_ASDS 32
@@ -28,7 +29,7 @@ namespace Synopsis {
             /*
              * Constructor
              */
-            Application();
+            Application(ASDPDB *db);
 
             /*
              * Performs library initialization
@@ -64,6 +65,8 @@ namespace Synopsis {
              */
             size_t buffer_size;
             void *memory_buffer;
+
+            ASDPDB *_db;
 
             int n_asds;
             std::tuple<std::string, std::string, ASDS*> asds[MAX_SYNOPSIS_APP_ASDS];

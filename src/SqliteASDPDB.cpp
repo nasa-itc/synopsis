@@ -158,4 +158,22 @@ namespace Synopsis {
     }
 
 
+    Status SqliteASDPDB::update_science_utility(int asdp_id, double sue) {
+        // TODO: Implement
+        return SUCCESS;
+    }
+
+
+    Status SqliteASDPDB::update_priority_bin(int asdp_id, int bin) {
+        // TODO: Implement
+        return SUCCESS;
+    }
+
+
+    Status SqliteASDPDB::update_downlink_state(int asdp_id, DownlinkState state) {
+        // TODO: Implement
+        return SUCCESS;
+    }
+
+
 };

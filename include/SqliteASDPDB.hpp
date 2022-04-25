@@ -22,6 +22,9 @@ namespace Synopsis {
             Status insert_data_product(DpDbMsg& msg);
             Status get_data_product(int asdp_id, DpDbMsg& msg);
             std::vector<int> list_data_product_ids(void);
+            Status update_science_utility(int asdp_id, double sue);
+            Status update_priority_bin(int asdp_id, int bin);
+            Status update_downlink_state(int asdp_id, DownlinkState state);
 
         private:
             std::string asdpdb_file;

@@ -11,9 +11,10 @@
 namespace Synopsis {
 
 
-    Application::Application() :
+    Application::Application(ASDPDB *db) :
         buffer_size(0),
         memory_buffer(NULL),
+        _db(db),
         n_asds(0)
     {
 
@@ -45,6 +46,8 @@ namespace Synopsis {
         void* pntr;
         size_t mem = 0;
         size_t offset = 0;
+
+        // Init ASDSs
         for (int i = 0; i < this->n_asds; i++) {
             ASDS *asds = std::get<2>(this->asds[i]);
             mem = asds->memory_requirement();
@@ -60,6 +63,19 @@ namespace Synopsis {
                 return FAILURE;
             }
         }
+
+        // Init ASDPDB
+        mem = _db->memory_requirement();
+        mem += Application::padding_nbytes(mem);
+        status = _db->init(mem, (void*)((char*)memory + offset));
+        if (status != SUCCESS) {
+            return status;
+        }
+        offset += mem;
+        if (offset > bytes) {
+            return FAILURE;
+        }
+
         return SUCCESS;
     }
 
@@ -69,6 +85,8 @@ namespace Synopsis {
      */
     Status Application::deinit(void) {
         Status status;
+
+        // De-init ASDSs
         for (int i = 0; i < this->n_asds; i++) {
             ASDS *asds = std::get<2>(this->asds[i]);
             status = asds->deinit();
@@ -76,6 +94,13 @@ namespace Synopsis {
                 return status;
             }
         }
+
+        // De-init ASDPDB
+        status = _db->deinit();
+        if (status != SUCCESS) {
+            return status;
+        }
+
         return SUCCESS;
     }
 
@@ -83,12 +108,20 @@ namespace Synopsis {
     size_t Application::memory_requirement(void) {
         size_t base_memory_req = 0;
         size_t mem = 0;
+
+        // Get ASDS memory requirement
         for (int i = 0; i < this->n_asds; i++) {
             ASDS *asds = std::get<2>(this->asds[i]);
             mem = asds->memory_requirement();
             mem += Application::padding_nbytes(mem);
             base_memory_req += mem;
         }
+
+        // Get ASDPDB memory requirement
+        mem = _db->memory_requirement();
+        mem += Application::padding_nbytes(mem);
+        base_memory_req += mem;
+
         return base_memory_req;
     }
 
