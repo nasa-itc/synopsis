@@ -21,19 +21,25 @@ namespace Synopsis {
     }
 
 
-    Status Application::add_asds(std::string instrument_name, ASDS *module) {
-        return this->add_asds(instrument_name, "", module);
+    Status Application::add_asds(std::string instrument_name, ASDS *asds) {
+        return this->add_asds(instrument_name, "", asds);
     }
 
 
     Status Application::add_asds(std::string instrument_name,
-            std::string dp_type, ASDS *module) {
+            std::string dp_type, ASDS *asds) {
         if (this->n_asds >= MAX_SYNOPSIS_APP_ASDS) {
             return FAILURE;
         }
+
+        // Add ASDS to application list
         this->asds[this->n_asds] =
-            std::make_tuple(instrument_name, dp_type, module);
+            std::make_tuple(instrument_name, dp_type, asds);
         this->n_asds += 1;
+
+        // Set the DB instance to be used by the ASDS
+        asds->set_database(this->_db);
+
         return SUCCESS;
     }
 

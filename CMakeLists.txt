@@ -13,6 +13,12 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+FetchContent_Declare(
+  json
+  URL https://github.com/nlohmann/json/releases/download/v3.10.5/json.tar.xz
+)
+FetchContent_MakeAvailable(json)
+
 add_library(synopsis SHARED
     src/sqlite3.c
     src/Sqlite3Statement.cpp
@@ -27,6 +33,7 @@ set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)
 target_include_directories(synopsis PRIVATE include)
 target_include_directories(synopsis PRIVATE src)
+target_link_libraries(synopsis PRIVATE nlohmann_json::nlohmann_json)
 
 include(GNUInstallDirs)
 install(TARGETS synopsis
