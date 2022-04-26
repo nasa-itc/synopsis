@@ -154,6 +154,7 @@ TEST(SynopsisTest, TestASDPDB) {
     // Check equality of all metadata retrieved
     auto meta1 = msg.get_metadata();
     auto meta2 = msg.get_metadata();
+    EXPECT_EQ(3, meta1.size());
     EXPECT_EQ(meta1.size(), meta2.size());
     for (auto const& pair : meta1) {
         std::string key = pair.first;
@@ -253,8 +254,9 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
     asdp_id = asdp_ids[0];
 
     // Test interfaces
-    double new_sue = 0.5;
-    int new_bin = 17;
+    double new_sue = 0.5, new_float = 123.456;
+    int new_bin = 17, new_int = 456;
+    std::string new_string = "new_test";
     Synopsis::DownlinkState new_state = Synopsis::DownlinkState::TRANSMITTED;
 
     status = app.update_science_utility(asdp_id, new_sue);
@@ -272,12 +274,38 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
     status = app.update_downlink_state(-1, new_state);
     EXPECT_EQ(Synopsis::Status::FAILURE, status);
 
+    status = app.update_asdp_metadata(asdp_id, "test_int", new_int);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    status = app.update_asdp_metadata(-1, "test_int", new_int);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+    status = app.update_asdp_metadata(asdp_id, "test_float", new_float);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    status = app.update_asdp_metadata(-1, "test_float", new_float);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+    status = app.update_asdp_metadata(asdp_id, "test_string", new_string);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    status = app.update_asdp_metadata(-1, "test_string", new_string);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+    status = app.update_asdp_metadata(asdp_id, "bad_field", 0);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
     // Check values
     status = db.get_data_product(asdp_id, msg);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
     EXPECT_EQ(new_sue, msg.get_science_utility_estimate());
     EXPECT_EQ(new_bin, msg.get_priority_bin());
     EXPECT_EQ(new_state, msg.get_downlink_state());
+
+    auto meta = msg.get_metadata();
+    EXPECT_EQ(Synopsis::MetadataType::INT, meta["test_int"].get_type());
+    EXPECT_EQ(Synopsis::MetadataType::FLOAT, meta["test_float"].get_type());
+    EXPECT_EQ(Synopsis::MetadataType::STRING, meta["test_string"].get_type());
+    EXPECT_EQ(new_int, meta["test_int"].get_int_value());
+    EXPECT_EQ(new_float, meta["test_float"].get_float_value());
+    EXPECT_EQ(new_string, meta["test_string"].get_string_value());
 
     status = app.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);

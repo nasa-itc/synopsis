@@ -27,6 +27,7 @@ namespace Synopsis {
         value_float REAL,
         value_string TEXT,
         FOREIGN KEY(asdp_id) REFERENCES ASDP(asdp_id)
+        CONSTRAINT UNIQUE_META UNIQUE (asdp_id,fieldname)
     );
 
     )";
@@ -87,11 +88,19 @@ namespace Synopsis {
 
     )";
 
-    static constexpr const char* SQL_UPDATE_DL_STATE= R"(
+    static constexpr const char* SQL_UPDATE_DL_STATE = R"(
 
     UPDATE ASDP
     SET downlink_state=?
     WHERE asdp_id=?;
+
+    )";
+
+    static constexpr const char* SQL_UPDATE_METADATA = R"(
+
+    UPDATE METADATA
+    SET type=?, value_int=?, value_float=?, value_string=?
+    WHERE asdp_id=? AND fieldname=?;
 
     )";
 

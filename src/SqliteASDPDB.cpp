@@ -126,10 +126,10 @@ namespace Synopsis {
         msg.set_downlink_state((DownlinkState)stmt.fetch<int>(7));
 
         Sqlite3Statement stmt2(this->_db, SQL_ASDP_METADATA_GET);
-        stmt2.bind(0 , asdp_id);
+        stmt2.bind(0, asdp_id);
 
         std::map<std::string, DpMetadataValue> metadata;
-        for (int rc = stmt.step(); rc == SQLITE_ROW; rc = stmt.step()) {
+        for (int rc = stmt2.step(); rc == SQLITE_ROW; rc = stmt2.step()) {
             std::string key = stmt2.fetch<std::string>(0);
             DpMetadataValue value(
                 (MetadataType)stmt2.fetch<int>(1),
@@ -201,6 +201,37 @@ namespace Synopsis {
         Sqlite3Statement stmt(this->_db, SQL_UPDATE_DL_STATE);
         stmt.bind(0, (int)state);
         stmt.bind(1, asdp_id);
+
+        if (stmt.step() != SQLITE_DONE) {
+            // TODO: Log error
+            return FAILURE;
+        }
+
+        if (sqlite3_changes(this->_db) == 0) {
+            // TODO: Log DP not found
+            return FAILURE;
+        }
+
+        return SUCCESS;
+    }
+
+
+    template <typename T>
+    Status SqliteASDPDB::update_metadata(int asdp_id, std::string fieldname, T value) {
+        return this->update_metadata(asdp_id, fieldname, DpMetadataValue(value));
+    }
+
+
+    Status SqliteASDPDB::update_metadata(
+            int asdp_id, std::string fieldname, DpMetadataValue value) {
+
+        Sqlite3Statement stmt(this->_db, SQL_UPDATE_METADATA);
+        stmt.bind(0, value.get_type());
+        stmt.bind(1, value.get_int_value());
+        stmt.bind(2, value.get_float_value());
+        stmt.bind(3, value.get_string_value());
+        stmt.bind(4, asdp_id);
+        stmt.bind(5, fieldname);
 
         if (stmt.step() != SQLITE_DONE) {
             // TODO: Log error

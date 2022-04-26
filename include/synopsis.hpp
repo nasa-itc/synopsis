@@ -51,6 +51,8 @@ namespace Synopsis {
             Status update_science_utility(int asdp_id, double sue);
             Status update_priority_bin(int asdp_id, int bin);
             Status update_downlink_state(int asdp_id, DownlinkState state);
+            template <typename T>
+            Status update_asdp_metadata(int asdp_id, std::string fieldname, T value);
 
             Status prioritize(
                 std::string configuration_id,

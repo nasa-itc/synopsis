@@ -25,6 +25,10 @@ namespace Synopsis {
             Status update_science_utility(int asdp_id, double sue);
             Status update_priority_bin(int asdp_id, int bin);
             Status update_downlink_state(int asdp_id, DownlinkState state);
+            Status update_metadata(
+                int asdp_id, std::string fieldname, DpMetadataValue value);
+            template <typename T>
+            Status update_metadata(int asdp_id, std::string fieldname, T value);
 
         private:
             std::string asdpdb_file;

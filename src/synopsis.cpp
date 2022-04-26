@@ -174,6 +174,24 @@ namespace Synopsis {
     }
 
 
+    template <>
+    Status Application::update_asdp_metadata(int asdp_id, std::string fieldname, int value) {
+        return _db->update_metadata(asdp_id, fieldname, value);
+    }
+
+
+    template <>
+    Status Application::update_asdp_metadata(int asdp_id, std::string fieldname, double value) {
+        return _db->update_metadata(asdp_id, fieldname, value);
+    }
+
+
+    template <>
+    Status Application::update_asdp_metadata(int asdp_id, std::string fieldname, std::string value) {
+        return _db->update_metadata(asdp_id, fieldname, value);
+    }
+
+
     Status Application::prioritize(
         std::string configuration_id, double max_processing_time_sec,
         std::vector<int> prioritized_list

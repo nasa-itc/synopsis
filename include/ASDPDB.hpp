@@ -22,6 +22,8 @@ namespace Synopsis {
             virtual Status update_science_utility(int asdp_id, double sue) = 0;
             virtual Status update_priority_bin(int asdp_id, int bin) = 0;
             virtual Status update_downlink_state(int asdp_id, DownlinkState state) = 0;
+            virtual Status update_metadata(
+                int asdp_id, std::string fieldname, DpMetadataValue value) = 0;
 
     };
 
