@@ -159,7 +159,7 @@ namespace Synopsis {
     }
 
 
-    Status Application::update_sue(int asdp_id, double sue) {
+    Status Application::update_science_utility(int asdp_id, double sue) {
         return _db->update_science_utility(asdp_id, sue);
     }
 

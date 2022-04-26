@@ -48,7 +48,7 @@ namespace Synopsis {
 
             Status accept_dp(DpMsg msg);
 
-            Status update_sue(int asdp_id, double sue);
+            Status update_science_utility(int asdp_id, double sue);
             Status update_priority_bin(int asdp_id, int bin);
             Status update_downlink_state(int asdp_id, DownlinkState state);
 

@@ -216,3 +216,70 @@ TEST(SynopsisTest, TestASDPDB) {
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
 }
+
+
+// Test ASDPDB interfaces and functionality
+TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
+
+    Synopsis::SqliteASDPDB db(":memory:");
+
+    Synopsis::Application app(&db);
+    Synopsis::Status status;
+    std::vector<int> asdp_ids;
+    int asdp_id;
+
+    // Initialize the application
+    status = app.init(0, NULL);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+
+    // Use low-level interface to insert ASDP entry
+    Synopsis::DpDbMsg msg(
+        -1, "test_instr", "test_type", "file:///data/file.dat",
+        101, 0.12345, 7, Synopsis::DownlinkState::UNTRANSMITTED,
+        {
+            {"test_int", Synopsis::DpMetadataValue(123)},
+            {"test_float", Synopsis::DpMetadataValue(123.456)},
+            {"test_string", Synopsis::DpMetadataValue("test")}
+        }
+    );
+
+    status = db.insert_data_product(msg);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    // Get ID of inserted ASDP
+    asdp_ids = db.list_data_product_ids();
+    EXPECT_EQ(asdp_ids.size(), 1);
+    asdp_id = asdp_ids[0];
+
+    // Test interfaces
+    double new_sue = 0.5;
+    int new_bin = 17;
+    Synopsis::DownlinkState new_state = Synopsis::DownlinkState::TRANSMITTED;
+
+    status = app.update_science_utility(asdp_id, new_sue);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    status = app.update_science_utility(-1, new_sue);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+    status = app.update_priority_bin(asdp_id, new_bin);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    status = app.update_priority_bin(-1, new_bin);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+    status = app.update_downlink_state(asdp_id, new_state);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    status = app.update_downlink_state(-1, new_state);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+    // Check values
+    status = db.get_data_product(asdp_id, msg);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    EXPECT_EQ(new_sue, msg.get_science_utility_estimate());
+    EXPECT_EQ(new_bin, msg.get_priority_bin());
+    EXPECT_EQ(new_state, msg.get_downlink_state());
+
+    status = app.deinit();
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+}
