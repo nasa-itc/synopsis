@@ -71,6 +71,30 @@ namespace Synopsis {
 
     )";
 
+    static constexpr const char* SQL_UPDATE_SUE = R"(
+
+    UPDATE ASDP
+    SET science_utility_estimate=?
+    WHERE asdp_id=?;
+
+    )";
+
+    static constexpr const char* SQL_UPDATE_BIN = R"(
+
+    UPDATE ASDP
+    SET priority_bin=?
+    WHERE asdp_id=?;
+
+    )";
+
+    static constexpr const char* SQL_UPDATE_DL_STATE= R"(
+
+    UPDATE ASDP
+    SET downlink_state=?
+    WHERE asdp_id=?;
+
+    )";
+
 
 };
 

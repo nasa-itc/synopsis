@@ -31,7 +31,7 @@ class TestASDS : public Synopsis::ASDS {
 };
 
 
-// Demonstrate some basic assertions.
+// Test high-level Synopsis Application interfaces
 TEST(SynopsisTest, TestApplicationInterface) {
     // Test initialization
     Synopsis::SqliteASDPDB db(":memory:");
@@ -75,6 +75,8 @@ TEST(SynopsisTest, TestApplicationInterface) {
     EXPECT_EQ(0, asds.invocations);
 }
 
+
+// Test DpMsg interfaces
 TEST(SynopsisTest, TestDpMsg) {
 
     Synopsis::DpMsg msg;
@@ -99,10 +101,12 @@ TEST(SynopsisTest, TestDpMsg) {
 }
 
 
+// Test ASDPDB interfaces and functionality
 TEST(SynopsisTest, TestASDPDB) {
 
     Synopsis::Status status;
     std::vector<int> asdp_ids;
+    int asdp_id;
 
     Synopsis::DpDbMsg msg(
         -1, "test_instr", "test_type", "file:///data/file.dat",
@@ -133,6 +137,9 @@ TEST(SynopsisTest, TestASDPDB) {
     status = db.get_data_product(asdp_ids[0], msg2);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
+    // Copy ASDP ID
+    asdp_id = asdp_ids[0];
+
     // Check all fields equal to inserted value
     EXPECT_EQ(msg.get_dp_id(), msg2.get_dp_id());
     EXPECT_EQ(msg.get_instrument_name(), msg2.get_instrument_name());
@@ -158,6 +165,50 @@ TEST(SynopsisTest, TestASDPDB) {
         EXPECT_EQ(value1.get_string_value(), value2.get_string_value());
     }
 
+
+    // Test Update SUE
+    double new_sue = 0.5;
+    status = db.update_science_utility(asdp_id, new_sue);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    status = db.get_data_product(asdp_ids[0], msg2);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    EXPECT_EQ(new_sue, msg2.get_science_utility_estimate());
+
+    status = db.update_science_utility(-1, new_sue);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+
+    // Test Update priority bin
+    int new_bin = 17;
+    status = db.update_priority_bin(asdp_id, new_bin);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    status = db.get_data_product(asdp_ids[0], msg2);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    EXPECT_EQ(new_bin, msg2.get_priority_bin());
+
+    status = db.update_priority_bin(-1, new_bin);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+
+    // Test update downlink_state
+    Synopsis::DownlinkState new_state = Synopsis::DownlinkState::TRANSMITTED;
+    status = db.update_downlink_state(asdp_id, new_state);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    status = db.get_data_product(asdp_ids[0], msg2);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    EXPECT_EQ(new_state, msg2.get_downlink_state());
+
+    status = db.update_downlink_state(-1, new_state);
+    EXPECT_EQ(Synopsis::Status::FAILURE, status);
+
+
+    // Test no ASDP found in DB
     status = db.get_data_product(-1, msg2);
     EXPECT_EQ(Synopsis::Status::FAILURE, status);
 

@@ -160,20 +160,17 @@ namespace Synopsis {
 
 
     Status Application::update_sue(int asdp_id, double sue) {
-        // TODO: set SUE in ASDP DB
-        return SUCCESS;
+        return _db->update_science_utility(asdp_id, sue);
     }
 
 
     Status Application::update_priority_bin(int asdp_id, int bin) {
-        // TODO: set bin in ASDP DB
-        return SUCCESS;
+        return _db->update_priority_bin(asdp_id, bin);
     }
 
 
     Status Application::update_downlink_state(int asdp_id, DownlinkState state) {
-        // TODO: set state in ASDP DB
-        return SUCCESS;
+        return _db->update_downlink_state(asdp_id, state);
     }
 
 

@@ -123,6 +123,7 @@ namespace Synopsis {
         msg.set_dp_size(stmt.fetch<int>(4));
         msg.set_science_utility_estimate(stmt.fetch<double>(5));
         msg.set_priority_bin(stmt.fetch<int>(6));
+        msg.set_downlink_state((DownlinkState)stmt.fetch<int>(7));
 
         Sqlite3Statement stmt2(this->_db, SQL_ASDP_METADATA_GET);
         stmt2.bind(0 , asdp_id);
@@ -159,19 +160,58 @@ namespace Synopsis {
 
 
     Status SqliteASDPDB::update_science_utility(int asdp_id, double sue) {
-        // TODO: Implement
+        Sqlite3Statement stmt(this->_db, SQL_UPDATE_SUE);
+        stmt.bind(0, sue);
+        stmt.bind(1, asdp_id);
+
+        if (stmt.step() != SQLITE_DONE) {
+            // TODO: Log error
+            return FAILURE;
+        }
+
+        if (sqlite3_changes(this->_db) == 0) {
+            // TODO: Log DP not found
+            return FAILURE;
+        }
+
         return SUCCESS;
     }
 
 
     Status SqliteASDPDB::update_priority_bin(int asdp_id, int bin) {
-        // TODO: Implement
+        Sqlite3Statement stmt(this->_db, SQL_UPDATE_BIN);
+        stmt.bind(0, bin);
+        stmt.bind(1, asdp_id);
+
+        if (stmt.step() != SQLITE_DONE) {
+            // TODO: Log error
+            return FAILURE;
+        }
+
+        if (sqlite3_changes(this->_db) == 0) {
+            // TODO: Log DP not found
+            return FAILURE;
+        }
+
         return SUCCESS;
     }
 
 
     Status SqliteASDPDB::update_downlink_state(int asdp_id, DownlinkState state) {
-        // TODO: Implement
+        Sqlite3Statement stmt(this->_db, SQL_UPDATE_DL_STATE);
+        stmt.bind(0, (int)state);
+        stmt.bind(1, asdp_id);
+
+        if (stmt.step() != SQLITE_DONE) {
+            // TODO: Log error
+            return FAILURE;
+        }
+
+        if (sqlite3_changes(this->_db) == 0) {
+            // TODO: Log DP not found
+            return FAILURE;
+        }
+
         return SUCCESS;
     }
 
