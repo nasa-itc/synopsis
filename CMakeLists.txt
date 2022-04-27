@@ -56,5 +56,6 @@ target_link_libraries(
 )
 
 include(GoogleTest)
-gtest_discover_tests(synopsis_test)
-
+gtest_discover_tests(synopsis_test PROPERTIES ENVIRONMENT
+  "SYNOPSIS_TEST_DATA=${CMAKE_CURRENT_LIST_DIR}/test/data"
+)

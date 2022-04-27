@@ -1,7 +1,11 @@
 #include <gtest/gtest.h>
+#include <filesystem>
 
 #include <synopsis.hpp>
 #include <SqliteASDPDB.hpp>
+
+
+namespace fs = std::__fs::filesystem;
 
 
 class TestASDS : public Synopsis::ASDS {
@@ -29,6 +33,15 @@ class TestASDS : public Synopsis::ASDS {
             return 123;
         }
 };
+
+
+fs::path get_absolute_data_path(std::string relative_path_str) {
+    const char* env_p = std::getenv("SYNOPSIS_TEST_DATA");
+    EXPECT_NE(nullptr, env_p);
+    fs::path base_path(env_p);
+    fs::path relative_path(relative_path_str);
+    return base_path / relative_path_str;
+}
 
 
 // Test high-level Synopsis Application interfaces
@@ -310,4 +323,78 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
     status = app.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
+}
+
+
+// Test pass-through ASDS
+TEST(SynopsisTest, TestPassThroughASDS) {
+
+    // Construct DP message for test data
+    fs::path data_path = get_absolute_data_path("example_dp.dat");
+    fs::path metadata_path = get_absolute_data_path("example_metadata.json");
+
+    Synopsis::DpMsg msg(
+        "test_instrument", "test_type",
+        data_path,
+        metadata_path,
+        true
+    );
+
+    // Test initialization
+    Synopsis::SqliteASDPDB db(":memory:");
+
+    Synopsis::Application app(&db);
+    Synopsis::Status status;
+
+    Synopsis::PassthroughASDS pt_asds;
+    status = app.add_asds("test_instrument", "test_type", &pt_asds);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    size_t mem_req;
+    mem_req = app.memory_requirement();
+    EXPECT_EQ(0, mem_req);
+
+    status = app.init(0, NULL);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    status = app.accept_dp(msg);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    // Check DB entry
+    std::vector<int> asdp_ids;
+    int asdp_id;
+
+    // Get ID of inserted ASDP
+    asdp_ids = db.list_data_product_ids();
+    EXPECT_EQ(asdp_ids.size(), 1);
+    asdp_id = asdp_ids[0];
+
+    // Get inserted ASDP
+    Synopsis::DpDbMsg db_msg;
+    status = db.get_data_product(asdp_id, db_msg);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    // Check ASDP values
+    EXPECT_EQ("test_instrument", db_msg.get_instrument_name());
+    EXPECT_EQ("test_type", db_msg.get_type());
+    EXPECT_EQ(data_path, db_msg.get_uri());
+    EXPECT_EQ(53, db_msg.get_dp_size());
+    EXPECT_EQ(0.123, db_msg.get_science_utility_estimate());
+    EXPECT_EQ(7, db_msg.get_priority_bin());
+    EXPECT_EQ(Synopsis::DownlinkState::UNTRANSMITTED, db_msg.get_downlink_state());
+
+    auto meta = db_msg.get_metadata();
+    EXPECT_EQ(3, meta.size());
+    auto int_val = meta["metadata_field_int"];
+    auto float_val = meta["metadata_field_float"];
+    auto string_val = meta["metadata_field_string"];
+    EXPECT_EQ(Synopsis::MetadataType::INT, int_val.get_type());
+    EXPECT_EQ(Synopsis::MetadataType::FLOAT, float_val.get_type());
+    EXPECT_EQ(Synopsis::MetadataType::STRING, string_val.get_type());
+    EXPECT_EQ(123, int_val.get_int_value());
+    EXPECT_EQ(1.23, float_val.get_float_value());
+    EXPECT_EQ("hello world", string_val.get_string_value());
+
+    status = app.deinit();
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
