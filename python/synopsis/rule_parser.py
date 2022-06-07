@@ -18,6 +18,8 @@ reserved = (
     'SUM',
     'LESS',
     'THAN',
+    'TRUE',
+    'FALSE',
 )
 
 tokens = reserved + (
@@ -158,9 +160,71 @@ def p_rule_body(p):
 
 def p_applies_clause(p):
     """
-    applies_clause : APPLIES
+    applies_clause : APPLIES conditional_expression
+    """
+    p[0] = p[2]
+
+
+def p_conditional_expression(p):
+    """
+    conditional_expression : comparator_expression
+                           | logical_constant
+    """
+#                           | logical_expression
+#                           | existential_expression
+#    """
+    p[0] = p[1]
+
+
+def p_logical_constant(p):
+    """
+    logical_constant : TRUE
+                     | FALSE
+    """
+    p[0] = LogicalConstant(p[1])
+
+
+def p_comparator(p):
+    """
+    comparator : LT
+               | LE
+               | GT
+               | GE
+               | EQ
+               | NE
     """
     p[0] = p[1]
+
+
+def p_value_expression(p):
+    """
+    value_expression : arithmetic_expression
+                     | string_expression
+    """
+    p[0] = p[1]
+
+
+def p_string_expression(p):
+    """
+    string_expression : SCONST
+    """
+    p[0] = StringConstant(p[1])
+
+
+def p_comparator_expression(p):
+    """
+    comparator_expression : value_expression comparator value_expression
+    """
+    if ((type(p[1]) == ConstExpression and type(p[3]) == ConstExpression) or
+        (type(p[1]) == StringConstant and type(p[3]) == StringConstant)):
+        p[0] = LogicalConstant(ComparatorExpression.evaluate(
+            p[2],
+            p[1].value,
+            p[3].value
+        ))
+
+    else:
+        p[0] = ComparatorExpression(p[2], p[1], p[3])
 
 
 def p_adjust_clause(p):
@@ -205,25 +269,27 @@ def p_paren_arithmetic_expression(p):
     p[0] = p[2]
 
 
+def p_operator(p):
+    """
+    operator : TIMES
+             | PLUS
+             | MINUS
+    """
+    p[0] = p[1]
+
+
 def p_binary_arithmetic_expression(p):
     """
-    arithmetic_expression : arithmetic_expression TIMES arithmetic_expression
-                          | arithmetic_expression PLUS arithmetic_expression
-                          | arithmetic_expression MINUS arithmetic_expression
+    arithmetic_expression : arithmetic_expression operator arithmetic_expression
     """
 
     # If both expressions are constant, evaluate operation
     if (type(p[1]) == ConstExpression) and (type(p[3]) == ConstExpression):
-        op = p[2]
-        lval = p[1].value
-        rval = p[3].value
-        if op == '*':
-            val = lval * rval
-        elif op == '+':
-            val = lval + rval
-        elif op == '-':
-            val = lval - rval
-        p[0] = ConstExpression(val)
+        p[0] = ConstExpression(BinaryExpression.evaluate(
+            p[2],
+            p[1].value,
+            p[3].value,
+        ))
 
     # Otherwise, represent binary operation
     else:
@@ -251,13 +317,13 @@ SYNOPSIS_PARSER = yacc()
 
 EXAMPLE1 = """\
 RULE(x):
-APPLIES
+APPLIES x.sue > 2
 ADJUST UTILITY -0.5 * x.sue
 MAXIMUM APPLICATIONS 1;
 """
 EXAMPLE2 = """\
 RULE(x, y):
-APPLIES
+APPLIES TRUE
 ADJUST UTILITY (x.sue + 1.0);
 """
 
