@@ -98,6 +98,8 @@ precedence = (
     ('left', 'PLUS', 'MINUS'),
     ('left', 'TIMES'),
     ('right', 'UMINUS'),
+    ('left', 'AND', 'OR'),
+    ('right', 'NOT'),
 )
 
 
@@ -169,11 +171,43 @@ def p_conditional_expression(p):
     """
     conditional_expression : comparator_expression
                            | logical_constant
+                           | logical_expression
     """
-#                           | logical_expression
 #                           | existential_expression
 #    """
     p[0] = p[1]
+
+
+def p_paren_conditional_expression(p):
+    """
+    conditional_expression : LPAREN conditional_expression RPAREN
+    """
+    p[0] = p[2]
+
+
+def p_logical_expression(p):
+    """
+    logical_expression : conditional_expression AND conditional_expression
+                       | conditional_expression OR conditional_expression
+                       | NOT conditional_expression
+    """
+    if len(p) == 4:
+        # Binary Operator
+        if type(p[1]) == LogicalConstant and type(p[3]) == LogicalConstant:
+            p[0] = LogicalConstant(BinaryLogicalExpression.evaluate(
+                p[2],
+                p[1].value,
+                p[3].value,
+            ))
+        else:
+            p[0] = BinaryLogicalExpression(p[2], p[1], p[3])
+
+    else:
+        # Unary Operator
+        if type(p[2]) == LogicalConstant:
+            p[0] = LogicalConstant(not p[2].value)
+        else:
+            p[0] = LogicalNot(p[2])
 
 
 def p_logical_constant(p):
@@ -269,18 +303,11 @@ def p_paren_arithmetic_expression(p):
     p[0] = p[2]
 
 
-def p_operator(p):
-    """
-    operator : TIMES
-             | PLUS
-             | MINUS
-    """
-    p[0] = p[1]
-
-
 def p_binary_arithmetic_expression(p):
     """
-    arithmetic_expression : arithmetic_expression operator arithmetic_expression
+    arithmetic_expression : arithmetic_expression TIMES arithmetic_expression
+                          | arithmetic_expression MINUS arithmetic_expression
+                          | arithmetic_expression PLUS arithmetic_expression
     """
 
     # If both expressions are constant, evaluate operation
@@ -317,13 +344,13 @@ SYNOPSIS_PARSER = yacc()
 
 EXAMPLE1 = """\
 RULE(x):
-APPLIES x.sue > 2
-ADJUST UTILITY -0.5 * x.sue
+APPLIES (NOT ((x.sue > 2) AND (x.sue < 1)))
+ADJUST UTILITY 0.5 * 2 + 1
 MAXIMUM APPLICATIONS 1;
 """
 EXAMPLE2 = """\
 RULE(x, y):
-APPLIES TRUE
+APPLIES NOT (FALSE AND FALSE)
 ADJUST UTILITY (x.sue + 1.0);
 """
 

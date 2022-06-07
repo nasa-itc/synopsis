@@ -89,6 +89,71 @@ class LogicalConstant(ValueExpression):
         return f'LogicalConstant({self.value})'
 
 
+class LogicalNot(ValueExpression):
+
+
+    def __init__(self, expression):
+        self.expression = expression
+
+
+    def validate(self, scope):
+        self.expression.validate(scope)
+
+
+    def get_value(self):
+        return not self.expression.get_value()
+
+
+    def __str__(self):
+        return f'NOT {self.expression}'
+
+
+    def __repr__(self):
+        return f'LogicalNot({repr(self.expression)})'
+
+
+class BinaryLogicalExpression(ValueExpression):
+
+
+    def __init__(self, operator, left_expression, right_expression):
+        self.operator = operator
+        self.left_expression = left_expression
+        self.right_expression = right_expression
+
+
+    @staticmethod
+    def evaluate(operator, left_value, right_value):
+        if operator == 'AND':
+            return (left_value and right_value)
+        elif operator == 'OR':
+            return (left_value or right_value)
+        else:
+            raise ValueError(f'Unknown logical operator "{operator}"')
+
+
+    def get_value(self):
+        return BinaryLogicalExpression.evaluate(
+            self.operator,
+            self.left_expression.get_value(),
+            self.right_expression.get_value(),
+        )
+
+
+    def validate(self, scope):
+        self.left_expression.validate(scope)
+        self.right_expression.validate(scope)
+
+
+    def __str__(self):
+        return f'({self.left_expression} {self.operator} {self.right_expression})'
+
+
+    def __repr__(self):
+        lrepr = repr(self.left_expression)
+        rrepr = repr(self.right_expression)
+        return f'BinaryLogicalExpression({self.operator}, {lrepr}, {rrepr})'
+
+
 class StringConstant(ValueExpression):
 
 
@@ -155,7 +220,7 @@ class ComparatorExpression(ValueExpression):
     def __repr__(self):
         lrepr = repr(self.left_expression)
         rrepr = repr(self.right_expression)
-        return f'BinaryExpression({self.comparator}, {lrepr}, {rrepr})'
+        return f'ComparatorExpression({self.comparator}, {lrepr}, {rrepr})'
 
 
 class ArithmeticExpression(ValueExpression): pass
