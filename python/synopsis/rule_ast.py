@@ -52,8 +52,45 @@ class TwoVarRule(Rule):
 
 class ValueExpression:
 
+
     def validate(self, scope):
         pass
+
+
+    def exposed_variables(self):
+        return set([])
+
+
+class ExistentialExpression(ValueExpression):
+
+
+    def __init__(self, variable, expression):
+        self.variable = variable
+        self.expression = expression
+
+
+    def validate(self, scope):
+        self.expression.validate(scope + (self.variable,))
+
+
+    def exposed_variables(self):
+        return (
+            self.expression.exposed_variables() -
+            set([self.variable])
+        )
+
+
+    def get_value(self):
+        # TODO: loop over free variables
+        return self.expression.get_value()
+
+
+    def __str__(self):
+        return f'EXISTS {self.variable} : ({self.expression})'
+
+
+    def __repr__(self):
+        return f'ExistentialExpression({self.variable}, {repr(self.expression)})'
 
 
 class LogicalConstant(ValueExpression):
@@ -100,6 +137,10 @@ class LogicalNot(ValueExpression):
         self.expression.validate(scope)
 
 
+    def exposed_variables(self):
+        return self.expression.exposed_variables()
+
+
     def get_value(self):
         return not self.expression.get_value()
 
@@ -144,6 +185,13 @@ class BinaryLogicalExpression(ValueExpression):
         self.right_expression.validate(scope)
 
 
+    def exposed_variables(self):
+        return (
+            self.left_expression.exposed_variables() |
+            self.right_expression.exposed_variables()
+        )
+
+
     def __str__(self):
         return f'({self.left_expression} {self.operator} {self.right_expression})'
 
@@ -184,6 +232,7 @@ class ComparatorExpression(ValueExpression):
 
     @staticmethod
     def evaluate(comparator, left_value, right_value):
+        # TODO: Handle type mismatch
         if comparator == '<':
             return (left_value < right_value)
         elif comparator == '<=':
@@ -211,6 +260,13 @@ class ComparatorExpression(ValueExpression):
     def validate(self, scope):
         self.left_expression.validate(scope)
         self.right_expression.validate(scope)
+
+
+    def exposed_variables(self):
+        return (
+            self.left_expression.exposed_variables() |
+            self.right_expression.exposed_variables()
+        )
 
 
     def __str__(self):
@@ -259,6 +315,13 @@ class BinaryExpression(ArithmeticExpression):
         self.right_expression.validate(scope)
 
 
+    def exposed_variables(self):
+        return (
+            self.left_expression.exposed_variables() |
+            self.right_expression.exposed_variables()
+        )
+
+
     @staticmethod
     def evaluate(operator, left_value, right_value):
         if operator == '*':
@@ -300,6 +363,10 @@ class MinusExpression(ArithmeticExpression):
         self.expression.validate(scope)
 
 
+    def exposed_variables(self):
+        return self.expression.exposed_variables()
+
+
     def get_value(self):
         return -self.expression.get_value()
 
@@ -324,6 +391,10 @@ class Field(ArithmeticExpression):
     def validate(self, scope):
         if self.variable_name not in scope:
             raise ValueError(f'Variable "{self.variable_name}" not in scope (line {self.lineno})')
+
+
+    def exposed_variables(self):
+        return set([self.variable_name])
 
 
     def __str__(self):

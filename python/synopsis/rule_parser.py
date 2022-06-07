@@ -172,9 +172,8 @@ def p_conditional_expression(p):
     conditional_expression : comparator_expression
                            | logical_constant
                            | logical_expression
+                           | existential_expression
     """
-#                           | existential_expression
-#    """
     p[0] = p[1]
 
 
@@ -183,6 +182,18 @@ def p_paren_conditional_expression(p):
     conditional_expression : LPAREN conditional_expression RPAREN
     """
     p[0] = p[2]
+
+
+def p_existential_expression(p):
+    """
+    existential_expression : EXISTS ID COLON LPAREN conditional_expression RPAREN
+    """
+    if p[2] not in p[5].exposed_variables():
+        # Unused variable in existential expression
+        p[0] = p[5]
+
+    else:
+        p[0] = ExistentialExpression(p[2], p[5])
 
 
 def p_logical_expression(p):
@@ -350,7 +361,7 @@ MAXIMUM APPLICATIONS 1;
 """
 EXAMPLE2 = """\
 RULE(x, y):
-APPLIES NOT (FALSE AND FALSE)
+APPLIES EXISTS z: (z.sue > x.sue) AND EXISTS z: (TRUE)
 ADJUST UTILITY (x.sue + 1.0);
 """
 
