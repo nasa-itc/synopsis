@@ -60,6 +60,43 @@ class Rule:
         return f'RULE({self.variables}, {app_repr}, {adj_repr}{max_clause})'
 
 
+class Constraint:
+
+
+    def __init__(self, variables, application, sum_field, constraint_value):
+        self.variables = tuple(variables)
+
+        application.validate(self.variables)
+        self.application = application
+
+        if sum_field is not None:
+            sum_field.validate(self.variables)
+        self.sum_field = sum_field
+
+        self.constraint_value = constraint_value
+
+
+    def apply(self, asdps):
+        aggregate = 0
+
+        for values in product(*(len(self.variables) * [asdps])):
+            assignment = dict(zip(self.variables, values))
+
+            if self.application.get_value(assignment, asdps):
+                if self.sum_field is None:
+                    value = 1
+                else:
+                    value = self.sum_field.get_value(assignment, asdps)
+                aggregate += value
+
+        return (aggregate < self.constraint_value)
+
+
+    def __repr__(self):
+        app_repr = repr(self.application)
+        return f'RULE({self.variables}, {app_repr}, sum_field={self.sum_field}, constraint_value={self.constraint_value})'
+
+
 class ValueExpression:
 
 

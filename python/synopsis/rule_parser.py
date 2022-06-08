@@ -5,6 +5,7 @@ from rule_ast import *
 
 reserved = (
     'RULE',
+    'CONSTRAINT',
     'APPLIES',
     'ADJUST',
     'UTILITY',
@@ -103,12 +104,81 @@ precedence = (
 )
 
 
+def p_rule_constraint_list(p):
+    """
+    rule_constraint_list : rule_constraint_list rule_declaration
+                         | rule_constraint_list constraint_declaration
+                         | rule_declaration
+                         | constraint_declaration
+    """
+    if len(p) == 2:
+        if type(p[1]) == Rule:
+            p[0] = {
+                'rules': [p[1]],
+                'constraints': [],
+            }
+        else:
+            p[0] = {
+                'rules': [],
+                'constraints': [p[1]],
+            }
+    else:
+        p[0] = p[1]
+        if type(p[2]) == Rule:
+            p[0]['rules'].append(p[2])
+        else:
+            p[0]['constraints'].append(p[2])
+
+
+def p_constraint_declaration(p):
+    """
+    constraint_declaration : CONSTRAINT variable_declaration COLON constraint_body SEMI
+    """
+    variable_list = p[2]
+    constraint_kwargs = p[4]
+    p[0] = Constraint(variable_list, **constraint_kwargs)
+
+
+def p_constraint_body(p):
+    """
+    constraint_body : applies_clause aggregate_expression LESS THAN constant_expression
+    """
+    p[0] = {
+        'application': p[1],
+        'sum_field': p[2],
+        'constraint_value': p[5],
+    }
+
+
+def p_aggregate_expression(p):
+    """
+    aggregate_expression : COUNT
+                         | SUM field
+    """
+    if len(p) == 2:
+        p[0] = None
+    else:
+        p[0] = p[2]
+
+
+def p_constant_expression(p):
+    """
+    constant_expression : ICONST
+                        | FCONST
+                        | MINUS ICONST
+                        | MINUS FCONST
+    """
+    if len(p) == 3:
+        p[0] = -float(p[2])
+    else:
+        p[0] = float(p[1])
+
+
 def p_rule_declaration(p):
     """
     rule_declaration : RULE variable_declaration COLON rule_body SEMI
     """
     variable_list = p[2]
-
     rule_kwargs = p[4]
     p[0] = Rule(variable_list, **rule_kwargs)
 
@@ -358,6 +428,11 @@ APPLIES x.instrument == "SIF" AND x.type == "CTX" AND
         AND y.context_id == x.id
     )
 ADJUST UTILITY -0.5 * x.sue;
+
+CONSTRAINT (x):
+APPLIES TRUE
+SUM x.sue
+LESS THAN 1.0;
 """
 
 EXAMPLE2 = """\
@@ -365,6 +440,11 @@ RULE(x, y):
 APPLIES EXISTS z: (z.sue > x.sue) AND EXISTS z: (TRUE)
 ADJUST UTILITY (y.sue + 1.0)
 MAXIMUM APPLICATIONS 1;
+
+CONSTRAINT (x):
+APPLIES TRUE
+COUNT
+LESS THAN 5;
 """
 
 asdps = [
@@ -383,8 +463,11 @@ asdps = [
     },
 ]
 
-rule_a = SYNOPSIS_PARSER.parse(EXAMPLE1)
-rule_b = SYNOPSIS_PARSER.parse(EXAMPLE2)
-print(rule_a)
-print(rule_b)
-print(rule_a.apply(asdps))
+rule_file_a = SYNOPSIS_PARSER.parse(EXAMPLE1)
+rule_file_b = SYNOPSIS_PARSER.parse(EXAMPLE2)
+print(rule_file_a)
+print(rule_file_b)
+for rule in rule_file_a['rules']:
+    print(rule.apply(asdps))
+for constr in rule_file_a['constraints']:
+    print(constr.apply(asdps))
