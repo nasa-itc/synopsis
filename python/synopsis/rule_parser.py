@@ -4,6 +4,8 @@ from ply.yacc import yacc
 from rule_ast import *
 
 reserved = (
+    'BIN',
+    'DEFAULT',
     'RULE',
     'CONSTRAINT',
     'APPLIES',
@@ -102,6 +104,50 @@ precedence = (
     ('left', 'AND', 'OR'),
     ('right', 'NOT'),
 )
+
+
+def p_rule_file_bins(p):
+    """
+    rule_file : bin_list
+    """
+    p[0] = p[1]
+
+
+def p_rule_file_no_bins(p):
+    """
+    rule_file : rule_constraint_list
+    """
+    p[0] = {
+        'default': p[1]
+    }
+
+
+def p_bin_list(p):
+    """
+    bin_list : bin_definition
+             | bin_list bin_definition
+    """
+    p[0] = p[1]
+    if len(p) > 2:
+        duplicate_keys = set(p[2].keys()) & set(p[1].keys())
+        if len(duplicate_keys) > 0:
+            raise ValueError(f'Duplicate bin definitions: {duplicate_keys}')
+        p[0].update(p[2])
+
+
+def p_bin_definition(p):
+    """
+    bin_definition : BIN ICONST COLON rule_constraint_list
+                   | DEFAULT COLON rule_constraint_list
+    """
+    if len(p) == 4:
+        p[0] = {
+            'default': p[3]
+        }
+    else:
+        p[0] = {
+            int(p[2]): p[4]
+        }
 
 
 def p_rule_constraint_list(p):
@@ -421,6 +467,8 @@ SYNOPSIS_PARSER = yacc()
 
 
 EXAMPLE1 = """\
+DEFAULT:
+
 RULE(x):
 APPLIES x.instrument == "SIF" AND x.type == "CTX" AND
     NOT EXISTS y: (
@@ -429,6 +477,18 @@ APPLIES x.instrument == "SIF" AND x.type == "CTX" AND
     )
 ADJUST UTILITY -0.5 * x.sue;
 
+CONSTRAINT (x):
+APPLIES TRUE
+SUM x.sue
+LESS THAN 1.0;
+
+BIN 1:
+CONSTRAINT (x):
+APPLIES TRUE
+SUM x.sue
+LESS THAN 1.0;
+
+BIN 2:
 CONSTRAINT (x):
 APPLIES TRUE
 SUM x.sue
@@ -467,7 +527,7 @@ rule_file_a = SYNOPSIS_PARSER.parse(EXAMPLE1)
 rule_file_b = SYNOPSIS_PARSER.parse(EXAMPLE2)
 print(rule_file_a)
 print(rule_file_b)
-for rule in rule_file_a['rules']:
+for rule in rule_file_a['default']['rules']:
     print(rule.apply(asdps))
-for constr in rule_file_a['constraints']:
+for constr in rule_file_a['default']['constraints']:
     print(constr.apply(asdps))
