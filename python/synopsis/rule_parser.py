@@ -105,42 +105,38 @@ precedence = (
 
 def p_rule_declaration(p):
     """
-    rule_declaration : rule_declaration_onevar
-                     | rule_declaration_twovar
-    """
-    p[0] = p[1]
-
-
-def p_rule_declaration_onevar(p):
-    """
-    rule_declaration_onevar : RULE decl_onevar COLON rule_body SEMI
+    rule_declaration : RULE variable_declaration COLON rule_body SEMI
     """
     variable_list = p[2]
+
     rule_kwargs = p[4]
-    p[0] = OneVarRule(*variable_list, **rule_kwargs)
+    p[0] = Rule(variable_list, **rule_kwargs)
 
 
-def p_rule_declaration_twovar(p):
+def p_variable_declaration(p):
     """
-    rule_declaration_twovar : RULE decl_twovar COLON rule_body SEMI
+    variable_declaration : LPAREN variable_decl_list RPAREN
     """
     variable_list = p[2]
-    rule_kwargs = p[4]
-    p[0] = TwoVarRule(*variable_list, **rule_kwargs)
+
+    # Check for duplicate variables
+    if len(variable_list) != len(set(variable_list)):
+        raise ValueError(
+            f'Line {p.lineno(1)}: Duplicate variables in list: {variable_list}'
+        )
+
+    p[0] = variable_list
 
 
-def p_decl_onevar(p):
+def p_variable_decl_list(p):
     """
-    decl_onevar : LPAREN ID RPAREN
+    variable_decl_list : ID
+                       | variable_decl_list COMMA ID
     """
-    p[0] = (p[2],)
-
-
-def p_decl_twovar(p):
-    """
-    decl_twovar : LPAREN ID COMMA ID RPAREN
-    """
-    p[0] = (p[2], p[4])
+    if len(p) == 2:
+        p[0] = (p[1],)
+    else:
+        p[0] = p[1] + (p[3],)
 
 
 def p_rule_body(p):
@@ -253,7 +249,8 @@ def p_string_expression(p):
     """
     string_expression : SCONST
     """
-    p[0] = StringConstant(p[1])
+    # Strip off quote marks
+    p[0] = StringConstant(p[1][1:-1])
 
 
 def p_comparator_expression(p):
@@ -355,15 +352,39 @@ SYNOPSIS_PARSER = yacc()
 
 EXAMPLE1 = """\
 RULE(x):
-APPLIES (NOT ((x.sue > 2) AND (x.sue < 1)))
-ADJUST UTILITY 0.5 * 2 + 1
-MAXIMUM APPLICATIONS 1;
+APPLIES x.instrument == "SIF" AND x.type == "CTX" AND
+    NOT EXISTS y: (
+        y.instrument == "SIF" AND y.type == "ZOOM"
+        AND y.context_id == x.id
+    )
+ADJUST UTILITY -0.5 * x.sue;
 """
+
 EXAMPLE2 = """\
 RULE(x, y):
 APPLIES EXISTS z: (z.sue > x.sue) AND EXISTS z: (TRUE)
-ADJUST UTILITY (x.sue + 1.0);
+ADJUST UTILITY (y.sue + 1.0)
+MAXIMUM APPLICATIONS 1;
 """
 
-print(SYNOPSIS_PARSER.parse(EXAMPLE1))
-print(SYNOPSIS_PARSER.parse(EXAMPLE2))
+asdps = [
+    {
+        'id': 0,
+        'sue': 0.5,
+        'instrument': 'SIF',
+        'type': 'CTX',
+    },
+    {
+        'id': 1,
+        'sue': 0.3,
+        'instrument': 'SIF',
+        'type': 'ZOOM',
+        'context_id': 2,
+    },
+]
+
+rule_a = SYNOPSIS_PARSER.parse(EXAMPLE1)
+rule_b = SYNOPSIS_PARSER.parse(EXAMPLE2)
+print(rule_a)
+print(rule_b)
+print(rule_a.apply(asdps))

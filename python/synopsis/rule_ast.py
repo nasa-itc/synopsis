@@ -1,56 +1,70 @@
 """
 Abstract Syntax Tree representation for SYNOPSIS rules
 """
+from itertools import product
 
 class Rule:
 
-    pass
 
+    def __init__(self, variables, application, adjustment, max_applications):
+        self.variables = tuple(variables)
 
-class OneVarRule(Rule):
-
-
-    def __init__(self, variable1, application, adjustment, max_applications):
-        self.variable1 = variable1
-
-        variables = (variable1,)
-
-        application.validate(variables)
+        application.validate(self.variables)
         self.application = application
 
-        adjustment.validate(variables)
+        adjustment.validate(self.variables)
         self.adjustment = adjustment
+
+        self.max_applications = max_applications
+
+        unused = (
+            set(self.variables) -
+            (application.exposed_variables() | adjustment.exposed_variables())
+        )
+        if len(unused) > 0:
+            print(f'Warning: unused variables {unused}')
+
+
+    def apply(self, asdps):
+
+        total_adj_value = 0
+        n_applications = 0
+
+        for values in product(*(len(self.variables) * [asdps])):
+            assignment = dict(zip(self.variables, values))
+            assigned_ids = {
+                k: v['id']
+                for k, v in assignment.items()
+            }
+
+            if self.application.get_value(assignment, asdps):
+                n_applications += 1
+                adj_value = self.adjustment.get_value(assignment, asdps)
+                total_adj_value += adj_value
+                print(f'Applied rule with {assigned_ids}, adjustment = {adj_value}')
+
+            if ((self.max_applications is not None) and
+                (n_applications >= self.max_applications)):
+                break
+
+        return total_adj_value
 
 
     def __repr__(self):
         app_repr = repr(self.application)
         adj_repr = repr(self.adjustment)
-        return f'RULE({self.variable1}, {app_repr}, {adj_repr})'
-
-
-class TwoVarRule(Rule):
-
-
-    def __init__(self, variable1, variable2, application, adjustment, max_applications):
-        self.variable1 = variable1
-        self.variable2 = variable2
-
-        variables = (variable1, variable2)
-
-        application.validate(variables)
-        self.application = application
-
-        adjustment.validate(variables)
-        self.adjustment = adjustment
-
-
-    def __repr__(self):
-        app_repr = repr(self.application)
-        adj_repr = repr(self.adjustment)
-        return f'RULE({self.variable1}, {self.variable2}, {app_repr}, {adj_repr})'
+        max_clause = (
+            '' if self.max_applications is None
+            else f', max_applications={self.max_applications}'
+        )
+        return f'RULE({self.variables}, {app_repr}, {adj_repr}{max_clause})'
 
 
 class ValueExpression:
+
+
+    def get_value(self, assignments, asdps):
+        raise NotImplementedError()
 
 
     def validate(self, scope):
@@ -80,9 +94,17 @@ class ExistentialExpression(ValueExpression):
         )
 
 
-    def get_value(self):
-        # TODO: loop over free variables
-        return self.expression.get_value()
+    def get_value(self, assignments, asdps):
+        for a in asdps:
+            new_assignemnts = dict(assignments)
+            new_assignemnts[self.variable] = a
+            try:
+                value = self.expression.get_value(new_assignemnts, asdps)
+            except KeyError:
+                # If assignment invalid, skip candidate for existential qualifier
+                continue
+            if value: return True
+        return False
 
 
     def __str__(self):
@@ -114,7 +136,7 @@ class LogicalConstant(ValueExpression):
             raise ValueError(f'Unexpected value type "{vtype}"')
 
 
-    def get_value(self):
+    def get_value(self, assignment, asdps):
         return self.value
 
 
@@ -141,8 +163,8 @@ class LogicalNot(ValueExpression):
         return self.expression.exposed_variables()
 
 
-    def get_value(self):
-        return not self.expression.get_value()
+    def get_value(self, assignment, asdps):
+        return not self.expression.get_value(assignment, asdps)
 
 
     def __str__(self):
@@ -172,11 +194,11 @@ class BinaryLogicalExpression(ValueExpression):
             raise ValueError(f'Unknown logical operator "{operator}"')
 
 
-    def get_value(self):
+    def get_value(self, assignment, asdps):
         return BinaryLogicalExpression.evaluate(
             self.operator,
-            self.left_expression.get_value(),
-            self.right_expression.get_value(),
+            self.left_expression.get_value(assignment, asdps),
+            self.right_expression.get_value(assignment, asdps),
         )
 
 
@@ -209,7 +231,7 @@ class StringConstant(ValueExpression):
         self.value = value
 
 
-    def get_value(self):
+    def get_value(self, assignment, asdps):
         return self.value
 
 
@@ -249,11 +271,11 @@ class ComparatorExpression(ValueExpression):
             raise ValueError(f'Unknown comparator "{comparator}"')
 
 
-    def get_value(self):
+    def get_value(self, assignment, asdps):
         return ComparatorExpression.evaluate(
             self.comparator,
-            self.left_expression.get_value(),
-            self.right_expression.get_value(),
+            self.left_expression.get_value(assignment, asdps),
+            self.right_expression.get_value(assignment, asdps),
         )
 
 
@@ -289,7 +311,7 @@ class ConstExpression(ArithmeticExpression):
         self.value = float(value)
 
 
-    def get_value(self):
+    def get_value(self, assignment, asdps):
         return self.value
 
 
@@ -334,11 +356,11 @@ class BinaryExpression(ArithmeticExpression):
             raise ValueError(f'Unknown operator "{operator}"')
 
 
-    def get_value(self):
+    def get_value(self, assignment, asdps):
         return BinaryExpression.evaluate(
             self.operator,
-            self.left_expression.get_value(),
-            self.right_expression.get_value(),
+            self.left_expression.get_value(assignment, asdps),
+            self.right_expression.get_value(assignment, asdps),
         )
 
 
@@ -367,8 +389,8 @@ class MinusExpression(ArithmeticExpression):
         return self.expression.exposed_variables()
 
 
-    def get_value(self):
-        return -self.expression.get_value()
+    def get_value(self, assignment, asdps):
+        return -self.expression.get_value(assignment, asdps)
 
 
     def __str__(self):
@@ -386,6 +408,10 @@ class Field(ArithmeticExpression):
         self.variable_name = variable_name
         self.field_name = field_name
         self.lineno = lineno
+
+
+    def get_value(self, assignment, asdps):
+        return assignment[self.variable_name][self.field_name]
 
 
     def validate(self, scope):
