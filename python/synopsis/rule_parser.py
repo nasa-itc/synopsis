@@ -531,3 +531,6 @@ for rule in rule_file_a['default']['rules']:
     print(rule.apply(asdps))
 for constr in rule_file_a['default']['constraints']:
     print(constr.apply(asdps))
+
+import json
+print(json.dumps(rule_file_a, cls=RuleJSONEncoder, indent=2))

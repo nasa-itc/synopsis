@@ -2,8 +2,33 @@
 Abstract Syntax Tree representation for SYNOPSIS rules
 """
 from itertools import product
+from json import JSONEncoder
 
-class Rule:
+
+class RuleJSONEncoder(JSONEncoder):
+
+    def default(self, obj):
+        if hasattr(obj, '__json__'):
+            return obj.__json__()
+        else:
+            return JSONEncoder.default(self, obj)
+
+
+class JSONEncodable:
+
+
+    def _json(self):
+        raise NotImplementedError()
+
+
+    def __json__(self):
+        return {
+            '__type__': type(self).__name__,
+            '__contents__': self._json(),
+        }
+
+
+class Rule(JSONEncodable):
 
 
     def __init__(self, variables, application, adjustment, max_applications):
@@ -60,7 +85,16 @@ class Rule:
         return f'RULE({self.variables}, {app_repr}, {adj_repr}{max_clause})'
 
 
-class Constraint:
+    def _json(self):
+        return {
+            'variables': list(self.variables),
+            'application': self.application,
+            'adjustment': self.adjustment,
+            'max_applications': self.max_applications,
+        }
+
+
+class Constraint(JSONEncodable):
 
 
     def __init__(self, variables, application, sum_field, constraint_value):
@@ -97,6 +131,15 @@ class Constraint:
         return f'RULE({self.variables}, {app_repr}, sum_field={self.sum_field}, constraint_value={self.constraint_value})'
 
 
+    def _json(self):
+        return {
+            'variables': list(self.variables),
+            'application': self.application,
+            'sum_field': self.sum_field,
+            'constraint_value': self.constraint_value,
+        }
+
+
 class ValueExpression:
 
 
@@ -112,7 +155,7 @@ class ValueExpression:
         return set([])
 
 
-class ExistentialExpression(ValueExpression):
+class ExistentialExpression(ValueExpression, JSONEncodable):
 
 
     def __init__(self, variable, expression):
@@ -152,7 +195,14 @@ class ExistentialExpression(ValueExpression):
         return f'ExistentialExpression({self.variable}, {repr(self.expression)})'
 
 
-class LogicalConstant(ValueExpression):
+    def _json(self):
+        return {
+            'variable': self.variable,
+            'expression': self.expression,
+        }
+
+
+class LogicalConstant(ValueExpression, JSONEncodable):
 
 
     def __init__(self, value):
@@ -185,7 +235,13 @@ class LogicalConstant(ValueExpression):
         return f'LogicalConstant({self.value})'
 
 
-class LogicalNot(ValueExpression):
+    def _json(self):
+        return {
+            'value': self.value,
+        }
+
+
+class LogicalNot(ValueExpression, JSONEncodable):
 
 
     def __init__(self, expression):
@@ -212,7 +268,13 @@ class LogicalNot(ValueExpression):
         return f'LogicalNot({repr(self.expression)})'
 
 
-class BinaryLogicalExpression(ValueExpression):
+    def _json(self):
+        return {
+            'expression': self.expression,
+        }
+
+
+class BinaryLogicalExpression(ValueExpression, JSONEncodable):
 
 
     def __init__(self, operator, left_expression, right_expression):
@@ -261,7 +323,15 @@ class BinaryLogicalExpression(ValueExpression):
         return f'BinaryLogicalExpression({self.operator}, {lrepr}, {rrepr})'
 
 
-class StringConstant(ValueExpression):
+    def _json(self):
+        return {
+            'operator': self.operator,
+            'left_expression': self.left_expression,
+            'right_expression': self.right_expression,
+        }
+
+
+class StringConstant(ValueExpression, JSONEncodable):
 
 
     def __init__(self, value):
@@ -280,7 +350,13 @@ class StringConstant(ValueExpression):
         return f'StringConstant({self.value})'
 
 
-class ComparatorExpression(ValueExpression):
+    def _json(self):
+        return {
+            'value': self.value,
+        }
+
+
+class ComparatorExpression(ValueExpression, JSONEncodable):
 
 
     def __init__(self, comparator, left_expression, right_expression):
@@ -338,10 +414,18 @@ class ComparatorExpression(ValueExpression):
         return f'ComparatorExpression({self.comparator}, {lrepr}, {rrepr})'
 
 
+    def _json(self):
+        return {
+            'comparator': self.comparator,
+            'left_expression': self.left_expression,
+            'right_expression': self.right_expression,
+        }
+
+
 class ArithmeticExpression(ValueExpression): pass
 
 
-class ConstExpression(ArithmeticExpression):
+class ConstExpression(ArithmeticExpression, JSONEncodable):
 
 
     def __init__(self, value):
@@ -360,7 +444,14 @@ class ConstExpression(ArithmeticExpression):
         return f'ConstExpression({self.value})'
 
 
-class BinaryExpression(ArithmeticExpression):
+    def _json(self):
+        return {
+            '__type__': type(self).__name__,
+            'value': self.value,
+        }
+
+
+class BinaryExpression(ArithmeticExpression, JSONEncodable):
 
 
     def __init__(self, operator, left_expression, right_expression):
@@ -411,7 +502,15 @@ class BinaryExpression(ArithmeticExpression):
         return f'BinaryExpression({self.operator}, {lrepr}, {rrepr})'
 
 
-class MinusExpression(ArithmeticExpression):
+    def _json(self):
+        return {
+            'operator': self.operator,
+            'left_expression': self.left_expression,
+            'right_expression': self.right_expression,
+        }
+
+
+class MinusExpression(ArithmeticExpression, JSONEncodable):
 
 
     def __init__(self, expression):
@@ -438,7 +537,13 @@ class MinusExpression(ArithmeticExpression):
         return f'MinusExpression({repr(self.expression)})'
 
 
-class Field(ArithmeticExpression):
+    def _json(self):
+        return {
+            'expression': self.expression,
+        }
+
+
+class Field(ArithmeticExpression, JSONEncodable):
 
 
     def __init__(self, variable_name, field_name, lineno):
@@ -466,3 +571,10 @@ class Field(ArithmeticExpression):
 
     def __repr__(self):
         return f'Field({self.variable_name}, {self.field_name}, {self.lineno})'
+
+
+    def _json(self):
+        return {
+            'variable_name': self.variable_name,
+            'field_name': self.field_name,
+        }
