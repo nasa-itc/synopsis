@@ -17,6 +17,7 @@ namespace Synopsis {
     class ASDS : public ApplicationModule {
 
         public:
+            virtual ~ASDS() = default;
             virtual Status process_data_product(DpMsg msg) = 0;
             void set_database(ASDPDB *db);
 

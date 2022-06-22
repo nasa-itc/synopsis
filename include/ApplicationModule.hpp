@@ -10,6 +10,7 @@ namespace Synopsis {
     class ApplicationModule {
 
         public:
+            virtual ~ApplicationModule() = default;
 
             /*
              * Performs module initialization
@@ -21,7 +22,6 @@ namespace Synopsis {
              * Returns the required memory for the module
              */
             virtual size_t memory_requirement(void) = 0;
-            virtual ~ApplicationModule() = default;
     };
 
 

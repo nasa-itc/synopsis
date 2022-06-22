@@ -14,6 +14,7 @@ namespace Synopsis {
         public:
 
             SqliteASDPDB(std::string asdpdb_file);
+            virtual ~SqliteASDPDB();
 
             Status init(size_t bytes, void* memory);
             Status deinit(void);

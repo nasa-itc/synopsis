@@ -14,6 +14,7 @@ namespace Synopsis {
              * Default Constructor
              */
             DpMsg();
+            ~DpMsg() = default;
 
             DpMsg(std::string instrument_name, std::string dp_type,
                 std::string dp_uri, std::string meta_uri, bool meta_usage);

@@ -10,6 +10,7 @@ namespace Synopsis {
     class PassthroughASDS : public ASDS {
 
         public:
+            virtual ~PassthroughASDS() = default;
             Status init(size_t bytes, void* memory);
             Status deinit(void);
             size_t memory_requirement(void);

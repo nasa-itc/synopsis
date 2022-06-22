@@ -14,6 +14,7 @@ namespace Synopsis {
         public:
 
             DpMetadataValue();
+            ~DpMetadataValue() = default;
 
             DpMetadataValue(int value);
             DpMetadataValue(double float_value);
@@ -44,6 +45,7 @@ namespace Synopsis {
              * Default Constructor
              */
             DpDbMsg();
+            ~DpDbMsg() = default;
 
             DpDbMsg(int dp_id, std::string instrument_name, std::string dp_type,
                 std::string dp_uri, size_t dp_size, double science_utility_estimate,

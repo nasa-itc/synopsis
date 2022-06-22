@@ -13,6 +13,10 @@ namespace Synopsis {
 
     }
 
+    SqliteASDPDB::~SqliteASDPDB() {
+        this->deinit();
+    }
+
 
     /*
      * Implement ASDS initialization
