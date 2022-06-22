@@ -21,6 +21,7 @@ namespace Synopsis {
              * Returns the required memory for the module
              */
             virtual size_t memory_requirement(void) = 0;
+            virtual ~ApplicationModule() = default;
     };
 
 
