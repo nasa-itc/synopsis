@@ -466,71 +466,10 @@ SYNOPSIS_LEXER = lex()
 SYNOPSIS_PARSER = yacc()
 
 
-EXAMPLE1 = """\
-DEFAULT:
+def parse_str(srd_str):
+    return SYNOPSIS_PARSER.parse(srd_str)
 
-RULE(x):
-APPLIES x.instrument == "SIF" AND x.type == "CTX" AND
-    NOT EXISTS y: (
-        y.instrument == "SIF" AND y.type == "ZOOM"
-        AND y.context_id == x.id
-    )
-ADJUST UTILITY -0.5 * x.sue;
 
-CONSTRAINT (x):
-APPLIES TRUE
-SUM x.sue
-LESS THAN 1.0;
-
-BIN 1:
-CONSTRAINT (x):
-APPLIES TRUE
-SUM x.sue
-LESS THAN 1.0;
-
-BIN 2:
-CONSTRAINT (x):
-APPLIES TRUE
-SUM x.sue
-LESS THAN 1.0;
-"""
-
-EXAMPLE2 = """\
-RULE(x, y):
-APPLIES EXISTS z: (z.sue > x.sue) AND EXISTS z: (TRUE)
-ADJUST UTILITY (y.sue + 1.0)
-MAXIMUM APPLICATIONS 1;
-
-CONSTRAINT (x):
-APPLIES TRUE
-COUNT
-LESS THAN 5;
-"""
-
-asdps = [
-    {
-        'id': 0,
-        'sue': 0.5,
-        'instrument': 'SIF',
-        'type': 'CTX',
-    },
-    {
-        'id': 1,
-        'sue': 0.3,
-        'instrument': 'SIF',
-        'type': 'ZOOM',
-        'context_id': 2,
-    },
-]
-
-rule_file_a = SYNOPSIS_PARSER.parse(EXAMPLE1)
-rule_file_b = SYNOPSIS_PARSER.parse(EXAMPLE2)
-print(rule_file_a)
-print(rule_file_b)
-for rule in rule_file_a['default']['rules']:
-    print(rule.apply(asdps))
-for constr in rule_file_a['default']['constraints']:
-    print(constr.apply(asdps))
-
-import json
-print(json.dumps(rule_file_a, cls=RuleJSONEncoder, indent=2))
+def parse_file(filename):
+    with open(filename, 'r') as f:
+        return parse_str(f.read())
