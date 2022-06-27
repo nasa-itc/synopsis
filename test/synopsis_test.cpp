@@ -45,6 +45,13 @@ fs::path get_absolute_data_path(std::string relative_path_str) {
 
 
 // Test high-level Synopsis Application interfaces
+/*
+ * Tests:
+ * SYNOPSIS-IR-01
+ * SYNOPSIS-IR-02
+ * SYNOPSIS-IR-03
+ * SYNOPSIS-IR-04
+ */
 TEST(SynopsisTest, TestApplicationInterface) {
     // Test initialization
     Synopsis::SqliteASDPDB db(":memory:");
@@ -115,6 +122,9 @@ TEST(SynopsisTest, TestDpMsg) {
 
 
 // Test ASDPDB interfaces and functionality
+/*
+ * Tests SYNOPSIS-IR-05
+ */
 TEST(SynopsisTest, TestASDPDB) {
 
     Synopsis::Status status;
@@ -233,6 +243,10 @@ TEST(SynopsisTest, TestASDPDB) {
 
 
 // Test ASDPDB interfaces and functionality
+/*
+ * Tests:
+ * SYNOPSIS-FR-02
+ */
 TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
 
     Synopsis::SqliteASDPDB db(":memory:");
