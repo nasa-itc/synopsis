@@ -56,7 +56,8 @@ namespace Synopsis {
             Status update_asdp_metadata(int asdp_id, std::string fieldname, T value);
 
             Status prioritize(
-                std::string configuration_id,
+                std::string rule_configuration_id,
+                std::string similarity_configuration_id,
                 double max_processing_time_sec,
                 std::vector<int> prioritized_list
             );

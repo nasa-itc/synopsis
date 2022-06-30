@@ -199,7 +199,9 @@ namespace Synopsis {
 
 
     Status Application::prioritize(
-        std::string configuration_id, double max_processing_time_sec,
+        std::string rule_configuration_id,
+        std::string similarity_configuration_id,
+        double max_processing_time_sec,
         std::vector<int> prioritized_list
     ) {
         /*

@@ -245,6 +245,7 @@ TEST(SynopsisTest, TestASDPDB) {
 // Test ASDPDB interfaces and functionality
 /*
  * Tests:
+ * SYNOPSIS-IR-06
  * SYNOPSIS-FR-02
  */
 TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
