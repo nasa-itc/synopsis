@@ -3,6 +3,7 @@
 
 #include <synopsis.hpp>
 #include <SqliteASDPDB.hpp>
+#include <StdLogger.hpp>
 
 
 namespace fs = std::__fs::filesystem;
@@ -412,4 +413,12 @@ TEST(SynopsisTest, TestPassThroughASDS) {
 
     status = app.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+}
+
+TEST(SynopsisTest, TestStdLogger) {
+
+    Synopsis::StdLogger logger;
+    logger.log(Synopsis::LogType::INFO, "Test log info: %ld", 5);
+    logger.log(Synopsis::LogType::WARN, "Test log warn: %ld", 5);
+    logger.log(Synopsis::LogType::ERROR, "Test log error: %ld", 5);
 }

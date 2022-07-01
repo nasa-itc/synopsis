@@ -29,6 +29,7 @@ add_library(synopsis SHARED
     src/DpDbMsg.cpp
     src/PassthroughASDS.cpp
     src/SqliteASDPDB.cpp
+    src/StdLogger.cpp
 )
 set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)

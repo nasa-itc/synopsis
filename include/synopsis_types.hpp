@@ -26,6 +26,13 @@ namespace Synopsis {
     } MetadataType;
 
 
+    typedef enum {
+        INFO = 0,
+        WARN = 1,
+        ERROR = 2
+    } LogType;
+
+
 };
 
 #endif
