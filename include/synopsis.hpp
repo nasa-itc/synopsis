@@ -29,7 +29,7 @@ namespace Synopsis {
             /*
              * Constructor
              */
-            Application(ASDPDB *db);
+            Application(ASDPDB *db, Logger *logger);
             ~Application() = default;
 
             /*
@@ -71,6 +71,7 @@ namespace Synopsis {
             void *memory_buffer;
 
             ASDPDB *_db;
+            Logger *_logger;
 
             int n_asds;
             std::tuple<std::string, std::string, ASDS*> asds[MAX_SYNOPSIS_APP_ASDS];

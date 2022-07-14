@@ -11,7 +11,7 @@ namespace Synopsis {
 
         public:
             virtual ~PassthroughASDS() = default;
-            Status init(size_t bytes, void* memory);
+            Status init(size_t bytes, void* memory, Logger *logger);
             Status deinit(void);
             size_t memory_requirement(void);
             Status process_data_product(DpMsg msg);

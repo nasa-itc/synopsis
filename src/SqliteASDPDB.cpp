@@ -21,8 +21,10 @@ namespace Synopsis {
     /*
      * Implement ASDS initialization
      */
-    Status SqliteASDPDB::init(size_t bytes, void* memory) {
+    Status SqliteASDPDB::init(size_t bytes, void* memory, Logger *logger) {
         int status;
+
+        this->_logger = logger;
 
         // Open database
         status= sqlite3_open(this->asdpdb_file.c_str(), &this->_db);

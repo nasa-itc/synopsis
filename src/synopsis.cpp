@@ -11,10 +11,11 @@
 namespace Synopsis {
 
 
-    Application::Application(ASDPDB *db) :
+    Application::Application(ASDPDB *db, Logger *logger) :
         buffer_size(0),
         memory_buffer(NULL),
         _db(db),
+        _logger(logger),
         n_asds(0)
     {
 
@@ -59,7 +60,9 @@ namespace Synopsis {
             mem = asds->memory_requirement();
             mem += Application::padding_nbytes(mem);
 
-            status = asds->init(mem, (void*)((char*)memory + offset));
+            status = asds->init(
+                mem, (void*)((char*)memory + offset), this->_logger
+            );
             if (status != SUCCESS) {
                 return status;
             }
@@ -73,7 +76,9 @@ namespace Synopsis {
         // Init ASDPDB
         mem = _db->memory_requirement();
         mem += Application::padding_nbytes(mem);
-        status = _db->init(mem, (void*)((char*)memory + offset));
+        status = _db->init(
+            mem, (void*)((char*)memory + offset), this->_logger
+        );
         if (status != SUCCESS) {
             return status;
         }

@@ -15,7 +15,8 @@ class TestASDS : public Synopsis::ASDS {
 
         int invocations;
 
-        Synopsis::Status init(size_t bytes, void* memory) override {
+        Synopsis::Status init(size_t bytes, void* memory, Synopsis::Logger *logger) override {
+            this->_logger = logger;
             this->invocations = 0;
             return Synopsis::SUCCESS;
         }
@@ -56,8 +57,9 @@ fs::path get_absolute_data_path(std::string relative_path_str) {
 TEST(SynopsisTest, TestApplicationInterface) {
     // Test initialization
     Synopsis::SqliteASDPDB db(":memory:");
+    Synopsis::StdLogger logger;
 
-    Synopsis::Application app(&db);
+    Synopsis::Application app(&db, &logger);
     Synopsis::Status status;
 
     TestASDS asds;
@@ -145,8 +147,9 @@ TEST(SynopsisTest, TestASDPDB) {
     Synopsis::DpDbMsg msg2;
 
     Synopsis::SqliteASDPDB db(":memory:");
+    Synopsis::StdLogger logger;
 
-    status = db.init(0, NULL);
+    status = db.init(0, NULL, &logger);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
     status = db.insert_data_product(msg);
@@ -252,8 +255,9 @@ TEST(SynopsisTest, TestASDPDB) {
 TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
 
     Synopsis::SqliteASDPDB db(":memory:");
+    Synopsis::StdLogger logger;
 
-    Synopsis::Application app(&db);
+    Synopsis::Application app(&db, &logger);
     Synopsis::Status status;
     std::vector<int> asdp_ids;
     int asdp_id;
@@ -358,8 +362,9 @@ TEST(SynopsisTest, TestPassThroughASDS) {
 
     // Test initialization
     Synopsis::SqliteASDPDB db(":memory:");
+    Synopsis::StdLogger logger;
 
-    Synopsis::Application app(&db);
+    Synopsis::Application app(&db, &logger);
     Synopsis::Status status;
 
     Synopsis::PassthroughASDS pt_asds;
