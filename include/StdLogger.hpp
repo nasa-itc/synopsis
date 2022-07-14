@@ -14,7 +14,7 @@ namespace Synopsis {
 
 
             /*
-             * Returns the required memory for the module
+             * Logs a message of the specified type
              */
             void log(LogType type, const char* fmt, ...);
 
