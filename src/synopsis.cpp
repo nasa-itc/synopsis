@@ -11,11 +11,12 @@
 namespace Synopsis {
 
 
-    Application::Application(ASDPDB *db, Logger *logger) :
+    Application::Application(ASDPDB *db, Logger *logger, Clock *clock) :
         buffer_size(0),
         memory_buffer(NULL),
         _db(db),
         _logger(logger),
+        _clock(clock),
         n_asds(0)
     {
 

@@ -4,6 +4,7 @@
 #include <synopsis.hpp>
 #include <SqliteASDPDB.hpp>
 #include <StdLogger.hpp>
+#include <LinuxClock.hpp>
 
 
 namespace fs = std::__fs::filesystem;
@@ -58,8 +59,9 @@ TEST(SynopsisTest, TestApplicationInterface) {
     // Test initialization
     Synopsis::SqliteASDPDB db(":memory:");
     Synopsis::StdLogger logger;
+    Synopsis::LinuxClock clock;
 
-    Synopsis::Application app(&db, &logger);
+    Synopsis::Application app(&db, &logger, &clock);
     Synopsis::Status status;
 
     TestASDS asds;
@@ -256,8 +258,9 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
 
     Synopsis::SqliteASDPDB db(":memory:");
     Synopsis::StdLogger logger;
+    Synopsis::LinuxClock clock;
 
-    Synopsis::Application app(&db, &logger);
+    Synopsis::Application app(&db, &logger, &clock);
     Synopsis::Status status;
     std::vector<int> asdp_ids;
     int asdp_id;
@@ -363,8 +366,9 @@ TEST(SynopsisTest, TestPassThroughASDS) {
     // Test initialization
     Synopsis::SqliteASDPDB db(":memory:");
     Synopsis::StdLogger logger;
+    Synopsis::LinuxClock clock;
 
-    Synopsis::Application app(&db, &logger);
+    Synopsis::Application app(&db, &logger, &clock);
     Synopsis::Status status;
 
     Synopsis::PassthroughASDS pt_asds;
@@ -426,4 +430,11 @@ TEST(SynopsisTest, TestStdLogger) {
     logger.log(Synopsis::LogType::INFO, "Test log info: %ld", 5);
     logger.log(Synopsis::LogType::WARN, "Test log warn: %ld", 5);
     logger.log(Synopsis::LogType::ERROR, "Test log error: %ld", 5);
+}
+
+TEST(SynopsisTest, TestLinuxClock) {
+
+    Synopsis::LinuxClock clock;
+    EXPECT_GT(clock.get_time(), 0.0);
+
 }

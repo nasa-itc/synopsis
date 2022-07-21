@@ -15,6 +15,8 @@
 #include "ASDS.hpp"
 #include "ASDPDB.hpp"
 #include "PassthroughASDS.hpp"
+#include "Logger.hpp"
+#include "Clock.hpp"
 
 #define MAX_SYNOPSIS_APP_ASDS 32
 #define MEM_ALIGN_SIZE 8
@@ -29,7 +31,7 @@ namespace Synopsis {
             /*
              * Constructor
              */
-            Application(ASDPDB *db, Logger *logger);
+            Application(ASDPDB *db, Logger *logger, Clock *clock);
             ~Application() = default;
 
             /*
@@ -72,6 +74,7 @@ namespace Synopsis {
 
             ASDPDB *_db;
             Logger *_logger;
+            Clock *_clock;
 
             int n_asds;
             std::tuple<std::string, std::string, ASDS*> asds[MAX_SYNOPSIS_APP_ASDS];
