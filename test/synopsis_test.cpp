@@ -5,6 +5,7 @@
 #include <SqliteASDPDB.hpp>
 #include <StdLogger.hpp>
 #include <LinuxClock.hpp>
+#include <Timer.hpp>
 
 
 namespace fs = std::__fs::filesystem;
@@ -436,5 +437,15 @@ TEST(SynopsisTest, TestLinuxClock) {
 
     Synopsis::LinuxClock clock;
     EXPECT_GT(clock.get_time(), 0.0);
+
+    Synopsis::Timer timer(&clock, 0.0);
+    EXPECT_FALSE(timer.is_expired());
+
+    timer.start();
+    EXPECT_TRUE(timer.is_expired());
+
+    Synopsis::Timer timer_long(&clock, 1e9);
+    timer_long.start();
+    EXPECT_FALSE(timer_long.is_expired());
 
 }
