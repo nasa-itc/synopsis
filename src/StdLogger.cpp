@@ -5,25 +5,35 @@
 namespace Synopsis {
 
     void StdLogger::log(LogType type, const char* fmt, ...) {
-        // TODO: Change output stream depending on type?
-
         va_list args;
         va_start(args, fmt);
 
+        FILE *out;
+        std::string prefix;
+
         switch (type) {
+
             case LogType::INFO:
-                printf("[INFO ] ");
+                out = stdout;
+                prefix = "[INFO ]";
                 break;
+
             case LogType::WARN:
-                printf("[WARN ] ");
+                out = stdout;
+                prefix = "[WARN ]";
                 break;
+
             case LogType::ERROR:
             default:
-                printf("[ERROR] ");
+                prefix = "[ERROR]";
+                out = stderr;
                 break;
+
         }
-        vprintf(fmt, args);
-        printf("\n");
+
+        fprintf(out, "%s", prefix.c_str());
+        vfprintf(out, fmt, args);
+        fprintf(out, "\n");
 
         va_end(args);
     }
