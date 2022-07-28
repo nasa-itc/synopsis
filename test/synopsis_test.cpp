@@ -6,6 +6,7 @@
 #include <StdLogger.hpp>
 #include <LinuxClock.hpp>
 #include <Timer.hpp>
+#include <RuleAST.hpp>
 
 
 namespace fs = std::__fs::filesystem;
@@ -447,5 +448,31 @@ TEST(SynopsisTest, TestLinuxClock) {
     Synopsis::Timer timer_long(&clock, 1e9);
     timer_long.start();
     EXPECT_FALSE(timer_long.is_expired());
+
+}
+
+
+TEST(SynopsisTest, TestRuleAST) {
+
+    std::vector<std::string> variables = {"x"};
+    Synopsis::LogicalConstant app_expr(true);
+    Synopsis::ConstExpression adj_expr(1.0);
+    int max_applications = 1;
+
+    Synopsis::Rule rule(variables, &app_expr, &adj_expr, max_applications);
+
+    std::vector<std::map<std::string, Synopsis::DpMetadataValue>> asdps = {
+        {
+            {"asdp_id", Synopsis::DpMetadataValue(1)}
+        },
+        {
+            {"asdp_id", Synopsis::DpMetadataValue(2)}
+        },
+    };
+
+    EXPECT_TRUE(app_expr.get_value({}, {}));
+    EXPECT_EQ(1.0, adj_expr.get_value({}, {}));
+    EXPECT_EQ(1.0, rule.apply(asdps));
+
 
 }
