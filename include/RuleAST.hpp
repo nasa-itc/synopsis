@@ -25,13 +25,13 @@ namespace Synopsis {
     };
 
 
-    class NumericValueExpression {
+    class ValueExpression {
 
         public:
 
-            virtual ~NumericValueExpression() = default;
+            virtual ~ValueExpression() = default;
 
-            virtual double get_value(
+            virtual DpMetadataValue get_value(
                 std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
                 std::vector<std::map<std::string, DpMetadataValue>> asdps
             ) = 0;
@@ -49,7 +49,7 @@ namespace Synopsis {
             Rule(
                 std::vector<std::string> variables,
                 BoolValueExpression *application_expression,
-                NumericValueExpression *adjustment_expression,
+                ValueExpression *adjustment_expression,
                 int max_applications
             );
             ~Rule() = default;
@@ -64,7 +64,7 @@ namespace Synopsis {
 
             std::vector<std::string> _variables;
             BoolValueExpression *_application_expression;
-            NumericValueExpression *_adjustment_expression;
+            ValueExpression *_adjustment_expression;
             int _max_applications;
 
 
@@ -89,22 +89,78 @@ namespace Synopsis {
     };
 
 
-    class ConstExpression : public NumericValueExpression {
+    class ConstExpression : public ValueExpression {
 
 
         public:
             ConstExpression(double value);
             virtual ~ConstExpression() = default;
 
-            double get_value(
+            DpMetadataValue get_value(
                 std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
                 std::vector<std::map<std::string, DpMetadataValue>> asdps
             );
 
         private:
-            double _value;
+            DpMetadataValue _value;
 
     };
+
+
+    class LogicalNot : public BoolValueExpression {
+
+
+        public:
+            LogicalNot(BoolValueExpression *expr);
+            virtual ~LogicalNot() = default;
+
+            bool get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            BoolValueExpression *_expr;
+
+    };
+
+
+    class BinaryLogicalExpression : public BoolValueExpression {
+
+
+        public:
+            BinaryLogicalExpression(
+                std::string op,
+                BoolValueExpression *left_expr,
+                BoolValueExpression *right_expr
+            );
+            virtual ~BinaryLogicalExpression() = default;
+
+            bool get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            std::string _op;
+            BoolValueExpression *_left_expr;
+            BoolValueExpression *_right_expr;
+
+    };
+
+
+// Remaining types:
+// [x] Rule
+// [ ] Constraint
+// [ ] ExistentialExpression   # bool
+// [x] LogicalConstant         # bool  ()
+// [x] BinaryLogicalExpression # bool  (bool, bool)
+// [ ] ComparatorExpression    # bool  (VALUE VALUE)
+// [ ] StringConstant          # VALUE ()
+// [x] ConstExpression         # VALUE ()
+// [ ] BinaryExpression        # VALUE (VALUE, VALUE)
+// [ ] MinusExpression         # VALUE (VALUE)
+// [ ] Field                   # VALUE
 
 
 };

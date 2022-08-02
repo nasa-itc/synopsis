@@ -70,6 +70,21 @@ namespace Synopsis {
     }
 
 
+    bool DpMetadataValue::is_numeric(void) {
+        return (this->type == INT) || (this->type == FLOAT);
+    }
+
+
+    double DpMetadataValue::get_numeric(void) {
+        switch (this->type) {
+            case INT:
+                return (double)this->int_value;
+            default:
+                return this->float_value;
+        }
+    }
+
+
     DpDbMsg::DpDbMsg() :
         dp_id(-1),
         instrument_name(""),

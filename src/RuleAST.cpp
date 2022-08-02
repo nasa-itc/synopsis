@@ -6,7 +6,7 @@ namespace Synopsis {
     Rule::Rule(
         std::vector<std::string> variables,
         BoolValueExpression *application_expression,
-        NumericValueExpression *adjustment_expression,
+        ValueExpression *adjustment_expression,
         int max_applications
     ) :
         _variables(variables),
@@ -22,6 +22,7 @@ namespace Synopsis {
 
         int n_applications = 0;
         double total_adj_value = 0.0;
+        DpMetadataValue adj;
 
         if (_variables.size() == 1) {
             for (auto a : asdps) {
@@ -29,8 +30,13 @@ namespace Synopsis {
                     {_variables[0], a}
                 };
                 if (_application_expression->get_value(assignments, asdps)) {
-                    n_applications += 1;
-                    total_adj_value += _adjustment_expression->get_value(assignments, asdps);
+                    adj = _adjustment_expression->get_value(assignments, asdps);
+                    if (adj.is_numeric()) {
+                        total_adj_value += adj.get_numeric();
+                        n_applications += 1;
+                    } else {
+                        // TODO: Log error, no application/adjustment
+                    }
                     // TODO: Log application of rule?
                     if ((_max_applications >= 0) && (n_applications >= _max_applications)) {
                         break;
@@ -47,8 +53,13 @@ namespace Synopsis {
                         {_variables[1], b}
                     };
                     if (_application_expression->get_value(assignments, asdps)) {
-                        n_applications += 1;
-                        total_adj_value += _adjustment_expression->get_value(assignments, asdps);
+                        adj = _adjustment_expression->get_value(assignments, asdps);
+                        if (adj.is_numeric()) {
+                            total_adj_value += adj.get_numeric();
+                            n_applications += 1;
+                        } else {
+                            // TODO: Log error, no application/adjustment
+                        }
                         // TODO: Log application of rule?
                         if ((_max_applications >= 0) && (n_applications >= _max_applications)) {
                             break;
@@ -84,16 +95,61 @@ namespace Synopsis {
 
 
     ConstExpression::ConstExpression(double value) :
-        _value(value)
+        _value(DpMetadataValue(value))
     {
 
     }
 
-    double ConstExpression::get_value(
+    DpMetadataValue ConstExpression::get_value(
             std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
             std::vector<std::map<std::string, DpMetadataValue>> asdps
         ) {
         return this->_value;
+    }
+
+
+    LogicalNot::LogicalNot(BoolValueExpression *expr) :
+        _expr(expr)
+    {
+
+    }
+
+
+    bool LogicalNot::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        return !(this->_expr->get_value(assignments, asdps));
+    }
+
+
+    BinaryLogicalExpression::BinaryLogicalExpression(
+        std::string op,
+        BoolValueExpression *left_expr,
+        BoolValueExpression *right_expr
+    ) :
+        _op(op),
+        _left_expr(left_expr),
+        _right_expr(right_expr)
+    {
+
+    }
+
+
+    bool BinaryLogicalExpression::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        bool left_value = this->_left_expr->get_value(assignments, asdps);
+        bool right_value = this->_right_expr->get_value(assignments, asdps);
+        if (this->_op == "AND") {
+            return left_value && right_value;
+        } else if (this->_op == "OR") {
+            return left_value || right_value;
+        } else {
+            // TODO: Log error
+            return false;
+        }
     }
 
 };

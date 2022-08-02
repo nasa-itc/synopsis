@@ -455,11 +455,14 @@ TEST(SynopsisTest, TestLinuxClock) {
 TEST(SynopsisTest, TestRuleAST) {
 
     std::vector<std::string> variables = {"x"};
-    Synopsis::LogicalConstant app_expr(true);
+    Synopsis::LogicalConstant true_expr(true);
+    Synopsis::LogicalConstant false_expr(false);
+    Synopsis::LogicalNot not_true_expr(&true_expr);
+    Synopsis::LogicalNot not_false_expr(&false_expr);
     Synopsis::ConstExpression adj_expr(1.0);
     int max_applications = 1;
 
-    Synopsis::Rule rule(variables, &app_expr, &adj_expr, max_applications);
+    Synopsis::Rule rule(variables, &true_expr, &adj_expr, max_applications);
 
     std::vector<std::map<std::string, Synopsis::DpMetadataValue>> asdps = {
         {
@@ -470,9 +473,27 @@ TEST(SynopsisTest, TestRuleAST) {
         },
     };
 
-    EXPECT_TRUE(app_expr.get_value({}, {}));
-    EXPECT_EQ(1.0, adj_expr.get_value({}, {}));
+    EXPECT_TRUE(true_expr.get_value({}, {}));
+    EXPECT_FALSE(false_expr.get_value({}, {}));
+    EXPECT_EQ(1.0, adj_expr.get_value({}, {}).get_numeric());
     EXPECT_EQ(1.0, rule.apply(asdps));
+
+    EXPECT_FALSE(not_true_expr.get_value({}, {}));
+    EXPECT_TRUE(not_false_expr.get_value({}, {}));
+
+    Synopsis::BinaryLogicalExpression true_and_true_expr("AND", &true_expr, &true_expr);
+    Synopsis::BinaryLogicalExpression true_and_false_expr("AND", &true_expr, &false_expr);
+    Synopsis::BinaryLogicalExpression false_and_false_expr("AND", &false_expr, &false_expr);
+    EXPECT_TRUE(true_and_true_expr.get_value({}, {}));
+    EXPECT_FALSE(true_and_false_expr.get_value({}, {}));
+    EXPECT_FALSE(false_and_false_expr.get_value({}, {}));
+
+    Synopsis::BinaryLogicalExpression true_or_true_expr("OR", &true_expr, &true_expr);
+    Synopsis::BinaryLogicalExpression true_or_false_expr("OR", &true_expr, &false_expr);
+    Synopsis::BinaryLogicalExpression false_or_false_expr("OR", &false_expr, &false_expr);
+    EXPECT_TRUE(true_or_true_expr.get_value({}, {}));
+    EXPECT_TRUE(true_or_false_expr.get_value({}, {}));
+    EXPECT_FALSE(false_or_false_expr.get_value({}, {}));
 
 
 }

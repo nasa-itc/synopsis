@@ -28,6 +28,9 @@ namespace Synopsis {
             double get_float_value(void);
             std::string get_string_value(void);
 
+            bool is_numeric(void);
+            double get_numeric(void);
+
         private:
             MetadataType type;
             int int_value;
