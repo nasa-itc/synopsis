@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <filesystem>
+#include <cmath>
 
 #include <synopsis.hpp>
 #include <SqliteASDPDB.hpp>
@@ -460,6 +461,10 @@ TEST(SynopsisTest, TestRuleAST) {
     Synopsis::LogicalNot not_true_expr(&true_expr);
     Synopsis::LogicalNot not_false_expr(&false_expr);
     Synopsis::ConstExpression adj_expr(1.0);
+    Synopsis::ConstExpression zero_expr(0.0);
+    Synopsis::ConstExpression one_expr(1.0);
+    Synopsis::StringConstant a_str_expr("a");
+    Synopsis::StringConstant b_str_expr("b");
     int max_applications = 1;
 
     Synopsis::Rule rule(variables, &true_expr, &adj_expr, max_applications);
@@ -494,6 +499,62 @@ TEST(SynopsisTest, TestRuleAST) {
     EXPECT_TRUE(true_or_true_expr.get_value({}, {}));
     EXPECT_TRUE(true_or_false_expr.get_value({}, {}));
     EXPECT_FALSE(false_or_false_expr.get_value({}, {}));
+
+
+    Synopsis::ComparatorExpression one_eq_one_expr("==", &one_expr, &one_expr);
+    Synopsis::ComparatorExpression one_eq_zero_expr("==", &one_expr, &zero_expr);
+    Synopsis::ComparatorExpression one_gt_zero_expr(">", &one_expr, &zero_expr);
+    EXPECT_TRUE(one_eq_one_expr.get_value({}, {}));
+    EXPECT_FALSE(one_eq_zero_expr.get_value({}, {}));
+    EXPECT_TRUE(one_gt_zero_expr.get_value({}, {}));
+
+
+    Synopsis::ComparatorExpression a_eq_a_expr("==", &a_str_expr, &a_str_expr);
+    Synopsis::ComparatorExpression a_eq_b_expr("==", &a_str_expr, &b_str_expr);
+    Synopsis::ComparatorExpression a_ne_a_expr("!=", &a_str_expr, &a_str_expr);
+    Synopsis::ComparatorExpression a_ne_b_expr("!=", &a_str_expr, &b_str_expr);
+    EXPECT_TRUE(a_eq_a_expr.get_value({}, {}));
+    EXPECT_FALSE(a_eq_b_expr.get_value({}, {}));
+    EXPECT_FALSE(a_ne_a_expr.get_value({}, {}));
+    EXPECT_TRUE(a_ne_b_expr.get_value({}, {}));
+
+    Synopsis::ComparatorExpression a_eq_one_expr("==", &a_str_expr, &one_expr);
+    EXPECT_FALSE(a_eq_one_expr.get_value({}, {}));
+
+    Synopsis::MinusExpression minus_one_expr(&one_expr);
+    EXPECT_EQ(-1.0, minus_one_expr.get_value({}, {}).get_numeric());
+
+    Synopsis::MinusExpression minus_a_expr(&a_str_expr);
+    EXPECT_TRUE(std::isnan(minus_a_expr.get_value({}, {}).get_numeric()));
+
+
+    Synopsis::BinaryExpression one_plus_one_expr("+", &one_expr, &one_expr);
+    Synopsis::BinaryExpression one_times_one_expr("*", &one_expr, &one_expr);
+    Synopsis::BinaryExpression one_minus_one_expr("-", &one_expr, &one_expr);
+    EXPECT_EQ(2.0, one_plus_one_expr.get_value({}, {}).get_numeric());
+    EXPECT_EQ(1.0, one_times_one_expr.get_value({}, {}).get_numeric());
+    EXPECT_EQ(0.0, one_minus_one_expr.get_value({}, {}).get_numeric());
+
+    Synopsis::BinaryExpression one_plus_a_expr("+", &one_expr, &a_str_expr);
+    Synopsis::BinaryExpression one_div_one_expr("/", &one_expr, &one_expr);
+    EXPECT_TRUE(std::isnan(one_plus_a_expr.get_value({}, {}).get_numeric()));
+    EXPECT_TRUE(std::isnan(one_div_one_expr.get_value({}, {}).get_numeric()));
+
+    std::map<std::string, std::map<std::string, Synopsis::DpMetadataValue>> assignments = {
+        {"x", asdps[0]},
+        {"y", asdps[1]}
+    };
+
+    Synopsis::Field x_id_field("x", "asdp_id");
+    Synopsis::Field y_id_field("y", "asdp_id");
+    Synopsis::Field z_id_field("z", "asdp_id");
+    Synopsis::Field x_missing_field("x", "missing");
+
+    EXPECT_EQ(1, x_id_field.get_value(assignments, {}).get_numeric());
+    EXPECT_EQ(2, y_id_field.get_value(assignments, {}).get_numeric());
+
+    EXPECT_TRUE(std::isnan(z_id_field.get_value(assignments, {}).get_numeric()));
+    EXPECT_TRUE(std::isnan(x_missing_field.get_value(assignments, {}).get_numeric()));
 
 
 }

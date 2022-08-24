@@ -152,4 +152,167 @@ namespace Synopsis {
         }
     }
 
+
+    ComparatorExpression::ComparatorExpression(
+        std::string comp,
+        ValueExpression *left_expr,
+        ValueExpression *right_expr
+    ) :
+        _comp(comp),
+        _left_expr(left_expr),
+        _right_expr(right_expr)
+    {
+
+    }
+
+
+    bool ComparatorExpression::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        DpMetadataValue left_value = this->_left_expr->get_value(assignments, asdps);
+        DpMetadataValue right_value = this->_right_expr->get_value(assignments, asdps);
+        if (left_value.is_numeric() ^ right_value.is_numeric()) {
+            // TODO: Log error (type mis-match)
+            return false;
+        }
+        if (left_value.is_numeric()) {
+            double left_value_dbl = left_value.get_numeric();
+            double right_value_dbl = right_value.get_numeric();
+            if (this->_comp == "==") {
+                return (left_value_dbl == right_value_dbl);
+            } else if (this->_comp == "!=") {
+                return (left_value_dbl != right_value_dbl);
+            } else if (this->_comp == ">") {
+                return (left_value_dbl > right_value_dbl);
+            } else if (this->_comp == ">=") {
+                return (left_value_dbl >= right_value_dbl);
+            } else if (this->_comp == "<") {
+                return (left_value_dbl < right_value_dbl);
+            } else if (this->_comp == "<=") {
+                return (left_value_dbl <= right_value_dbl);
+            } else {
+                // TODO: Log error (unknown string comparision)
+                return false;
+            }
+        } else {
+            std::string left_value_str = left_value.get_string_value();
+            std::string right_value_str = right_value.get_string_value();
+            if (this->_comp == "==") {
+                return (left_value_str == right_value_str);
+            } else if (this->_comp == "!=") {
+                return (left_value_str != right_value_str);
+            } else {
+                // TODO: Log error (unknown string comparision)
+                return false;
+            }
+        }
+    }
+
+
+    StringConstant::StringConstant(std::string value) :
+        _value(DpMetadataValue(value))
+    {
+
+    }
+
+    DpMetadataValue StringConstant::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        return this->_value;
+    }
+
+
+    MinusExpression::MinusExpression(ValueExpression *expr) :
+        _expr(expr)
+    {
+
+    }
+
+    DpMetadataValue MinusExpression::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        DpMetadataValue value = this->_expr->get_value(assignments, asdps);
+        if (value.is_numeric()) {
+            return DpMetadataValue(-value.get_numeric());
+        } else {
+            // TODO: Warn not a number
+            return DpMetadataValue(std::numeric_limits<double>::quiet_NaN());
+        }
+    }
+
+
+    BinaryExpression::BinaryExpression(
+        std::string op,
+        ValueExpression *left_expr,
+        ValueExpression *right_expr
+    ) :
+        _op(op),
+        _left_expr(left_expr),
+        _right_expr(right_expr)
+    {
+
+    }
+
+
+    DpMetadataValue BinaryExpression::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        DpMetadataValue left_value = this->_left_expr->get_value(assignments, asdps);
+        DpMetadataValue right_value = this->_right_expr->get_value(assignments, asdps);
+        if (left_value.is_numeric() && right_value.is_numeric()) {
+            double left_value_dbl = left_value.get_numeric();
+            double right_value_dbl = right_value.get_numeric();
+            if (this->_op == "*") {
+                return DpMetadataValue(left_value_dbl * right_value_dbl);
+            } else if (this->_op == "+") {
+                return DpMetadataValue(left_value_dbl + right_value_dbl);
+            } else if (this->_op == "-") {
+                return DpMetadataValue(left_value_dbl - right_value_dbl);
+            } else {
+                // TODO: Warn operator not supported
+                return DpMetadataValue(std::numeric_limits<double>::quiet_NaN());
+            }
+        } else {
+            // TODO: Warn not a number
+            return DpMetadataValue(std::numeric_limits<double>::quiet_NaN());
+        }
+    }
+
+
+    Field::Field(
+        std::string var_name,
+        std::string field_name
+    ) :
+        _var_name(var_name),
+        _field_name(field_name)
+    {
+
+    }
+
+
+    DpMetadataValue Field::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        if (assignments.count(this->_var_name) > 0) {
+            auto fields = assignments[this->_var_name];
+            if (fields.count(this->_field_name) > 0) {
+                return fields[this->_field_name];
+            } else {
+                // TODO: Field not found
+                return DpMetadataValue(
+                    std::numeric_limits<double>::quiet_NaN()
+                );
+            }
+
+        } else {
+            // TODO: Variable not found
+            return DpMetadataValue(std::numeric_limits<double>::quiet_NaN());
+        }
+    }
+
 };

@@ -149,18 +149,128 @@ namespace Synopsis {
     };
 
 
+    class ComparatorExpression : public BoolValueExpression {
+
+
+        public:
+            ComparatorExpression(
+                std::string comp,
+                ValueExpression *left_expr,
+                ValueExpression *right_expr
+            );
+            virtual ~ComparatorExpression() = default;
+
+            bool get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            std::string _comp;
+            ValueExpression *_left_expr;
+            ValueExpression *_right_expr;
+
+    };
+
+
+    class StringConstant : public ValueExpression {
+
+
+        public:
+            StringConstant(
+                std::string value
+            );
+            virtual ~StringConstant() = default;
+
+            DpMetadataValue get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            DpMetadataValue _value;
+
+    };
+
+
+    class MinusExpression : public ValueExpression {
+
+
+        public:
+            MinusExpression(
+                ValueExpression *expr
+            );
+            virtual ~MinusExpression() = default;
+
+            DpMetadataValue get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            ValueExpression *_expr;
+
+    };
+
+
+    class BinaryExpression : public ValueExpression {
+
+
+        public:
+            BinaryExpression(
+                std::string op,
+                ValueExpression *left_expr,
+                ValueExpression *right_expr
+            );
+            virtual ~BinaryExpression() = default;
+
+            DpMetadataValue get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            std::string _op;
+            ValueExpression *_left_expr;
+            ValueExpression *_right_expr;
+
+    };
+
+
+    class Field : public ValueExpression {
+
+
+        public:
+            Field(
+                std::string var_name,
+                std::string field_name
+            );
+            virtual ~Field() = default;
+
+            DpMetadataValue get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            std::string _var_name;
+            std::string _field_name;
+
+    };
+
+
 // Remaining types:
 // [x] Rule
 // [ ] Constraint
 // [ ] ExistentialExpression   # bool
 // [x] LogicalConstant         # bool  ()
 // [x] BinaryLogicalExpression # bool  (bool, bool)
-// [ ] ComparatorExpression    # bool  (VALUE VALUE)
-// [ ] StringConstant          # VALUE ()
+// [x] ComparatorExpression    # bool  (VALUE VALUE)
+// [x] StringConstant          # VALUE ()
 // [x] ConstExpression         # VALUE ()
-// [ ] BinaryExpression        # VALUE (VALUE, VALUE)
-// [ ] MinusExpression         # VALUE (VALUE)
-// [ ] Field                   # VALUE
+// [x] BinaryExpression        # VALUE (VALUE, VALUE)
+// [x] MinusExpression         # VALUE (VALUE)
+// [x] Field                   # VALUE
 
 
 };
