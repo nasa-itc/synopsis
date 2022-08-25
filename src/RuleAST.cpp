@@ -315,4 +315,36 @@ namespace Synopsis {
         }
     }
 
+
+    ExistentialExpression::ExistentialExpression(
+        std::string variable,
+        BoolValueExpression *expr
+    ) :
+        _var(variable),
+        _expr(expr)
+    {
+
+    }
+
+
+    bool ExistentialExpression::get_value(
+            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+            std::vector<std::map<std::string, DpMetadataValue>> asdps
+        ) {
+        for (auto asdp : asdps) {
+
+            // Assign asdp to variable
+            std::map<std::string, std::map<std::string, DpMetadataValue>> \
+                new_assignments(assignments);
+            new_assignments[this->_var] = asdp;
+
+            // Evaluate expression and return if true
+            bool evaluation = this->_expr->get_value(new_assignments, asdps);
+            if (evaluation) { return true; }
+
+        }
+        return false;
+    }
+
+
 };

@@ -259,10 +259,32 @@ namespace Synopsis {
     };
 
 
+    class ExistentialExpression : public BoolValueExpression {
+
+
+        public:
+            ExistentialExpression(
+                std::string variable,
+                BoolValueExpression *expr
+            );
+            virtual ~ExistentialExpression() = default;
+
+            bool get_value(
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
+                std::vector<std::map<std::string, DpMetadataValue>> asdps
+            );
+
+        private:
+            std::string _var;
+            BoolValueExpression *_expr;
+
+    };
+
+
 // Remaining types:
 // [x] Rule
 // [ ] Constraint
-// [ ] ExistentialExpression   # bool
+// [x] ExistentialExpression   # bool
 // [x] LogicalConstant         # bool  ()
 // [x] BinaryLogicalExpression # bool  (bool, bool)
 // [x] ComparatorExpression    # bool  (VALUE VALUE)

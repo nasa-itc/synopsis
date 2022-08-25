@@ -557,4 +557,13 @@ TEST(SynopsisTest, TestRuleAST) {
     EXPECT_TRUE(std::isnan(x_missing_field.get_value(assignments, {}).get_numeric()));
 
 
+    Synopsis::ComparatorExpression ex_cond_expr_zero("==", &zero_expr, &x_id_field);
+    Synopsis::ComparatorExpression ex_cond_expr_one("==", &one_expr, &x_id_field);
+    Synopsis::ExistentialExpression ex_expr_zero("x", &ex_cond_expr_zero);
+    Synopsis::ExistentialExpression ex_expr_one("x", &ex_cond_expr_one);
+
+    EXPECT_FALSE(ex_expr_zero.get_value({}, asdps));
+    EXPECT_TRUE(ex_expr_one.get_value({}, asdps));
+
+
 }
