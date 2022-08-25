@@ -71,6 +71,37 @@ namespace Synopsis {
     };
 
 
+    class Constraint {
+
+        public:
+
+            /*
+             * Default Constructor
+             */
+            Constraint(
+                std::vector<std::string> variables,
+                BoolValueExpression *application_expression,
+                ValueExpression *sum_field,
+                double constraint_value
+            );
+            ~Constraint() = default;
+
+
+            /*
+             * Returns whether the constraint is satisfied for the ASDPs
+             */
+            bool apply(std::vector<std::map<std::string, DpMetadataValue>> asdps);
+
+        private:
+
+            std::vector<std::string> _variables;
+            BoolValueExpression *_application_expression;
+            ValueExpression *_sum_field;
+            double _constraint_value;
+
+    };
+
+
     class LogicalConstant : public BoolValueExpression {
 
 

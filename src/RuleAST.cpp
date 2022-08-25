@@ -79,6 +79,56 @@ namespace Synopsis {
     }
 
 
+    Constraint::Constraint(
+        std::vector<std::string> variables,
+        BoolValueExpression *application_expression,
+        ValueExpression *sum_field,
+        double constraint_value
+    ) :
+        _variables(variables),
+        _application_expression(application_expression),
+        _sum_field(sum_field),
+        _constraint_value(constraint_value)
+    {
+
+    }
+
+
+    bool Constraint::apply(std::vector<std::map<std::string, DpMetadataValue>> asdps) {
+
+        double aggregate = 0.0;
+        DpMetadataValue value;
+
+        if (_variables.size() == 1) {
+            for (auto a : asdps) {
+                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments = {
+                    {_variables[0], a}
+                };
+                if (_application_expression->get_value(assignments, asdps)) {
+                    if (_sum_field) {
+                        value = _sum_field->get_value(assignments, asdps);
+                        if (value.is_numeric()) {
+                            aggregate += value.get_numeric();
+                        } else {
+                            // TODO: Log error, value not aggregated
+                        }
+                    } else {
+                        aggregate += 1;
+                    }
+                }
+            }
+            return aggregate < _constraint_value;
+
+        } else {
+            // TODO: Case not handled
+            return true;
+        }
+
+        /* UNREACHABLE */
+
+    }
+
+
     LogicalConstant::LogicalConstant(bool value) :
         _value(value)
     {

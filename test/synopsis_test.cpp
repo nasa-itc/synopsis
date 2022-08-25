@@ -566,4 +566,13 @@ TEST(SynopsisTest, TestRuleAST) {
     EXPECT_TRUE(ex_expr_one.get_value({}, asdps));
 
 
+    Synopsis::Constraint constraint_nosum_sat(variables, &ex_cond_expr_zero, NULL, 1.0);
+    Synopsis::Constraint constraint_nosum_unsat(variables, &ex_cond_expr_one, NULL, 1.0);
+    Synopsis::Constraint constraint_sum_sat(variables, &true_expr, &x_id_field, 4.0);
+    Synopsis::Constraint constraint_sum_unsat(variables, &true_expr, &x_id_field, 3.0);
+
+    EXPECT_TRUE(constraint_sum_sat.apply(asdps));
+    EXPECT_FALSE(constraint_sum_unsat.apply(asdps));
+
+
 }
