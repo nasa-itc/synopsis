@@ -129,6 +129,27 @@ namespace Synopsis {
     }
 
 
+    RuleSet::RuleSet() {}
+
+
+    std::vector<Rule> RuleSet::get_rules(int bin) {
+        if (this->_rule_map.count(bin)) {
+            return this->_rule_map[bin];
+        } else {
+            return this->_default_rules;
+        }
+    }
+
+
+    std::vector<Constraint> RuleSet::get_constraints(int bin) {
+        if (this->_constraint_map.count(bin)) {
+            return this->_constraint_map[bin];
+        } else {
+            return this->_default_constraints;
+        }
+    }
+
+
     LogicalConstant::LogicalConstant(bool value) :
         _value(value)
     {

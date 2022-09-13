@@ -102,6 +102,26 @@ namespace Synopsis {
     };
 
 
+    class RuleSet {
+
+        public:
+            RuleSet();
+            ~RuleSet() = default;
+
+            std::vector<Rule> get_rules(int bin);
+            std::vector<Constraint> get_constraints(int bin);
+
+
+        private:
+
+            std::map<int, std::vector<Rule>> _rule_map;
+            std::map<int, std::vector<Constraint>> _constraint_map;
+            std::vector<Rule> _default_rules;
+            std::vector<Constraint> _default_constraints;
+
+    };
+
+
     class LogicalConstant : public BoolValueExpression {
 
 
