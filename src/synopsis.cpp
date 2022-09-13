@@ -11,10 +11,13 @@
 namespace Synopsis {
 
 
-    Application::Application(ASDPDB *db, Logger *logger, Clock *clock) :
+    Application::Application(
+        ASDPDB *db, DownlinkPlanner *planner, Logger *logger, Clock *clock
+    ) :
         buffer_size(0),
         memory_buffer(NULL),
         _db(db),
+        _planner(planner),
         _logger(logger),
         _clock(clock),
         n_asds(0)
@@ -87,6 +90,23 @@ namespace Synopsis {
         if (offset > bytes) {
             return FAILURE;
         }
+
+
+        // Init Planner
+        mem = _planner->memory_requirement();
+        mem += Application::padding_nbytes(mem);
+        status = _planner->init(
+            mem, (void*)((char*)memory + offset), this->_logger
+        );
+        if (status != SUCCESS) {
+            return status;
+        }
+        offset += mem;
+        if (offset > bytes) {
+            return FAILURE;
+        }
+        this->_planner->set_database(this->_db);
+        this->_planner->set_clock(this->_clock);
 
         return SUCCESS;
     }
@@ -210,13 +230,12 @@ namespace Synopsis {
         double max_processing_time_sec,
         std::vector<int> prioritized_list
     ) {
-        /*
-         * TODO:
-         * 1. Load configuration
-         * 2. Invoke planner with configuration and max_processing_time_sec
-         * 3. Populate vector with sorted product IDs (do not exceed capacity)
-         */
-        return SUCCESS;
+        return _planner->prioritize(
+            rule_configuration_id,
+            similarity_configuration_id,
+            max_processing_time_sec,
+            prioritized_list
+        );
     }
 
 

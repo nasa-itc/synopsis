@@ -17,6 +17,7 @@
 #include "PassthroughASDS.hpp"
 #include "Logger.hpp"
 #include "Clock.hpp"
+#include "DownlinkPlanner.hpp"
 
 #define MAX_SYNOPSIS_APP_ASDS 32
 #define MEM_ALIGN_SIZE 8
@@ -31,7 +32,7 @@ namespace Synopsis {
             /*
              * Constructor
              */
-            Application(ASDPDB *db, Logger *logger, Clock *clock);
+            Application(ASDPDB *db, DownlinkPlanner *planner, Logger *logger, Clock *clock);
             ~Application() = default;
 
             /*
@@ -73,6 +74,7 @@ namespace Synopsis {
             void *memory_buffer;
 
             ASDPDB *_db;
+            DownlinkPlanner *_planner;
             Logger *_logger;
             Clock *_clock;
 

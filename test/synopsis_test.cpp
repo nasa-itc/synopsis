@@ -8,6 +8,7 @@
 #include <LinuxClock.hpp>
 #include <Timer.hpp>
 #include <RuleAST.hpp>
+#include <MaxMarginalRelevanceDownlinkPlanner.hpp>
 
 
 namespace fs = std::__fs::filesystem;
@@ -63,8 +64,9 @@ TEST(SynopsisTest, TestApplicationInterface) {
     Synopsis::SqliteASDPDB db(":memory:");
     Synopsis::StdLogger logger;
     Synopsis::LinuxClock clock;
+    Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
 
-    Synopsis::Application app(&db, &logger, &clock);
+    Synopsis::Application app(&db, &planner, &logger, &clock);
     Synopsis::Status status;
 
     TestASDS asds;
@@ -262,8 +264,9 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
     Synopsis::SqliteASDPDB db(":memory:");
     Synopsis::StdLogger logger;
     Synopsis::LinuxClock clock;
+    Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
 
-    Synopsis::Application app(&db, &logger, &clock);
+    Synopsis::Application app(&db, &planner, &logger, &clock);
     Synopsis::Status status;
     std::vector<int> asdp_ids;
     int asdp_id;
@@ -370,8 +373,9 @@ TEST(SynopsisTest, TestPassThroughASDS) {
     Synopsis::SqliteASDPDB db(":memory:");
     Synopsis::StdLogger logger;
     Synopsis::LinuxClock clock;
+    Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
 
-    Synopsis::Application app(&db, &logger, &clock);
+    Synopsis::Application app(&db, &planner, &logger, &clock);
     Synopsis::Status status;
 
     Synopsis::PassthroughASDS pt_asds;
