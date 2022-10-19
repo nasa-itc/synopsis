@@ -2,13 +2,16 @@
 #ifndef JPL_SYNOPSIS_TYPES
 #define JPL_SYNOPSIS_TYPES
 
+#include <cstddef>
+
 
 namespace Synopsis {
 
 
     typedef enum {
         SUCCESS = 0,
-        FAILURE = 1
+        FAILURE = 1,
+        TIMEOUT = 2
     } Status;
 
 

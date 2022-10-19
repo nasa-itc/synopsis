@@ -1,3 +1,5 @@
+#include <limits>
+
 #include "RuleAST.hpp"
 
 namespace Synopsis {
