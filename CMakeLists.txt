@@ -40,7 +40,7 @@ set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)
 target_include_directories(synopsis PRIVATE include)
 target_include_directories(synopsis PRIVATE src)
-target_link_libraries(synopsis PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(synopsis PRIVATE nlohmann_json::nlohmann_json ${CMAKE_DL_LIBS})
 
 include(GNUInstallDirs)
 install(TARGETS synopsis
