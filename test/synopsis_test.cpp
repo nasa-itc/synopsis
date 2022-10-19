@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <filesystem>
 #include <cmath>
 
 #include <synopsis.hpp>
@@ -9,9 +8,6 @@
 #include <Timer.hpp>
 #include <RuleAST.hpp>
 #include <MaxMarginalRelevanceDownlinkPlanner.hpp>
-
-
-namespace fs = std::__fs::filesystem;
 
 
 class TestASDS : public Synopsis::ASDS {
@@ -42,12 +38,16 @@ class TestASDS : public Synopsis::ASDS {
 };
 
 
-fs::path get_absolute_data_path(std::string relative_path_str) {
+std::string get_absolute_data_path(std::string relative_path_str) {
+    char sep = '/';
     const char* env_p = std::getenv("SYNOPSIS_TEST_DATA");
     EXPECT_NE(nullptr, env_p);
-    fs::path base_path(env_p);
-    fs::path relative_path(relative_path_str);
-    return base_path / relative_path_str;
+    std::string base_path(env_p);
+    if (base_path[base_path.length()] != sep) {
+        return base_path + sep + relative_path_str;
+    } else {
+        return base_path + relative_path_str;
+    }
 }
 
 
@@ -359,8 +359,8 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
 TEST(SynopsisTest, TestPassThroughASDS) {
 
     // Construct DP message for test data
-    fs::path data_path = get_absolute_data_path("example_dp.dat");
-    fs::path metadata_path = get_absolute_data_path("example_metadata.json");
+    std::string data_path = get_absolute_data_path("example_dp.dat");
+    std::string metadata_path = get_absolute_data_path("example_metadata.json");
 
     Synopsis::DpMsg msg(
         "test_instrument", "test_type",

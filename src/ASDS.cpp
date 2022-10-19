@@ -1,12 +1,14 @@
 #include <nlohmann/json.hpp>
-#include <filesystem>
 #include <fstream>
 
 #include "ASDS.hpp"
 
-namespace fs = std::__fs::filesystem;
-
 namespace Synopsis {
+
+    size_t get_file_size(std::string filename) {
+        std::ifstream file(filename, std::ios::binary | std::ios::ate);
+        return file.tellg();
+    }
 
     void ASDS::set_database(ASDPDB *db) {
         this->_db = db;
@@ -24,8 +26,7 @@ namespace Synopsis {
 
     Status ASDS::submit_data_product(DpMsg msg) {
 
-        fs::path dp_path(msg.get_uri());
-        size_t dp_size = fs::file_size(dp_path);
+        size_t dp_size = get_file_size(msg.get_uri());
 
         // Default values
         double sue = 0.0;
@@ -89,7 +90,7 @@ namespace Synopsis {
             -1,
             msg.get_instrument_name(),
             msg.get_type(),
-            dp_path,
+            msg.get_uri(),
             dp_size,
             sue,
             priority_bin,
