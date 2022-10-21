@@ -131,7 +131,29 @@ namespace Synopsis {
     }
 
 
-    RuleSet::RuleSet() {}
+    RuleSet::RuleSet():
+        _rule_map({}),
+        _constraint_map({}),
+        _default_rules({}),
+        _default_constraints({})
+    {
+
+    }
+
+
+    RuleSet::RuleSet(
+        std::map<int, std::vector<Rule>> rule_map,
+        std::map<int, std::vector<Constraint>> constraint_map,
+        std::vector<Rule> default_rules,
+        std::vector<Constraint> default_constraints
+    ) :
+        _rule_map(rule_map),
+        _constraint_map(constraint_map),
+        _default_rules(default_rules),
+        _default_constraints(default_constraints)
+    {
+
+    }
 
 
     std::vector<Rule> RuleSet::get_rules(int bin) {

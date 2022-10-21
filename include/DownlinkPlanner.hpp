@@ -24,12 +24,12 @@ namespace Synopsis {
                 std::string rule_configuration_id,
                 std::string similarity_configuration_id,
                 double max_processing_time_sec,
-                std::vector<int> prioritized_list
+                std::vector<int> &prioritized_list
             ) = 0;
             void set_database(ASDPDB *db);
             void set_clock(Clock *clock);
 
-        private:
+        protected:
             ASDPDB *_db = nullptr;
             Clock *_clock = nullptr;
 

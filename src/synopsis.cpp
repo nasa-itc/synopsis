@@ -228,7 +228,7 @@ namespace Synopsis {
         std::string rule_configuration_id,
         std::string similarity_configuration_id,
         double max_processing_time_sec,
-        std::vector<int> prioritized_list
+        std::vector<int> &prioritized_list
     ) {
         return _planner->prioritize(
             rule_configuration_id,

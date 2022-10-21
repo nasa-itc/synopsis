@@ -106,6 +106,12 @@ namespace Synopsis {
 
         public:
             RuleSet();
+            RuleSet(
+                std::map<int, std::vector<Rule>> rule_map,
+                std::map<int, std::vector<Constraint>> constraint_map,
+                std::vector<Rule> default_rules,
+                std::vector<Constraint> default_constraints
+            );
             ~RuleSet() = default;
 
             std::vector<Rule> get_rules(int bin);
@@ -330,20 +336,6 @@ namespace Synopsis {
             BoolValueExpression *_expr;
 
     };
-
-
-// Remaining types:
-// [x] Rule
-// [ ] Constraint
-// [x] ExistentialExpression   # bool
-// [x] LogicalConstant         # bool  ()
-// [x] BinaryLogicalExpression # bool  (bool, bool)
-// [x] ComparatorExpression    # bool  (VALUE VALUE)
-// [x] StringConstant          # VALUE ()
-// [x] ConstExpression         # VALUE ()
-// [x] BinaryExpression        # VALUE (VALUE, VALUE)
-// [x] MinusExpression         # VALUE (VALUE)
-// [x] Field                   # VALUE
 
 
 };
