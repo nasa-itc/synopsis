@@ -11,6 +11,10 @@
 namespace Synopsis {
 
 
+    // TODO: separate out reusable utility functions?
+    size_t get_file_size(std::string filename);
+
+
     /*
      * Base class for an Autonomous Science Data System (ASDS)
      */
