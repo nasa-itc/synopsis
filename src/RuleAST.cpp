@@ -174,6 +174,36 @@ namespace Synopsis {
     }
 
 
+    std::pair<bool, double> RuleSet::apply(
+        int bin,
+        std::vector<std::map<std::string, DpMetadataValue>> queue
+    ) {
+
+        // Check constraints
+        std::vector<Constraint> constraints = this->get_constraints(bin);
+        bool violated = false;
+        for (auto &constraint : constraints) {
+            if (!constraint.apply(queue)) {
+                violated = true;
+                break;
+            }
+        }
+        if (violated) {
+            return std::make_pair(false, 0.0);
+        }
+
+        // Apply rules
+        std::vector<Rule> rules = this->get_rules(bin);
+        double utility = 0.0;
+        for (auto &rule : rules) {
+            double adj = rule.apply(queue);
+            utility += adj;
+        }
+
+        return std::make_pair(true, utility);
+    }
+
+
     LogicalConstant::LogicalConstant(bool value) :
         _value(value)
     {

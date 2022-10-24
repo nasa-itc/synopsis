@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <utility>
 
 #include "synopsis_types.hpp"
 #include "DpDbMsg.hpp"
@@ -88,7 +89,7 @@ namespace Synopsis {
 
 
             /*
-             * Returns whether the constraint is satisfied for the ASDPs
+             * Returns whether the constraint is satisfied for the given ASDPs
              */
             bool apply(std::vector<std::map<std::string, DpMetadataValue>> asdps);
 
@@ -116,6 +117,16 @@ namespace Synopsis {
 
             std::vector<Rule> get_rules(int bin);
             std::vector<Constraint> get_constraints(int bin);
+
+            /*
+             * Returns a pair of values; the first entry indicates whether all
+             * constraints were satisfied, and if true, the second entry
+             * specifies the total utility adjustment to apply.
+             */
+            std::pair<bool, double> apply(
+                int bin,
+                std::vector<std::map<std::string, DpMetadataValue>> queue
+            );
 
 
         private:

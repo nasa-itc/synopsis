@@ -29,8 +29,6 @@ namespace Synopsis {
         RuleSet ruleset
     ) {
         std::vector<std::map<std::string, DpMetadataValue>> prioritized;
-        std::vector<Rule> rules = ruleset.get_rules(bin);
-        std::vector<Constraint> constraints = ruleset.get_constraints(bin);
         int maxiter = asdps.size();
 
         for (int i = 0; i < maxiter; i++) {
@@ -43,16 +41,6 @@ namespace Synopsis {
                 std::vector<std::map<std::string, DpMetadataValue>> candidate(prioritized);
                 candidate.push_back(asdp);
 
-                // TODO: move logic within RuleSet?
-                bool violated = false;
-                for (auto &constraint : constraints) {
-                    if (!constraint.apply(candidate)) {
-                        violated = true;
-                        break;
-                    }
-                }
-                if (violated) { continue; }
-
                 int size = 0;
                 double utility = 0;
                 for (auto &a : candidate) {
@@ -61,11 +49,14 @@ namespace Synopsis {
                     utility += a["science_utility_estimate"].get_float_value();
                 }
 
-                // Apply rules
-                for (auto &rule : rules) {
-                    double adj = rule.apply(candidate);
-                    utility += adj;
+                auto applied = ruleset.apply(bin, candidate);
+                if (!applied.first) {
+                    // Constraints violated
+                    continue;
                 }
+
+                // Apply rule adjustement
+                utility += applied.second;
 
                 double relative_utility = utility / size;
                 if ((best_idx < 0) || (relative_utility > best_value)) {
