@@ -1,6 +1,7 @@
 #include "MaxMarginalRelevanceDownlinkPlanner.hpp"
 #include "Timer.hpp"
 #include "RuleAST.hpp"
+#include "Similarity.hpp"
 
 
 namespace Synopsis {
@@ -26,10 +27,15 @@ namespace Synopsis {
     std::vector<int> _prioritize_bin(
         int bin,
         std::vector<std::map<std::string, DpMetadataValue>> asdps,
-        RuleSet ruleset
+        RuleSet ruleset,
+        Similarity similarity,
+        double alpha
     ) {
         std::vector<std::map<std::string, DpMetadataValue>> prioritized;
         int maxiter = asdps.size();
+
+        int cumulative_size = 0;
+        double cumulative_sue = 0.0;
 
         for (int i = 0; i < maxiter; i++) {
 
@@ -41,13 +47,24 @@ namespace Synopsis {
                 std::vector<std::map<std::string, DpMetadataValue>> candidate(prioritized);
                 candidate.push_back(asdp);
 
-                int size = 0;
-                double utility = 0;
-                for (auto &a : candidate) {
-                    size += a["size"].get_int_value();
-                    // TODO: Similarity discount
-                    utility += a["science_utility_estimate"].get_float_value();
-                }
+                // Compute Similarity Score
+                double similarity_value = similarity.get_max_similarity(
+                    bin, prioritized, asdp
+                );
+
+                // Derive final SUE value (TODO: add alpha)
+                double discount_factor = (1.0 - alpha) + (
+                    alpha * (1.0 - similarity_value)
+                );
+                double final_sue = (
+                    discount_factor *
+                    asdp["science_utility_estimate"].get_float_value()
+                );
+                asdp["final_science_utility_estimate"] = DpMetadataValue(final_sue);
+
+                // Compute candidate cumulative utility and size
+                double candidate_utility = cumulative_sue + final_sue;
+                int candidate_size = cumulative_size + asdp["size"].get_int_value();
 
                 auto applied = ruleset.apply(bin, candidate);
                 if (!applied.first) {
@@ -56,9 +73,9 @@ namespace Synopsis {
                 }
 
                 // Apply rule adjustement
-                utility += applied.second;
+                candidate_utility += applied.second;
 
-                double relative_utility = utility / size;
+                double relative_utility = candidate_utility / candidate_size;
                 if ((best_idx < 0) || (relative_utility > best_value)) {
                     best_idx = idx;
                     best_value = relative_utility;
@@ -72,8 +89,11 @@ namespace Synopsis {
             }
 
             // Push best ASDP onto prioritized list
-            prioritized.push_back(asdps[best_idx]);
+            auto best_asdp = asdps[best_idx];
+            prioritized.push_back(best_asdp);
             asdps.erase(asdps.begin() + best_idx);
+            cumulative_size += best_asdp["size"].get_int_value();
+            cumulative_sue += best_asdp["final_science_utility_estimate"].get_float_value();
 
         }
 
@@ -116,12 +136,7 @@ namespace Synopsis {
         double max_processing_time_sec,
         std::vector<int> &prioritized_list
     ) {
-        /*
-         * TODO:
-         * 1. Load configuration
-         * 2. Invoke planner with configuration and max_processing_time_sec
-         * 3. Populate vector with sorted product IDs (do not exceed capacity)
-         */
+
         Status status;
 
         Timer timer(this->_clock, max_processing_time_sec);
@@ -219,6 +234,10 @@ namespace Synopsis {
         );
 
         // TODO: Load similarity config
+        Similarity similarity({});
+
+        // TODO: add alpha to similarity config
+        double alpha = 1.0;
 
         // Load ASDPs
         std::vector<int> dp_ids = this->_db->list_data_product_ids();
@@ -263,7 +282,7 @@ namespace Synopsis {
             int bin = entry.first;
             auto &asdps = entry.second;
             std::vector<int> prioritized_bin = _prioritize_bin(
-                bin, asdps, ruleset
+                bin, asdps, ruleset, similarity, alpha
             );
             for (int asdp_id : prioritized_bin) {
                 prioritized_list.push_back(asdp_id);

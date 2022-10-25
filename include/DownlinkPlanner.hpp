@@ -13,7 +13,7 @@ namespace Synopsis {
 
 
     /*
-     * Base class for an Autonomous Science Data System (ASDS)
+     * Base class for a downlink planner algorithm
      */
     class DownlinkPlanner : public ApplicationModule {
 
