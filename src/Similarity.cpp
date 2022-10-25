@@ -25,10 +25,12 @@ namespace Synopsis {
     }
 
     Similarity::Similarity(
+        std::map<int, double> alpha,
         std::map<int, std::map<
             std::pair<std::string, std::string>, SimilarityFunction
         >> functions
     ) :
+        _alpha(alpha),
         _functions(functions)
     {
 
@@ -42,6 +44,21 @@ namespace Synopsis {
     ) {
         // TODO: Implement
         return 0.0;
+    }
+
+
+    double Similarity::get_discount_factor(
+        int bin,
+        std::vector<std::map<std::string, DpMetadataValue>> queue,
+        std::map<std::string, DpMetadataValue> asdp
+    ) {
+        double max_similarity = this->get_max_similarity(bin, queue, asdp);
+        double alpha = 1.0;
+        if (this->_alpha.count(bin)) {
+            // If alpha specified, overwrite default 1.0 value
+            alpha = this->_alpha[bin];
+        }
+        return (1.0 - alpha) + (alpha * (1.0 - max_similarity));
     }
 
 };

@@ -3,6 +3,7 @@
 
 #include "DownlinkPlanner.hpp"
 #include "RuleAST.hpp"
+#include "Similarity.hpp"
 
 
 namespace Synopsis {
@@ -12,7 +13,7 @@ namespace Synopsis {
     std::vector<int> _prioritize_bin(
         int bin,
         std::vector<std::map<std::string, DpMetadataValue>> asdps,
-        RuleSet ruleset
+        RuleSet ruleset, Similarity similarity
     );
 
     class MaxMarginalRelevanceDownlinkPlanner : public DownlinkPlanner {

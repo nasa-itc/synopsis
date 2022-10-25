@@ -1,7 +1,5 @@
 #include "MaxMarginalRelevanceDownlinkPlanner.hpp"
 #include "Timer.hpp"
-#include "RuleAST.hpp"
-#include "Similarity.hpp"
 
 
 namespace Synopsis {
@@ -28,8 +26,7 @@ namespace Synopsis {
         int bin,
         std::vector<std::map<std::string, DpMetadataValue>> asdps,
         RuleSet ruleset,
-        Similarity similarity,
-        double alpha
+        Similarity similarity
     ) {
         std::vector<std::map<std::string, DpMetadataValue>> prioritized;
         int maxiter = asdps.size();
@@ -47,15 +44,12 @@ namespace Synopsis {
                 std::vector<std::map<std::string, DpMetadataValue>> candidate(prioritized);
                 candidate.push_back(asdp);
 
-                // Compute Similarity Score
-                double similarity_value = similarity.get_max_similarity(
+                // Compute similarity discount factor
+                double discount_factor = similarity.get_discount_factor(
                     bin, prioritized, asdp
                 );
 
-                // Derive final SUE value (TODO: add alpha)
-                double discount_factor = (1.0 - alpha) + (
-                    alpha * (1.0 - similarity_value)
-                );
+                // Compute final SUE value
                 double final_sue = (
                     discount_factor *
                     asdp["science_utility_estimate"].get_float_value()
@@ -234,10 +228,7 @@ namespace Synopsis {
         );
 
         // TODO: Load similarity config
-        Similarity similarity({});
-
-        // TODO: add alpha to similarity config
-        double alpha = 1.0;
+        Similarity similarity({}, {});
 
         // Load ASDPs
         std::vector<int> dp_ids = this->_db->list_data_product_ids();
@@ -282,7 +273,7 @@ namespace Synopsis {
             int bin = entry.first;
             auto &asdps = entry.second;
             std::vector<int> prioritized_bin = _prioritize_bin(
-                bin, asdps, ruleset, similarity, alpha
+                bin, asdps, ruleset, similarity
             );
             for (int asdp_id : prioritized_bin) {
                 prioritized_list.push_back(asdp_id);

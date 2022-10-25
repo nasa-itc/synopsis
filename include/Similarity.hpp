@@ -41,6 +41,7 @@ namespace Synopsis {
 
         public:
             Similarity(
+                std::map<int, double> alpha,
                 std::map<int, std::map<
                     std::pair<std::string, std::string>, SimilarityFunction
                 >> functions
@@ -53,10 +54,17 @@ namespace Synopsis {
                 std::map<std::string, DpMetadataValue> asdp
             );
 
+            double get_discount_factor(
+                int bin,
+                std::vector<std::map<std::string, DpMetadataValue>> queue,
+                std::map<std::string, DpMetadataValue> asdp
+            );
+
         private:
             std::map<int, std::map<
                 std::pair<std::string, std::string>, SimilarityFunction
             >> _functions;
+            std::map<int, double> _alpha;
             std::map<std::pair<int, int>, double> _cache;
 
     };
