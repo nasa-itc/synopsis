@@ -44,9 +44,19 @@ namespace Synopsis {
                 std::map<int, double> alpha,
                 std::map<int, std::map<
                     std::pair<std::string, std::string>, SimilarityFunction
-                >> functions
+                >> functions,
+                std::map<
+                    std::pair<std::string, std::string>, SimilarityFunction
+                > default_functions
             );
             ~Similarity() = default;
+
+
+            double _get_cached_similarity(
+                SimilarityFunction &similarity_function,
+                std::map<std::string, DpMetadataValue> asdp1,
+                std::map<std::string, DpMetadataValue> asdp2
+            );
 
             double get_max_similarity(
                 int bin,
@@ -64,6 +74,9 @@ namespace Synopsis {
             std::map<int, std::map<
                 std::pair<std::string, std::string>, SimilarityFunction
             >> _functions;
+            std::map<
+                std::pair<std::string, std::string>, SimilarityFunction
+            > _default_functions;
             std::map<int, double> _alpha;
             std::map<std::pair<int, int>, double> _cache;
 

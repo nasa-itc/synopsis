@@ -228,7 +228,7 @@ namespace Synopsis {
         );
 
         // TODO: Load similarity config
-        Similarity similarity({}, {});
+        Similarity similarity({}, {}, {});
 
         // Load ASDPs
         std::vector<int> dp_ids = this->_db->list_data_product_ids();
