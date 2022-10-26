@@ -1,6 +1,36 @@
+#include <cmath>
+
 #include "Similarity.hpp"
 
+
 namespace Synopsis {
+
+
+    double _sq_euclidean_dist(
+        std::vector<double> dd1, std::vector<double> dd2
+    ) {
+        double acc = 0.0;
+        int n1 = dd1.size();
+        int n2 = dd2.size();
+        int n = std::min(n1, n2);
+
+        for (int i = 0; i < n; i++) {
+            double diff = dd1[i] - dd2[i];
+            acc += (diff * diff);
+        }
+
+        return acc;
+    }
+
+
+    double _gaussian_similarity(
+        double sigma,
+        std::vector<double> dd1, std::vector<double> dd2
+    ) {
+        double dist_sq = _sq_euclidean_dist(dd1, dd2);
+        return exp(-(dist_sq / (sigma * sigma)));
+    }
+
 
     SimilarityFunction::SimilarityFunction(
         std::vector<std::string> diversity_descriptors,
@@ -16,13 +46,56 @@ namespace Synopsis {
 
     }
 
+    std::vector<double> SimilarityFunction::_extract_dd(
+        std::map<std::string, DpMetadataValue> asdp
+    ) {
+        std::vector<double> dd;
+        int n_dd = this->_diversity_descriptors.size();
+
+        for (int i = 0; i < n_dd; i++) {
+            std::string key = this->_diversity_descriptors[i];
+
+            // TODO: handle missing key
+            double dd_i = asdp[key].get_float_value();
+
+            // Multiply by factor (if provided)
+            if (i < this->_dd_factors.size()) {
+                dd_i *= this->_dd_factors[i];
+            }
+
+            dd.push_back(dd_i);
+
+        }
+
+        return dd;
+    }
+
+
     double SimilarityFunction::get_similarity(
         std::map<std::string, DpMetadataValue> asdp1,
         std::map<std::string, DpMetadataValue> asdp2
     ) {
+
+        double similarity = 0.0;
+        auto dd1 = this->_extract_dd(asdp1);
+        auto dd2 = this->_extract_dd(asdp2);
+
+        if (this->_similarity_type == "gaussian") {
+            double sigma = 1.0;
+            if (this->_similarity_params.count("sigma")) {
+                sigma = this->_similarity_params["sigma"];
+            } else {
+                // TODO: Log warning about missing parameter
+            }
+            similarity = _gaussian_similarity(sigma, dd1, dd2);
+        } else {
+            // TODO: Log unknown similarity type
+        }
+
         // TODO: Implement
-        return 0.0;
+        return similarity;
     }
+
 
     Similarity::Similarity(
         std::map<int, double> alpha,

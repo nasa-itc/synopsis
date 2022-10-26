@@ -12,6 +12,17 @@
 namespace Synopsis {
 
 
+    double _sq_euclidean_dist(
+        std::vector<double> dd1, std::vector<double> dd2
+    );
+
+
+    double _gaussian_similarity(
+        double sigma,
+        std::vector<double> dd1, std::vector<double> dd2
+    );
+
+
     class SimilarityFunction {
 
         public:
@@ -22,6 +33,10 @@ namespace Synopsis {
                 std::map<std::string, double> similarity_params
             );
             ~SimilarityFunction() = default;
+
+            std::vector<double> _extract_dd(
+                std::map<std::string, DpMetadataValue> asdp
+            );
 
             double get_similarity(
                 std::map<std::string, DpMetadataValue> asdp1,
