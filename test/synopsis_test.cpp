@@ -582,7 +582,7 @@ TEST(SynopsisTest, TestRuleAST) {
 }
 
 
-TEST(SynopsisTest, TestPrioritize) {
+TEST(SynopsisTest, TestPrioritizeInstPair) {
     std::string db_path = get_absolute_data_path("instrument_pair.db");
 
     // Test initialization
@@ -603,6 +603,34 @@ TEST(SynopsisTest, TestPrioritize) {
     EXPECT_EQ(2, prioritized_list.size());
     EXPECT_EQ(3, prioritized_list[0]);
     EXPECT_EQ(4, prioritized_list[1]);
+
+    status = app.deinit();
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+}
+
+
+TEST(SynopsisTest, TestPrioritizeDD) {
+    std::string db_path = get_absolute_data_path("dd_example.db");
+
+    // Test initialization
+    Synopsis::SqliteASDPDB db(db_path);
+    Synopsis::StdLogger logger;
+    Synopsis::LinuxClock clock;
+    Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
+
+    Synopsis::Application app(&db, &planner, &logger, &clock);
+    Synopsis::Status status;
+
+    status = app.init(0, NULL);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+
+    std::vector<int> prioritized_list;
+    status = app.prioritize("", "", 100, prioritized_list);
+    EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    EXPECT_EQ(2, prioritized_list.size());
+    EXPECT_EQ(1, prioritized_list[0]);
+    EXPECT_EQ(3, prioritized_list[1]);
 
     status = app.deinit();
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);

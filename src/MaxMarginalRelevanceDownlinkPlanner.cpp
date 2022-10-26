@@ -203,10 +203,20 @@ namespace Synopsis {
          * APPLIES x.instrument == "SFI"
          * SUM x.size
          * LESS THAN 3;
+         *
+         * CONSTRAINT(x):
+         * APPLIES x.instrument == "OWLS"
+         * SUM x.size
+         * LESS THAN 3;
          */
 
         // Constraint Expressions
         Field x_size_field = Field("x", "size");
+
+        StringConstant owls_str = StringConstant("OWLS");
+        ComparatorExpression owls_inst_check = ComparatorExpression(
+            "==", &x_instr_field, &owls_str
+        );
 
         RuleSet ruleset({}, {},
             {
@@ -223,12 +233,30 @@ namespace Synopsis {
                     &x_inst_check,
                     &x_size_field,
                     3
+                ),
+                Constraint(
+                    {"x"},
+                    &owls_inst_check,
+                    &x_size_field,
+                    3
                 )
             }
         );
 
         // TODO: Load similarity config
-        Similarity similarity({}, {}, {});
+        Similarity similarity({}, {},
+            {
+                {
+                    std::make_pair("OWLS", "ACME"),
+                    SimilarityFunction(
+                        {"background_avg", "unique_masses"},
+                        {1.0, 0.5},
+                        "gaussian",
+                        {{"sigma", 1.34289567767}}
+                    )
+                }
+            }
+        );
 
         // Load ASDPs
         std::vector<int> dp_ids = this->_db->list_data_product_ids();
