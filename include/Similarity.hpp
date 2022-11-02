@@ -57,6 +57,7 @@ namespace Synopsis {
         public:
             Similarity(
                 std::map<int, double> alpha,
+                double default_alpha,
                 std::map<int, std::map<
                     std::pair<std::string, std::string>, SimilarityFunction
                 >> functions,
@@ -93,9 +94,13 @@ namespace Synopsis {
                 std::pair<std::string, std::string>, SimilarityFunction
             > _default_functions;
             std::map<int, double> _alpha;
+            double _default_alpha;
             std::map<std::pair<int, int>, double> _cache;
 
     };
+
+
+    Similarity parse_similarity_config(std::string config_file);
 
 
 };

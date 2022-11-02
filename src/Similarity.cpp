@@ -1,9 +1,18 @@
 #include <cmath>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 #include "Similarity.hpp"
 
 
 namespace Synopsis {
+
+    /*
+     * Function prototype
+     */
+    std::map<
+        std::pair<std::string, std::string>, SimilarityFunction
+    > _parse_function_list(nlohmann::json flist);
 
 
     double _sq_euclidean_dist(
@@ -99,6 +108,7 @@ namespace Synopsis {
 
     Similarity::Similarity(
         std::map<int, double> alpha,
+        double default_alpha,
         std::map<int, std::map<
             std::pair<std::string, std::string>, SimilarityFunction
         >> functions,
@@ -107,6 +117,7 @@ namespace Synopsis {
         > default_functions
     ) :
         _alpha(alpha),
+        _default_alpha(default_alpha),
         _functions(functions),
         _default_functions(default_functions)
     {
@@ -209,12 +220,223 @@ namespace Synopsis {
         std::map<std::string, DpMetadataValue> asdp
     ) {
         double max_similarity = this->get_max_similarity(bin, queue, asdp);
-        double alpha = 1.0;
+        double alpha = this->_default_alpha;
         if (this->_alpha.count(bin)) {
             // If alpha specified, overwrite default 1.0 value
             alpha = this->_alpha[bin];
         }
         return (1.0 - alpha) + (alpha * (1.0 - max_similarity));
     }
+
+
+    std::map<
+        std::pair<std::string, std::string>, SimilarityFunction
+    > _parse_function_list(nlohmann::json flist) {
+
+        std::map<
+            std::pair<std::string, std::string>, SimilarityFunction
+        > functions;
+        std::pair<std::string, std::string> key;
+
+        for (auto& f : flist) {
+            if (!f.is_object()) {
+                // TODO: log bad function type
+                continue;
+            }
+
+            // Parse Key
+            // TODO: handle key missing
+            auto j_key = f["key"];
+            if (j_key.is_array() && j_key.size() == 2) {
+                // TODO: verify string values
+                key = std::make_pair(
+                    j_key[0].get<std::string>(),
+                    j_key[1].get<std::string>()
+                );
+            } else {
+                // TODO: log bad function key type/size
+                continue;
+            }
+
+            // Parse Function
+            // TODO: handle keys missing
+            auto j_func = f["function"];
+            if (!j_func.is_object()) {
+                // TODO: log bad j_func type
+                continue;
+            }
+
+            // TODO: handle keys missing
+            auto j_dd = j_func["diversity_descriptor"];
+            auto j_weights = j_func["weights"];
+            auto j_sim_type = j_func["similarity_type"];
+            auto j_sim_param = j_func["similarity_parameters"];
+
+            // Check types
+            if (!j_dd.is_array()) {
+                // TODO: log bad type
+                continue;
+            }
+            if (!j_weights.is_array()) {
+                // TODO: log bad type
+                continue;
+            }
+            if (!j_sim_type.is_string()) {
+                // TODO: log bad type
+                continue;
+            }
+            if (!j_sim_param.is_object()) {
+                // TODO: log bad type
+                continue;
+            }
+
+            if (j_dd.size() != j_weights.size()) {
+                // TODO: log mismatch
+                continue;
+            }
+
+            std::vector<std::string> dds;
+            std::vector<double> dd_factors;
+            std::string similarity_type;
+            std::map<std::string, double> similarity_params;
+
+            // Parse DDs and weights
+            for (int i = 0; i < j_dd.size(); i++) {
+                auto j_dd_i = j_dd[i];
+                if (!j_dd_i.is_string()) {
+                    // TODO: warn
+                    continue;
+                }
+                auto j_weight_i = j_weights[i];
+                if (!j_weight_i.is_number()) {
+                    // TODO: warn
+                    continue;
+                }
+                dds.push_back(j_dd_i.get<std::string>());
+                dd_factors.push_back(j_weight_i.get<double>());
+            }
+
+            similarity_type = j_sim_type.get<std::string>();
+
+            for (auto& j_p_el : j_sim_param.items()) {
+                std::string p_key = j_p_el.key();
+                auto val = j_p_el.value();
+                if (!val.is_number()) {
+                    // TODO: log error
+                    continue;
+                }
+                similarity_params[p_key] = val.get<double>();
+            }
+
+            SimilarityFunction func = SimilarityFunction(
+                dds, dd_factors, similarity_type, similarity_params
+            );
+            functions.insert(std::make_pair(key, func));
+
+        }
+
+        return functions;
+    }
+
+
+    Similarity parse_similarity_config(std::string config_file) {
+
+        // If no config file provided, return default configuration
+        if (config_file.size() == 0) {
+            return Similarity({}, 1.0, {}, {});
+        }
+
+        std::ifstream file_input(config_file);
+        auto j = nlohmann::json::parse(file_input);
+
+        // Parse alpha parameters
+
+        std::map<int, double> alpha;
+        double default_alpha = 1.0;
+
+        // TODO: handle no "alphas" key
+        auto j_alphas = j["alphas"];
+        if (j_alphas.is_object()) {
+            for (auto& el : j_alphas.items()) {
+
+                std::string key = el.key();
+                auto val = el.value();
+                double dval = 1.0;
+                if (val.is_number()) {
+                    dval = val.get<double>();
+                } else {
+                    // TODO: log bad alpha entry type
+                    continue;
+                }
+
+                if (key == "default") {
+                    default_alpha = dval;
+                } else {
+                    try {
+                        int ikey = std::stoi(key);
+                        alpha[ikey] = dval;
+                    } catch ( std::invalid_argument & e ) {
+                        // TODO: log bad alpha key type
+                        continue;
+                    }
+                }
+            }
+        } else {
+            // TODO: log bad "alphas" type
+        }
+
+        // Parse similarity functions
+
+        std::map<int, std::map<
+            std::pair<std::string, std::string>, SimilarityFunction
+        >> functions;
+        std::map<
+            std::pair<std::string, std::string>, SimilarityFunction
+        > default_functions;
+
+        // TODO: handle no "functions" key
+        auto j_functions = j["functions"];
+
+        if (j_functions.is_object()) {
+            for (auto& el : j_functions.items()) {
+
+                std::string key = el.key();
+                auto val = el.value();
+
+                std::map<
+                    std::pair<std::string, std::string>, SimilarityFunction
+                > _functions;
+
+                if (val.is_array()) {
+                    _functions = _parse_function_list(val);
+                } else {
+                    // TODO: log bad functions entry type
+                    continue;
+                }
+
+                if (key == "default") {
+                    default_functions = _functions;
+                } else {
+                    try {
+                        int ikey = std::stoi(key);
+                        functions[ikey] = _functions;
+                    } catch ( std::invalid_argument & e ) {
+                        // TODO: log bad function key type
+                        continue;
+                    }
+                }
+
+            }
+        } else {
+            // TODO: log bad "functions" type
+        }
+
+        Similarity similarity(
+            alpha, default_alpha,
+            functions, default_functions
+        );
+        return similarity;
+    }
+
 
 };

@@ -612,6 +612,7 @@ TEST(SynopsisTest, TestPrioritizeInstPair) {
 
 TEST(SynopsisTest, TestPrioritizeDD) {
     std::string db_path = get_absolute_data_path("dd_example.db");
+    std::string dd_config_path = get_absolute_data_path("dd_example_config.json");
 
     // Test initialization
     Synopsis::SqliteASDPDB db(db_path);
@@ -626,7 +627,7 @@ TEST(SynopsisTest, TestPrioritizeDD) {
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
     std::vector<int> prioritized_list;
-    status = app.prioritize("", "", 100, prioritized_list);
+    status = app.prioritize("", dd_config_path, 100, prioritized_list);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
     EXPECT_EQ(2, prioritized_list.size());
     EXPECT_EQ(1, prioritized_list[0]);

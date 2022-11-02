@@ -243,20 +243,9 @@ namespace Synopsis {
             }
         );
 
-        // TODO: Load similarity config
-        Similarity similarity({}, {},
-            {
-                {
-                    std::make_pair("OWLS", "ACME"),
-                    SimilarityFunction(
-                        {"background_avg", "unique_masses"},
-                        {1.0, 0.5},
-                        "gaussian",
-                        {{"sigma", 1.34289567767}}
-                    )
-                }
-            }
-        );
+        // Load similarity configuration
+        Similarity similarity = \
+            parse_similarity_config(similarity_configuration_id);
 
         // Load ASDPs
         std::vector<int> dp_ids = this->_db->list_data_product_ids();
