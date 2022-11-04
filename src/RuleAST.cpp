@@ -1,8 +1,23 @@
 #include <limits>
+#include <nlohmann/json.hpp>
+#include <fstream>
 
 #include "RuleAST.hpp"
 
 namespace Synopsis {
+
+
+    // Function Prototype
+    std::pair<std::vector<Rule>, std::vector<Constraint>>
+    _parse_bin(
+            nlohmann::json &j_bin,
+            std::vector<std::shared_ptr<RuleExpression>> &exprs
+    );
+
+    template<class T> T _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    );
 
 
     Rule::Rule(
@@ -135,7 +150,8 @@ namespace Synopsis {
         _rule_map({}),
         _constraint_map({}),
         _default_rules({}),
-        _default_constraints({})
+        _default_constraints({}),
+        _expressions({})
     {
 
     }
@@ -150,7 +166,25 @@ namespace Synopsis {
         _rule_map(rule_map),
         _constraint_map(constraint_map),
         _default_rules(default_rules),
-        _default_constraints(default_constraints)
+        _default_constraints(default_constraints),
+        _expressions({})
+    {
+
+    }
+
+
+    RuleSet::RuleSet(
+        std::map<int, std::vector<Rule>> rule_map,
+        std::map<int, std::vector<Constraint>> constraint_map,
+        std::vector<Rule> default_rules,
+        std::vector<Constraint> default_constraints,
+        std::vector<std::shared_ptr<RuleExpression>> expressions
+    ) :
+        _rule_map(rule_map),
+        _constraint_map(constraint_map),
+        _default_rules(default_rules),
+        _default_constraints(default_constraints),
+        _expressions(expressions)
     {
 
     }
@@ -469,6 +503,443 @@ namespace Synopsis {
 
         }
         return false;
+    }
+
+
+    Status _get_argument_obj(
+        nlohmann::json *result, nlohmann::json &j_obj, std::string arg
+    ) {
+        if (!j_obj.is_object()) {
+            return FAILURE;
+        }
+
+        // TODO: Check for key
+        auto j_contents = j_obj["__contents__"];
+        if (!j_contents.is_object()) {
+            return FAILURE;
+        }
+
+        // TODO: Check for key
+        *result = j_contents[arg];
+        return SUCCESS;
+    }
+
+
+    std::string _get_obj_type(nlohmann::json &j_obj) {
+        if (!j_obj.is_object()) {
+            // TODO: log invalid object
+            return "";
+        }
+        auto j_type = j_obj["__type__"];
+        if (!j_type.is_string()) {
+            // TODO: log invalid type
+            return "";
+        }
+        return j_type.get<std::string>();
+    }
+
+    template<> std::vector<std::string> _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        std::vector<std::string> bad = {};
+        nlohmann::json j_arg;
+        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        if (status != SUCCESS) { return bad; }
+
+        if (j_arg.is_array()) {
+            std::vector<std::string> result;
+            for (auto& j_v : j_arg) {
+                if (j_v.is_string()) {
+                    result.push_back(j_v.get<std::string>());
+                }
+            }
+            return result;
+        }
+
+        return bad;
+    }
+
+
+    template<> std::string _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        std::string bad = "";
+        nlohmann::json j_arg;
+        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        if (status != SUCCESS) { return bad; }
+
+        if (j_arg.is_string()) {
+            return j_arg.get<std::string>();
+        }
+
+        return bad;
+    }
+
+
+    template<> int _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        int bad = -1;
+        nlohmann::json j_arg;
+        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        if (status != SUCCESS) { return bad; }
+
+        if (j_arg.is_number_integer()) {
+            return j_arg.get<int>();
+        } else {
+            // TODO: log error
+            return bad;
+        }
+
+    }
+
+
+    template<> double _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        double bad = 0.0;
+        nlohmann::json j_arg;
+        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        if (status != SUCCESS) { return bad; }
+
+        if (j_arg.is_number()) {
+            return j_arg.get<double>();
+        } else {
+            // TODO: log error
+            return bad;
+        }
+
+    }
+
+
+    template<> bool _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        bool bad = false;
+        nlohmann::json j_arg;
+        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        if (status != SUCCESS) { return bad; }
+
+        if (j_arg.is_boolean()) {
+            return j_arg.get<bool>();
+        } else {
+            // TODO: log error
+            return bad;
+        }
+
+    }
+
+
+    template<> ValueExpression* _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        ValueExpression* bad = nullptr;
+        nlohmann::json j_arg;
+        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        if (status != SUCCESS) { return bad; }
+
+        std::string type = _get_obj_type(j_arg);
+
+        std::shared_ptr<ValueExpression> ptr;
+
+        if (type == "ConstExpression") {
+            double value = _parse_argument<double>(j_arg, "value", exprs);
+            ptr = std::make_shared<ConstExpression>(
+                ConstExpression(value)
+            );
+
+        } else if (type == "StringConstant") {
+            std::string value = _parse_argument<std::string>(
+                j_arg, "value", exprs
+            );
+            ptr = std::make_shared<StringConstant>(
+                StringConstant(value)
+            );
+
+        } else if (type == "MinusExpression") {
+            ValueExpression *expr = _parse_argument<ValueExpression*>(
+                j_arg, "expression", exprs
+            );
+            if (!expr) { return bad; }
+            ptr = std::make_shared<MinusExpression>(
+                MinusExpression(expr)
+            );
+
+        } else if (type == "BinaryExpression") {
+            std::string op = _parse_argument<std::string>(
+                j_arg, "operator", exprs
+            );
+            ValueExpression *left_expr = _parse_argument<ValueExpression*>(
+                j_arg, "left_expression", exprs
+            );
+            if (!left_expr) { return bad; }
+            ValueExpression *right_expr = _parse_argument<ValueExpression*>(
+                j_arg, "right_expression", exprs
+            );
+            if (!right_expr) { return bad; }
+            ptr = std::make_shared<BinaryExpression>(
+                BinaryExpression(op, left_expr, right_expr)
+            );
+
+        } else if (type == "Field") {
+            std::string var_name = _parse_argument<std::string>(
+                j_arg, "variable_name", exprs
+            );
+            std::string field_name = _parse_argument<std::string>(
+                j_arg, "field_name", exprs
+            );
+            ptr = std::make_shared<Field>(
+                Field(var_name, field_name)
+            );
+
+        } else {
+            return bad;
+        }
+
+
+        exprs.push_back(ptr);
+        return ptr.get();
+    }
+
+
+    template<> BoolValueExpression* _parse_argument(
+        nlohmann::json &j_obj, std::string arg,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        BoolValueExpression* bad = nullptr;
+        nlohmann::json j_arg;
+        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        if (status != SUCCESS) { return bad; }
+
+        std::string type = _get_obj_type(j_arg);
+
+        std::shared_ptr<BoolValueExpression> ptr;
+
+        if (type == "LogicalConstant") {
+            bool value = _parse_argument<bool>(j_arg, "value", exprs);
+            ptr = std::make_shared<LogicalConstant>(
+                LogicalConstant(value)
+            );
+
+        } else if (type == "LogicalNot") {
+            BoolValueExpression *expr = _parse_argument<BoolValueExpression*>(
+                j_arg, "expression", exprs
+            );
+            if (!expr) { return bad; }
+            ptr = std::make_shared<LogicalNot>(
+                LogicalNot(expr)
+            );
+
+        } else if (type == "BinaryLogicalExpression") {
+            std::string op = _parse_argument<std::string>(
+                j_arg, "operator", exprs
+            );
+            BoolValueExpression *left_expr = _parse_argument<BoolValueExpression*>(
+                j_arg, "left_expression", exprs
+            );
+            if (!left_expr) { return bad; }
+            BoolValueExpression *right_expr = _parse_argument<BoolValueExpression*>(
+                j_arg, "right_expression", exprs
+            );
+            if (!right_expr) { return bad; }
+            ptr = std::make_shared<BinaryLogicalExpression>(
+                BinaryLogicalExpression(op, left_expr, right_expr)
+            );
+
+        } else if (type == "ComparatorExpression") {
+            std::string comp = _parse_argument<std::string>(
+                j_arg, "comparator", exprs
+            );
+            ValueExpression *left_expr = _parse_argument<ValueExpression*>(
+                j_arg, "left_expression", exprs
+            );
+            if (!left_expr) { return bad; }
+            ValueExpression *right_expr = _parse_argument<ValueExpression*>(
+                j_arg, "right_expression", exprs
+            );
+            if (!right_expr) { return bad; }
+            ptr = std::make_shared<ComparatorExpression>(
+                ComparatorExpression(comp, left_expr, right_expr)
+            );
+
+        } else if (type == "ExistentialExpression") {
+            std::string variable = _parse_argument<std::string>(
+                j_arg, "variable", exprs
+            );
+            BoolValueExpression *expr = _parse_argument<BoolValueExpression*>(
+                j_arg, "expression", exprs
+            );
+            if (!expr) { return bad; }
+            ptr = std::make_shared<ExistentialExpression>(
+                ExistentialExpression(variable, expr)
+            );
+
+        } else {
+            return bad;
+        }
+
+        exprs.push_back(ptr);
+        return ptr.get();
+    }
+
+
+    Constraint _parse_constraint(
+        nlohmann::json &j_constraint,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        Constraint bad = Constraint({}, nullptr, nullptr, 0.0);
+
+        std::string type = _get_obj_type(j_constraint);
+        if (type != "Constraint") {
+            // TODO: log warning
+            return bad;
+        }
+
+        auto variables = _parse_argument<std::vector<std::string>>(
+            j_constraint, "variables", exprs
+        );
+        auto application = _parse_argument<BoolValueExpression*>(
+            j_constraint, "application", exprs
+        );
+        auto sum_field = _parse_argument<ValueExpression*>(
+            j_constraint, "sum_field", exprs
+        );
+        auto constraint_value = _parse_argument<double>(
+            j_constraint, "constraint_value", exprs
+        );
+
+        if (!application) {
+            // TODO: bad application expression
+            return bad;
+        }
+
+        return Constraint(
+            variables, application, sum_field, constraint_value
+        );
+
+    }
+
+
+    Rule _parse_rule(
+        nlohmann::json &j_rule,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        Rule bad = Rule({}, nullptr, nullptr, 0);
+
+        std::string type = _get_obj_type(j_rule);
+        if (type != "Rule") {
+            // TODO: log warning
+            return bad;
+        }
+
+        auto variables = _parse_argument<std::vector<std::string>>(
+            j_rule, "variables", exprs
+        );
+        auto application = _parse_argument<BoolValueExpression*>(
+            j_rule, "application", exprs
+        );
+        auto adjustment = _parse_argument<ValueExpression*>(
+            j_rule, "adjustment", exprs
+        );
+        auto max_applications = _parse_argument<int>(
+            j_rule, "max_applications", exprs
+        );
+
+        if (!application) {
+            // TODO: bad application expression
+            return bad;
+        }
+        if (!adjustment) {
+            // TODO: bad adjustment expression
+            return bad;
+        }
+
+        return Rule(
+            variables, application, adjustment, max_applications
+        );
+
+    }
+
+
+    std::pair<std::vector<Rule>, std::vector<Constraint>>
+    _parse_bin(
+            nlohmann::json &j_bin,
+            std::vector<std::shared_ptr<RuleExpression>> &exprs
+    ) {
+        std::vector<Rule> rules;
+        std::vector<Constraint> constraints;
+
+        // TODO: use zero variables to indicate invalid rules, and exclude
+        // these from lists?
+
+        // TODO: check for key
+        auto j_rules = j_bin["rules"];
+        if (j_rules.is_array()) {
+            for (auto j_rule : j_rules) {
+                rules.push_back(_parse_rule(j_rule, exprs));
+            }
+        }
+
+        // TODO: check for key
+        auto j_constraints = j_bin["constraints"];
+        if (j_constraints.is_array()) {
+            for (auto j_constraint : j_constraints) {
+                constraints.push_back(_parse_constraint(j_constraint, exprs));
+            }
+        }
+
+        return std::make_pair(rules, constraints);
+    }
+
+
+    RuleSet parse_rule_config(std::string config_file) {
+
+        std::ifstream file_input(config_file);
+        auto j = nlohmann::json::parse(file_input);
+
+        if (!j.is_object()) {
+            // TODO: log warning
+            return RuleSet();
+        }
+
+        std::map<int, std::vector<Rule>> rule_map;
+        std::map<int, std::vector<Constraint>> constraint_map;
+        std::vector<Rule> default_rules;
+        std::vector<Constraint> default_constraints;
+        std::vector<std::shared_ptr<RuleExpression>> exprs;
+
+        for (auto& el : j.items()) {
+            std::string key = el.key();
+            auto val = el.value();
+
+            auto bin_rules = _parse_bin(val, exprs);
+
+            if (key == "default") {
+                default_rules = bin_rules.first;
+                default_constraints = bin_rules.second;
+            } else {
+                try {
+                    int ikey = std::stoi(key);
+                    rule_map[ikey] = bin_rules.first;
+                    constraint_map[ikey] = bin_rules.second;
+                } catch ( std::invalid_argument & e ) {
+                    // TODO: log bad alpha key type
+                    continue;
+                }
+            }
+        }
+
+        return RuleSet(
+            rule_map, constraint_map,
+            default_rules, default_constraints,
+            exprs
+        );
     }
 
 

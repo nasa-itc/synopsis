@@ -12,7 +12,16 @@
 namespace Synopsis {
 
 
-    class BoolValueExpression {
+    class RuleExpression {
+
+        public:
+
+            virtual ~RuleExpression() = default;
+
+    };
+
+
+    class BoolValueExpression : public RuleExpression {
 
         public:
 
@@ -26,7 +35,7 @@ namespace Synopsis {
     };
 
 
-    class ValueExpression {
+    class ValueExpression : public RuleExpression {
 
         public:
 
@@ -113,6 +122,13 @@ namespace Synopsis {
                 std::vector<Rule> default_rules,
                 std::vector<Constraint> default_constraints
             );
+            RuleSet(
+                std::map<int, std::vector<Rule>> rule_map,
+                std::map<int, std::vector<Constraint>> constraint_map,
+                std::vector<Rule> default_rules,
+                std::vector<Constraint> default_constraints,
+                std::vector<std::shared_ptr<RuleExpression>> expressions
+            );
             ~RuleSet() = default;
 
             std::vector<Rule> get_rules(int bin);
@@ -135,6 +151,7 @@ namespace Synopsis {
             std::map<int, std::vector<Constraint>> _constraint_map;
             std::vector<Rule> _default_rules;
             std::vector<Constraint> _default_constraints;
+            std::vector<std::shared_ptr<RuleExpression>> _expressions;
 
     };
 
@@ -347,6 +364,9 @@ namespace Synopsis {
             BoolValueExpression *_expr;
 
     };
+
+
+    RuleSet parse_rule_config(std::string config_file);
 
 
 };

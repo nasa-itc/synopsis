@@ -584,6 +584,7 @@ TEST(SynopsisTest, TestRuleAST) {
 
 TEST(SynopsisTest, TestPrioritizeInstPair) {
     std::string db_path = get_absolute_data_path("instrument_pair.db");
+    std::string rules_path = get_absolute_data_path("instrument_pair_rules.json");
 
     // Test initialization
     Synopsis::SqliteASDPDB db(db_path);
@@ -598,7 +599,7 @@ TEST(SynopsisTest, TestPrioritizeInstPair) {
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
     std::vector<int> prioritized_list;
-    status = app.prioritize("", "", 100, prioritized_list);
+    status = app.prioritize(rules_path, "", 100, prioritized_list);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
     EXPECT_EQ(2, prioritized_list.size());
     EXPECT_EQ(3, prioritized_list[0]);
@@ -613,6 +614,7 @@ TEST(SynopsisTest, TestPrioritizeInstPair) {
 TEST(SynopsisTest, TestPrioritizeDD) {
     std::string db_path = get_absolute_data_path("dd_example.db");
     std::string dd_config_path = get_absolute_data_path("dd_example_config.json");
+    std::string dd_rules_path = get_absolute_data_path("dd_example_rules.json");
 
     // Test initialization
     Synopsis::SqliteASDPDB db(db_path);
@@ -627,7 +629,7 @@ TEST(SynopsisTest, TestPrioritizeDD) {
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
     std::vector<int> prioritized_list;
-    status = app.prioritize("", dd_config_path, 100, prioritized_list);
+    status = app.prioritize(dd_rules_path, dd_config_path, 100, prioritized_list);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
     EXPECT_EQ(2, prioritized_list.size());
     EXPECT_EQ(1, prioritized_list[0]);
