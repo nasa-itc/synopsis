@@ -28,8 +28,8 @@ namespace Synopsis {
             virtual ~BoolValueExpression() = default;
 
             virtual bool get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             ) = 0;
 
     };
@@ -42,8 +42,8 @@ namespace Synopsis {
             virtual ~ValueExpression() = default;
 
             virtual DpMetadataValue get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             ) = 0;
 
     };
@@ -68,7 +68,7 @@ namespace Synopsis {
             /*
              * Returns total SUE adjustment due to application of rule
              */
-            double apply(std::vector<std::map<std::string, DpMetadataValue>> asdps);
+            double apply(AsdpList asdps);
 
         private:
 
@@ -100,7 +100,7 @@ namespace Synopsis {
             /*
              * Returns whether the constraint is satisfied for the given ASDPs
              */
-            bool apply(std::vector<std::map<std::string, DpMetadataValue>> asdps);
+            bool apply(AsdpList asdps);
 
         private:
 
@@ -141,7 +141,7 @@ namespace Synopsis {
              */
             std::pair<bool, double> apply(
                 int bin,
-                std::vector<std::map<std::string, DpMetadataValue>> queue
+                AsdpList queue
             );
 
 
@@ -164,8 +164,8 @@ namespace Synopsis {
             virtual ~LogicalConstant() = default;
 
             bool get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -182,8 +182,8 @@ namespace Synopsis {
             virtual ~ConstExpression() = default;
 
             DpMetadataValue get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -200,8 +200,8 @@ namespace Synopsis {
             virtual ~LogicalNot() = default;
 
             bool get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -222,8 +222,8 @@ namespace Synopsis {
             virtual ~BinaryLogicalExpression() = default;
 
             bool get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -246,8 +246,8 @@ namespace Synopsis {
             virtual ~ComparatorExpression() = default;
 
             bool get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -268,8 +268,8 @@ namespace Synopsis {
             virtual ~StringConstant() = default;
 
             DpMetadataValue get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -288,8 +288,8 @@ namespace Synopsis {
             virtual ~MinusExpression() = default;
 
             DpMetadataValue get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -310,8 +310,8 @@ namespace Synopsis {
             virtual ~BinaryExpression() = default;
 
             DpMetadataValue get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -333,8 +333,8 @@ namespace Synopsis {
             virtual ~Field() = default;
 
             DpMetadataValue get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:
@@ -355,8 +355,8 @@ namespace Synopsis {
             virtual ~ExistentialExpression() = default;
 
             bool get_value(
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-                std::vector<std::map<std::string, DpMetadataValue>> asdps
+                AsdpAssignments assignments,
+                AsdpList asdps
             );
 
         private:

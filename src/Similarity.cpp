@@ -56,7 +56,7 @@ namespace Synopsis {
     }
 
     std::vector<double> SimilarityFunction::_extract_dd(
-        std::map<std::string, DpMetadataValue> asdp
+        AsdpEntry asdp
     ) {
         std::vector<double> dd;
         int n_dd = this->_diversity_descriptors.size();
@@ -81,8 +81,8 @@ namespace Synopsis {
 
 
     double SimilarityFunction::get_similarity(
-        std::map<std::string, DpMetadataValue> asdp1,
-        std::map<std::string, DpMetadataValue> asdp2
+        AsdpEntry asdp1,
+        AsdpEntry asdp2
     ) {
 
         double similarity = 0.0;
@@ -127,8 +127,8 @@ namespace Synopsis {
 
     double Similarity::_get_cached_similarity(
         SimilarityFunction &similarity_function,
-        std::map<std::string, DpMetadataValue> asdp1,
-        std::map<std::string, DpMetadataValue> asdp2
+        AsdpEntry asdp1,
+        AsdpEntry asdp2
     ) {
 
         // Make cache key
@@ -158,8 +158,8 @@ namespace Synopsis {
 
     double Similarity::get_max_similarity(
         int bin,
-        std::vector<std::map<std::string, DpMetadataValue>> queue,
-        std::map<std::string, DpMetadataValue> asdp
+        AsdpList queue,
+        AsdpEntry asdp
     ) {
 
         if (queue.size() == 0) {
@@ -216,8 +216,8 @@ namespace Synopsis {
 
     double Similarity::get_discount_factor(
         int bin,
-        std::vector<std::map<std::string, DpMetadataValue>> queue,
-        std::map<std::string, DpMetadataValue> asdp
+        AsdpList queue,
+        AsdpEntry asdp
     ) {
         double max_similarity = this->get_max_similarity(bin, queue, asdp);
         double alpha = this->_default_alpha;

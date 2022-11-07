@@ -35,12 +35,12 @@ namespace Synopsis {
             ~SimilarityFunction() = default;
 
             std::vector<double> _extract_dd(
-                std::map<std::string, DpMetadataValue> asdp
+                AsdpEntry asdp
             );
 
             double get_similarity(
-                std::map<std::string, DpMetadataValue> asdp1,
-                std::map<std::string, DpMetadataValue> asdp2
+                AsdpEntry asdp1,
+                AsdpEntry asdp2
             );
 
         private:
@@ -70,20 +70,20 @@ namespace Synopsis {
 
             double _get_cached_similarity(
                 SimilarityFunction &similarity_function,
-                std::map<std::string, DpMetadataValue> asdp1,
-                std::map<std::string, DpMetadataValue> asdp2
+                AsdpEntry asdp1,
+                AsdpEntry asdp2
             );
 
             double get_max_similarity(
                 int bin,
-                std::vector<std::map<std::string, DpMetadataValue>> queue,
-                std::map<std::string, DpMetadataValue> asdp
+                AsdpList queue,
+                AsdpEntry asdp
             );
 
             double get_discount_factor(
                 int bin,
-                std::vector<std::map<std::string, DpMetadataValue>> queue,
-                std::map<std::string, DpMetadataValue> asdp
+                AsdpList queue,
+                AsdpEntry asdp
             );
 
         private:

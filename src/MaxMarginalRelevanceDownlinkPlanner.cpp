@@ -5,7 +5,7 @@
 namespace Synopsis {
 
 
-    Status _populate_asdp(DpDbMsg msg, std::map<std::string, DpMetadataValue> &asdp) {
+    Status _populate_asdp(DpDbMsg msg, AsdpEntry &asdp) {
 
         // Initialize with existing metadata
         asdp = msg.get_metadata();
@@ -24,11 +24,11 @@ namespace Synopsis {
 
     std::vector<int> _prioritize_bin(
         int bin,
-        std::vector<std::map<std::string, DpMetadataValue>> asdps,
+        AsdpList asdps,
         RuleSet ruleset,
         Similarity similarity
     ) {
-        std::vector<std::map<std::string, DpMetadataValue>> prioritized;
+        AsdpList prioritized;
         int maxiter = asdps.size();
 
         int cumulative_size = 0;
@@ -41,7 +41,7 @@ namespace Synopsis {
             double best_value = 0.0;
             for (auto &asdp : asdps) {
                 idx += 1;
-                std::vector<std::map<std::string, DpMetadataValue>> candidate(prioritized);
+                AsdpList candidate(prioritized);
                 candidate.push_back(asdp);
 
                 // Compute similarity discount factor
@@ -145,8 +145,8 @@ namespace Synopsis {
 
         // Load ASDPs
         std::vector<int> dp_ids = this->_db->list_data_product_ids();
-        std::map<int, std::vector<std::map<std::string, DpMetadataValue>>> binned_asdps;
-        std::vector<std::map<std::string, DpMetadataValue>> transmitted;
+        std::map<int, AsdpList> binned_asdps;
+        AsdpList transmitted;
         DpDbMsg msg;
         for (int dp_id : dp_ids) {
             Status status = this->_db->get_data_product(dp_id, msg);
@@ -157,7 +157,7 @@ namespace Synopsis {
 
             int bin = msg.get_priority_bin();
 
-            std::map<std::string, DpMetadataValue> asdp;
+            AsdpEntry asdp;
             status = _populate_asdp(msg, asdp);
             if (status != SUCCESS) {
                 // TODO: Log Error
@@ -170,7 +170,7 @@ namespace Synopsis {
                 if (binned_asdps.count(bin)) {
                     binned_asdps[bin].push_back(asdp);
                 } else {
-                    std::vector<std::map<std::string, DpMetadataValue>> binlist = { asdp };
+                    AsdpList binlist = { asdp };
                     binned_asdps[bin] = binlist;
                 }
             }

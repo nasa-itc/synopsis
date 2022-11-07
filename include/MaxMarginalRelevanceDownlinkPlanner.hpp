@@ -8,11 +8,11 @@
 
 namespace Synopsis {
 
-    Status _populate_asdp(DpDbMsg msg, std::map<std::string, DpMetadataValue> &asdp);
+    Status _populate_asdp(DpDbMsg msg, AsdpEntry &asdp);
 
     std::vector<int> _prioritize_bin(
         int bin,
-        std::vector<std::map<std::string, DpMetadataValue>> asdps,
+        AsdpList asdps,
         RuleSet ruleset, Similarity similarity
     );
 

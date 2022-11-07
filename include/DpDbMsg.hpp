@@ -40,6 +40,11 @@ namespace Synopsis {
     };
 
 
+    using AsdpEntry = std::map<std::string, DpMetadataValue>;
+    using AsdpList = std::vector<AsdpEntry>;
+    using AsdpAssignments = std::map<std::string, AsdpEntry>;
+
+
     class DpDbMsg {
 
         public:
@@ -53,7 +58,7 @@ namespace Synopsis {
             DpDbMsg(int dp_id, std::string instrument_name, std::string dp_type,
                 std::string dp_uri, size_t dp_size, double science_utility_estimate,
                 int priority_bin, DownlinkState downlink_state,
-                std::map<std::string, DpMetadataValue> metadata);
+                AsdpEntry metadata);
 
             int get_dp_id(void);
             std::string get_instrument_name(void);
@@ -63,7 +68,7 @@ namespace Synopsis {
             double get_science_utility_estimate(void);
             int get_priority_bin(void);
             DownlinkState get_downlink_state(void);
-            std::map<std::string, DpMetadataValue> get_metadata(void);
+            AsdpEntry get_metadata(void);
 
             void set_dp_id(int id);
             void set_instrument_name(std::string name);
@@ -73,7 +78,7 @@ namespace Synopsis {
             void set_science_utility_estimate(double sue);
             void set_priority_bin(int bin);
             void set_downlink_state(DownlinkState state);
-            void set_metadata(std::map<std::string, DpMetadataValue> metadata);
+            void set_metadata(AsdpEntry metadata);
 
         private:
             int dp_id;
@@ -84,7 +89,7 @@ namespace Synopsis {
             double science_utility_estimate;
             int priority_bin;
             DownlinkState downlink_state;
-            std::map<std::string, DpMetadataValue> metadata;
+            AsdpEntry metadata;
     };
 
 

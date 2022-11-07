@@ -65,7 +65,7 @@ namespace Synopsis {
     }
 
 
-    double Rule::apply(std::vector<std::map<std::string, DpMetadataValue>> asdps) {
+    double Rule::apply(AsdpList asdps) {
 
         int n_applications = 0;
         double total_adj_value = 0.0;
@@ -73,7 +73,7 @@ namespace Synopsis {
 
         if (_variables.size() == 1) {
             for (auto a : asdps) {
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments = {
+                AsdpAssignments assignments = {
                     {_variables[0], a}
                 };
                 if (_application_expression->get_value(assignments, asdps)) {
@@ -95,7 +95,7 @@ namespace Synopsis {
         } else if (_variables.size() == 2) {
             for (auto a : asdps) {
                 for (auto b : asdps) {
-                    std::map<std::string, std::map<std::string, DpMetadataValue>> assignments = {
+                    AsdpAssignments assignments = {
                         {_variables[0], a},
                         {_variables[1], b}
                     };
@@ -141,14 +141,14 @@ namespace Synopsis {
     }
 
 
-    bool Constraint::apply(std::vector<std::map<std::string, DpMetadataValue>> asdps) {
+    bool Constraint::apply(AsdpList asdps) {
 
         double aggregate = 0.0;
         DpMetadataValue value;
 
         if (_variables.size() == 1) {
             for (auto a : asdps) {
-                std::map<std::string, std::map<std::string, DpMetadataValue>> assignments = {
+                AsdpAssignments assignments = {
                     {_variables[0], a}
                 };
                 if (_application_expression->get_value(assignments, asdps)) {
@@ -240,7 +240,7 @@ namespace Synopsis {
 
     std::pair<bool, double> RuleSet::apply(
         int bin,
-        std::vector<std::map<std::string, DpMetadataValue>> queue
+        AsdpList queue
     ) {
 
         // Check constraints
@@ -276,8 +276,8 @@ namespace Synopsis {
 
 
     bool LogicalConstant::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         return this->_value;
     }
@@ -290,8 +290,8 @@ namespace Synopsis {
     }
 
     DpMetadataValue ConstExpression::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         return this->_value;
     }
@@ -305,8 +305,8 @@ namespace Synopsis {
 
 
     bool LogicalNot::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         return !(this->_expr->get_value(assignments, asdps));
     }
@@ -326,8 +326,8 @@ namespace Synopsis {
 
 
     bool BinaryLogicalExpression::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         bool left_value = this->_left_expr->get_value(assignments, asdps);
         bool right_value = this->_right_expr->get_value(assignments, asdps);
@@ -356,8 +356,8 @@ namespace Synopsis {
 
 
     bool ComparatorExpression::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         DpMetadataValue left_value = this->_left_expr->get_value(assignments, asdps);
         DpMetadataValue right_value = this->_right_expr->get_value(assignments, asdps);
@@ -406,8 +406,8 @@ namespace Synopsis {
     }
 
     DpMetadataValue StringConstant::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         return this->_value;
     }
@@ -420,8 +420,8 @@ namespace Synopsis {
     }
 
     DpMetadataValue MinusExpression::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         DpMetadataValue value = this->_expr->get_value(assignments, asdps);
         if (value.is_numeric()) {
@@ -447,8 +447,8 @@ namespace Synopsis {
 
 
     DpMetadataValue BinaryExpression::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         DpMetadataValue left_value = this->_left_expr->get_value(assignments, asdps);
         DpMetadataValue right_value = this->_right_expr->get_value(assignments, asdps);
@@ -484,8 +484,8 @@ namespace Synopsis {
 
 
     DpMetadataValue Field::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         if (assignments.count(this->_var_name) > 0) {
             auto fields = assignments[this->_var_name];
@@ -517,14 +517,13 @@ namespace Synopsis {
 
 
     bool ExistentialExpression::get_value(
-            std::map<std::string, std::map<std::string, DpMetadataValue>> assignments,
-            std::vector<std::map<std::string, DpMetadataValue>> asdps
+            AsdpAssignments assignments,
+            AsdpList asdps
         ) {
         for (auto asdp : asdps) {
 
             // Assign asdp to variable
-            std::map<std::string, std::map<std::string, DpMetadataValue>> \
-                new_assignments(assignments);
+            AsdpAssignments new_assignments(assignments);
             new_assignments[this->_var] = asdp;
 
             // Evaluate expression and return if true

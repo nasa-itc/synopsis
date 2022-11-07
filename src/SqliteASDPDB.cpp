@@ -134,7 +134,7 @@ namespace Synopsis {
         Sqlite3Statement stmt2(this->_db, SQL_ASDP_METADATA_GET);
         stmt2.bind(0, asdp_id);
 
-        std::map<std::string, DpMetadataValue> metadata;
+        AsdpEntry metadata;
         for (int rc = stmt2.step(); rc == SQLITE_ROW; rc = stmt2.step()) {
             std::string key = stmt2.fetch<std::string>(0);
             DpMetadataValue value(

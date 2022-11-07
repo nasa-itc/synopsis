@@ -31,7 +31,7 @@ namespace Synopsis {
         // Default values
         double sue = 0.0;
         int priority_bin = 0;
-        std::map<std::string, DpMetadataValue> metadata;
+        AsdpEntry metadata;
 
         if (msg.get_metadata_usage()) {
             // Parse metadata JSON

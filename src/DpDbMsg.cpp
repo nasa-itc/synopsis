@@ -108,7 +108,7 @@ namespace Synopsis {
         double science_utility_estimate,
         int priority_bin,
         DownlinkState downlink_state,
-        std::map<std::string, DpMetadataValue> metadata
+        AsdpEntry metadata
         ) :
         dp_id(dp_id),
         instrument_name(instrument_name),
@@ -155,7 +155,7 @@ namespace Synopsis {
         return this->downlink_state;
     }
 
-    std::map<std::string, DpMetadataValue> DpDbMsg::get_metadata(void) {
+    AsdpEntry DpDbMsg::get_metadata(void) {
         return this->metadata;
     }
 
@@ -191,7 +191,7 @@ namespace Synopsis {
         this->downlink_state = state;
     }
 
-    void DpDbMsg::set_metadata(std::map<std::string, DpMetadataValue> metadata) {
+    void DpDbMsg::set_metadata(AsdpEntry metadata) {
         this->metadata = metadata;
     }
 
