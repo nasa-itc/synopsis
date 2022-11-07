@@ -10,9 +10,7 @@ namespace Synopsis {
     /*
      * Function prototype
      */
-    std::map<
-        std::pair<std::string, std::string>, SimilarityFunction
-    > _parse_function_list(nlohmann::json flist);
+    SimFuncMap _parse_function_list(nlohmann::json flist);
 
 
     double _sq_euclidean_dist(
@@ -45,7 +43,7 @@ namespace Synopsis {
         std::vector<std::string> diversity_descriptors,
         std::vector<double> dd_factors,
         std::string similarity_type,
-        std::map<std::string, double> similarity_params
+        SimParamMap similarity_params
     ) :
         _diversity_descriptors(diversity_descriptors),
         _dd_factors(dd_factors),
@@ -109,11 +107,8 @@ namespace Synopsis {
     Similarity::Similarity(
         std::map<int, double> alpha,
         double default_alpha,
-        std::map<int, std::map<
-            std::pair<std::string, std::string>, SimilarityFunction
-        >> functions,
-        std::map<
-            std::pair<std::string, std::string>, SimilarityFunction
+        std::map<int, SimFuncMap> functions,
+        std::map<SimKey, SimilarityFunction
         > default_functions
     ) :
         _alpha(alpha),
@@ -172,7 +167,7 @@ namespace Synopsis {
             asdp["type"].get_string_value()
         );
 
-        std::map<std::pair<std::string, std::string>, SimilarityFunction> sf;
+        SimFuncMap sf;
         if (this->_functions.count(bin)) {
             sf = this->_functions[bin];
         } else {
@@ -229,14 +224,10 @@ namespace Synopsis {
     }
 
 
-    std::map<
-        std::pair<std::string, std::string>, SimilarityFunction
-    > _parse_function_list(nlohmann::json flist) {
+    SimFuncMap _parse_function_list(nlohmann::json flist) {
 
-        std::map<
-            std::pair<std::string, std::string>, SimilarityFunction
-        > functions;
-        std::pair<std::string, std::string> key;
+        SimFuncMap functions;
+        SimKey key;
 
         for (auto& f : flist) {
             if (!f.is_object()) {
@@ -298,7 +289,7 @@ namespace Synopsis {
             std::vector<std::string> dds;
             std::vector<double> dd_factors;
             std::string similarity_type;
-            std::map<std::string, double> similarity_params;
+            SimParamMap similarity_params;
 
             // Parse DDs and weights
             for (int i = 0; i < j_dd.size(); i++) {
@@ -387,12 +378,8 @@ namespace Synopsis {
 
         // Parse similarity functions
 
-        std::map<int, std::map<
-            std::pair<std::string, std::string>, SimilarityFunction
-        >> functions;
-        std::map<
-            std::pair<std::string, std::string>, SimilarityFunction
-        > default_functions;
+        std::map<int, SimFuncMap> functions;
+        SimFuncMap default_functions;
 
         // TODO: handle no "functions" key
         auto j_functions = j["functions"];
@@ -403,9 +390,7 @@ namespace Synopsis {
                 std::string key = el.key();
                 auto val = el.value();
 
-                std::map<
-                    std::pair<std::string, std::string>, SimilarityFunction
-                > _functions;
+                SimFuncMap _functions;
 
                 if (val.is_array()) {
                     _functions = _parse_function_list(val);

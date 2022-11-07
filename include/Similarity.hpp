@@ -23,6 +23,9 @@ namespace Synopsis {
     );
 
 
+    using SimParamMap = std::map<std::string, double>;
+
+
     class SimilarityFunction {
 
         public:
@@ -30,7 +33,7 @@ namespace Synopsis {
                 std::vector<std::string> diversity_descriptors,
                 std::vector<double> dd_factors,
                 std::string similarity_type,
-                std::map<std::string, double> similarity_params
+                SimParamMap similarity_params
             );
             ~SimilarityFunction() = default;
 
@@ -47,9 +50,13 @@ namespace Synopsis {
             std::vector<std::string> _diversity_descriptors;
             std::vector<double> _dd_factors;
             std::string _similarity_type;
-            std::map<std::string, double> _similarity_params;
+            SimParamMap _similarity_params;
 
     };
+
+
+    using SimKey = std::pair<std::string, std::string>;
+    using SimFuncMap = std::map<SimKey, SimilarityFunction>;
 
 
     class Similarity {
@@ -58,12 +65,8 @@ namespace Synopsis {
             Similarity(
                 std::map<int, double> alpha,
                 double default_alpha,
-                std::map<int, std::map<
-                    std::pair<std::string, std::string>, SimilarityFunction
-                >> functions,
-                std::map<
-                    std::pair<std::string, std::string>, SimilarityFunction
-                > default_functions
+                std::map<int, SimFuncMap> functions,
+                SimFuncMap default_functions
             );
             ~Similarity() = default;
 
@@ -87,12 +90,8 @@ namespace Synopsis {
             );
 
         private:
-            std::map<int, std::map<
-                std::pair<std::string, std::string>, SimilarityFunction
-            >> _functions;
-            std::map<
-                std::pair<std::string, std::string>, SimilarityFunction
-            > _default_functions;
+            std::map<int, SimFuncMap> _functions;
+            SimFuncMap _default_functions;
             std::map<int, double> _alpha;
             double _default_alpha;
             std::map<std::pair<int, int>, double> _cache;
