@@ -112,27 +112,31 @@ namespace Synopsis {
     };
 
 
+    using RuleList = std::vector<Rule>;
+    using ConstraintList = std::vector<Constraint>;
+
+
     class RuleSet {
 
         public:
             RuleSet();
             RuleSet(
-                std::map<int, std::vector<Rule>> rule_map,
-                std::map<int, std::vector<Constraint>> constraint_map,
-                std::vector<Rule> default_rules,
-                std::vector<Constraint> default_constraints
+                std::map<int, RuleList> rule_map,
+                std::map<int, ConstraintList> constraint_map,
+                RuleList default_rules,
+                ConstraintList default_constraints
             );
             RuleSet(
-                std::map<int, std::vector<Rule>> rule_map,
-                std::map<int, std::vector<Constraint>> constraint_map,
-                std::vector<Rule> default_rules,
-                std::vector<Constraint> default_constraints,
+                std::map<int, RuleList> rule_map,
+                std::map<int, ConstraintList> constraint_map,
+                RuleList default_rules,
+                ConstraintList default_constraints,
                 std::vector<std::shared_ptr<RuleExpression>> expressions
             );
             ~RuleSet() = default;
 
-            std::vector<Rule> get_rules(int bin);
-            std::vector<Constraint> get_constraints(int bin);
+            RuleList get_rules(int bin);
+            ConstraintList get_constraints(int bin);
 
             /*
              * Returns a pair of values; the first entry indicates whether all
@@ -147,10 +151,10 @@ namespace Synopsis {
 
         private:
 
-            std::map<int, std::vector<Rule>> _rule_map;
-            std::map<int, std::vector<Constraint>> _constraint_map;
-            std::vector<Rule> _default_rules;
-            std::vector<Constraint> _default_constraints;
+            std::map<int, RuleList> _rule_map;
+            std::map<int, ConstraintList> _constraint_map;
+            RuleList _default_rules;
+            ConstraintList _default_constraints;
             std::vector<std::shared_ptr<RuleExpression>> _expressions;
 
     };

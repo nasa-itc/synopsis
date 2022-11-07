@@ -12,7 +12,7 @@ namespace Synopsis {
      */
 
 
-    std::pair<std::vector<Rule>, std::vector<Constraint>>
+    std::pair<RuleList, ConstraintList>
     _parse_bin(
             nlohmann::json &j_bin,
             std::vector<std::shared_ptr<RuleExpression>> &exprs
@@ -188,10 +188,10 @@ namespace Synopsis {
 
 
     RuleSet::RuleSet(
-        std::map<int, std::vector<Rule>> rule_map,
-        std::map<int, std::vector<Constraint>> constraint_map,
-        std::vector<Rule> default_rules,
-        std::vector<Constraint> default_constraints
+        std::map<int, RuleList> rule_map,
+        std::map<int, ConstraintList> constraint_map,
+        RuleList default_rules,
+        ConstraintList default_constraints
     ) :
         _rule_map(rule_map),
         _constraint_map(constraint_map),
@@ -204,10 +204,10 @@ namespace Synopsis {
 
 
     RuleSet::RuleSet(
-        std::map<int, std::vector<Rule>> rule_map,
-        std::map<int, std::vector<Constraint>> constraint_map,
-        std::vector<Rule> default_rules,
-        std::vector<Constraint> default_constraints,
+        std::map<int, RuleList> rule_map,
+        std::map<int, ConstraintList> constraint_map,
+        RuleList default_rules,
+        ConstraintList default_constraints,
         std::vector<std::shared_ptr<RuleExpression>> expressions
     ) :
         _rule_map(rule_map),
@@ -220,7 +220,7 @@ namespace Synopsis {
     }
 
 
-    std::vector<Rule> RuleSet::get_rules(int bin) {
+    RuleList RuleSet::get_rules(int bin) {
         if (this->_rule_map.count(bin)) {
             return this->_rule_map[bin];
         } else {
@@ -229,7 +229,7 @@ namespace Synopsis {
     }
 
 
-    std::vector<Constraint> RuleSet::get_constraints(int bin) {
+    ConstraintList RuleSet::get_constraints(int bin) {
         if (this->_constraint_map.count(bin)) {
             return this->_constraint_map[bin];
         } else {
@@ -244,7 +244,7 @@ namespace Synopsis {
     ) {
 
         // Check constraints
-        std::vector<Constraint> constraints = this->get_constraints(bin);
+        ConstraintList constraints = this->get_constraints(bin);
         bool violated = false;
         for (auto &constraint : constraints) {
             if (!constraint.apply(queue)) {
@@ -257,7 +257,7 @@ namespace Synopsis {
         }
 
         // Apply rules
-        std::vector<Rule> rules = this->get_rules(bin);
+        RuleList rules = this->get_rules(bin);
         double utility = 0.0;
         for (auto &rule : rules) {
             double adj = rule.apply(queue);
@@ -896,13 +896,13 @@ namespace Synopsis {
     }
 
 
-    std::pair<std::vector<Rule>, std::vector<Constraint>>
+    std::pair<RuleList, ConstraintList>
     _parse_bin(
             nlohmann::json &j_bin,
             std::vector<std::shared_ptr<RuleExpression>> &exprs
     ) {
-        std::vector<Rule> rules;
-        std::vector<Constraint> constraints;
+        RuleList rules;
+        ConstraintList constraints;
 
         // TODO: use zero variables to indicate invalid rules, and exclude
         // these from lists?
@@ -937,10 +937,10 @@ namespace Synopsis {
             return RuleSet();
         }
 
-        std::map<int, std::vector<Rule>> rule_map;
-        std::map<int, std::vector<Constraint>> constraint_map;
-        std::vector<Rule> default_rules;
-        std::vector<Constraint> default_constraints;
+        std::map<int, RuleList> rule_map;
+        std::map<int, ConstraintList> constraint_map;
+        RuleList default_rules;
+        ConstraintList default_constraints;
         std::vector<std::shared_ptr<RuleExpression>> exprs;
 
         for (auto& el : j.items()) {
