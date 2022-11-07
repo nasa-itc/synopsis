@@ -1,4 +1,11 @@
-
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * Defines SQL queries used by the SqliteASDPDB implementation.
+ *
+ * @see SqliteASDPDB.hpp
+ */
 #ifndef JPL_SYNOPSIS_SQL
 #define JPL_SYNOPSIS_SQL
 
@@ -6,6 +13,11 @@
 namespace Synopsis {
 
 
+    /**
+     * ASDPDB schema; defines two tables to hold ASDPs and associated metadata
+     *
+     * @see SqliteASDPDB::init
+     */
     static constexpr const char* SQL_SCHEMA = R"(
 
     CREATE TABLE IF NOT EXISTS ASDP (
@@ -32,6 +44,11 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to insert a new ASDP
+     *
+     * @see SqliteASDPDB::insert_data_product
+     */
     static constexpr const char* SQL_ASDP_INSERT = R"(
 
     INSERT INTO ASDP (
@@ -41,6 +58,11 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to insert new ASDP metadata
+     *
+     * @see SqliteASDPDB::insert_data_product
+     */
     static constexpr const char* SQL_ASDP_METADATA_INSERT = R"(
 
     INSERT INTO METADATA (
@@ -49,12 +71,22 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to fetch all ASDP ids
+     *
+     * @see SqliteASDPDB::list_data_product_ids
+     */
     static constexpr const char* SQL_ASDP_SELECT = R"(
 
     SELECT asdp_id FROM ASDP;
 
     )";
 
+    /**
+     * Defines query to fetch a specific ASDP
+     *
+     * @see SqliteASDPDB::get_data_product
+     */
     static constexpr const char* SQL_ASDP_GET = R"(
 
     SELECT
@@ -64,6 +96,11 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to fetch metadata for a specific ASDP
+     *
+     * @see SqliteASDPDB::get_data_product
+     */
     static constexpr const char* SQL_ASDP_METADATA_GET = R"(
 
     SELECT
@@ -72,6 +109,11 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to update the science utility estimate of an ASDP
+     *
+     * @see SqliteASDPDB::update_science_utility
+     */
     static constexpr const char* SQL_UPDATE_SUE = R"(
 
     UPDATE ASDP
@@ -80,6 +122,11 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to update the priority bin of an ASDP
+     *
+     * @see SqliteASDPDB::update_priority_bin
+     */
     static constexpr const char* SQL_UPDATE_BIN = R"(
 
     UPDATE ASDP
@@ -88,6 +135,11 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to update the downlink state of an ASDP
+     *
+     * @see SqliteASDPDB::update_downlink_state
+     */
     static constexpr const char* SQL_UPDATE_DL_STATE = R"(
 
     UPDATE ASDP
@@ -96,6 +148,11 @@ namespace Synopsis {
 
     )";
 
+    /**
+     * Defines query to update the metadata field of an ASDP
+     *
+     * @see SqliteASDPDB::update_metadata
+     */
     static constexpr const char* SQL_UPDATE_METADATA = R"(
 
     UPDATE METADATA

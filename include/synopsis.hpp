@@ -62,6 +62,8 @@ namespace Synopsis {
              * application and its modules. Should be called prior to
              * initialization to provided an appropriately sized memory block
              * to the application.
+             *
+             * @return: memory required in bytes
              */
             size_t memory_requirement(void);
 
