@@ -7,17 +7,47 @@
 namespace Synopsis {
 
 
-    // Function Prototype
+    /*
+     * PRIVATE FUNCTION PROTOTYPES
+     */
+
+
     std::pair<std::vector<Rule>, std::vector<Constraint>>
     _parse_bin(
             nlohmann::json &j_bin,
             std::vector<std::shared_ptr<RuleExpression>> &exprs
     );
 
+
     template<class T> T _parse_argument(
         nlohmann::json &j_obj, std::string arg,
         std::vector<std::shared_ptr<RuleExpression>> &exprs
     );
+
+
+    Rule _parse_rule(
+        nlohmann::json &j_rule,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    );
+
+
+    Constraint _parse_constraint(
+        nlohmann::json &j_constraint,
+        std::vector<std::shared_ptr<RuleExpression>> &exprs
+    );
+
+
+    std::string _get_obj_type(nlohmann::json &j_obj);
+
+
+    Status _get_argument_obj(
+        nlohmann::json *result, nlohmann::json &j_obj, std::string arg
+    );
+
+
+    /*
+     * IMPLEMENTATIONS
+     */
 
 
     Rule::Rule(
