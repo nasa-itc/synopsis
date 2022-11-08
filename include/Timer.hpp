@@ -41,7 +41,8 @@ namespace Synopsis {
 
             /**
              * Check whether the timer has expired, given the specified
-             * duration during construction.
+             * duration during construction. Returns `false` if the timer has
+             * not been started.
              *
              * @return: `true` if `duration` has elapsed since the last time
              * the timer was started, or `false` otherwise

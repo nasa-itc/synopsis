@@ -1,7 +1,14 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see DpDbMsg.hpp
+ */
 #include "synopsis.hpp"
 #include "DpDbMsg.hpp"
 
 namespace Synopsis {
+
 
     DpMetadataValue::DpMetadataValue() :
         type(INT),
@@ -194,5 +201,6 @@ namespace Synopsis {
     void DpDbMsg::set_metadata(AsdpEntry metadata) {
         this->metadata = metadata;
     }
+
 
 };

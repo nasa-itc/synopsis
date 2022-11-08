@@ -1,3 +1,9 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see SqliteASDPDB.hpp
+ */
 #include "SqliteASDPDB.hpp"
 #include "Sqlite3Statement.hpp"
 #include "synopsis_sql.hpp"
@@ -18,9 +24,6 @@ namespace Synopsis {
     }
 
 
-    /*
-     * Implement ASDS initialization
-     */
     Status SqliteASDPDB::init(size_t bytes, void* memory, Logger *logger) {
         int status;
 
@@ -44,9 +47,6 @@ namespace Synopsis {
     }
 
 
-    /*
-     * Implement ASDS de-initialization
-     */
     Status SqliteASDPDB::deinit() {
         // Close database connection
         sqlite3_close(this->_db);

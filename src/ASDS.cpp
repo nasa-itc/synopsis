@@ -1,3 +1,9 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see ASDS.hpp
+ */
 #include <nlohmann/json.hpp>
 #include <fstream>
 
@@ -5,10 +11,12 @@
 
 namespace Synopsis {
 
+
     size_t get_file_size(std::string filename) {
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
         return file.tellg();
     }
+
 
     void ASDS::set_database(ASDPDB *db) {
         this->_db = db;
@@ -100,5 +108,6 @@ namespace Synopsis {
 
         return this->submit_data_product(db_msg);
     }
+
 
 };

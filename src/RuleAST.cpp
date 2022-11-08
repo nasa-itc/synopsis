@@ -1,53 +1,103 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see RuleAST.hpp
+ */
 #include <limits>
 #include <nlohmann/json.hpp>
 #include <fstream>
 
 #include "RuleAST.hpp"
 
+
 namespace Synopsis {
 
 
-    /*
-     * PRIVATE FUNCTION PROTOTYPES
+    /**
+     * Determine the object type within the JSON AST representation using the
+     * `__type__` field.
+     *
+     * @param[in] j_obj: JSON object representation of AST element
+     *
+     * @return: string object type
      */
+    std::string _get_obj_type(nlohmann::json &j_obj);
 
-
-    std::pair<RuleList, ConstraintList>
-    _parse_bin(
-            nlohmann::json &j_bin,
-            std::vector<std::shared_ptr<RuleExpression>> &exprs
+    /**
+     * Get JSON argument object from an AST element within the `__contents__`
+     * field
+     *
+     * @param[out] results: pointer to location where extracted argument object
+     * will be stored
+     * @param[in] j_obj: JSON object representation of an AST element
+     * @param[in] arg: string argument name
+     *
+     * @return: SUCCESS if the argument exists; or an error code
+     */
+    Status _get_argument_obj(
+        nlohmann::json *result, nlohmann::json &j_obj, std::string arg
     );
 
-
+    /**
+     * Generic prototype to parse an expression argument of a given type.
+     *
+     * @param[in] j_obj: JSON object representation of argument; the argument
+     * will be within the `__contents__` field of the object
+     * @param[in] arg: string argument name
+     * @param[out] exprs: vector of parsed expression shared pointers to
+     * maintain persistence in memory
+     *
+     * @return: parsed argument value, or pointer to a sub-expression
+     */
     template<class T> T _parse_argument(
         nlohmann::json &j_obj, std::string arg,
         std::vector<std::shared_ptr<RuleExpression>> &exprs
     );
 
-
+    /**
+     * Parse a rule definition from JSON AST representation
+     *
+     * @param[in] j_rule: JSON object representation of a rule
+     * @param[out] exprs: vector of parsed expression shared pointers to
+     * maintain persistence in memory
+     *
+     * @return: parsed rule
+     */
     Rule _parse_rule(
         nlohmann::json &j_rule,
         std::vector<std::shared_ptr<RuleExpression>> &exprs
     );
 
-
+    /**
+     * Parse a constraint definition from JSON AST representation
+     *
+     * @param[in] j_constraint: JSON object representation of a constraint
+     * @param[out] exprs: vector of parsed expression shared pointers to
+     * maintain persistence in memory
+     *
+     * @return: parsed constraint
+     */
     Constraint _parse_constraint(
         nlohmann::json &j_constraint,
         std::vector<std::shared_ptr<RuleExpression>> &exprs
     );
 
-
-    std::string _get_obj_type(nlohmann::json &j_obj);
-
-
-    Status _get_argument_obj(
-        nlohmann::json *result, nlohmann::json &j_obj, std::string arg
-    );
-
-
-    /*
-     * IMPLEMENTATIONS
+    /**
+     * Parses a list of rules and constraints from a priority bin within a JSON
+     * configuration.
+     *
+     * @param[in] j_bin: JSON representation of priority bin configuration
+     * @param[out] exprs: vector of parsed expression shared pointers to
+     * maintain persistence in memory
+     *
+     * @return: pair containing a parsed rule list and a constraint list
      */
+    std::pair<RuleList, ConstraintList>
+    _parse_bin(
+            nlohmann::json &j_bin,
+            std::vector<std::shared_ptr<RuleExpression>> &exprs
+    );
 
 
     Rule::Rule(
@@ -63,7 +113,6 @@ namespace Synopsis {
     {
 
     }
-
 
     double Rule::apply(AsdpList asdps) {
 

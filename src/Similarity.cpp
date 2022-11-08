@@ -1,3 +1,9 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see: Similarity.hpp
+ */
 #include <cmath>
 #include <nlohmann/json.hpp>
 #include <fstream>
@@ -7,8 +13,13 @@
 
 namespace Synopsis {
 
-    /*
-     * Function prototype
+
+    /**
+     * Utility to parse a list of functions from a JSON object.
+     *
+     * @param[in] flist: JSON object containing function list
+     *
+     * @return: mapping from similarity function keys to functions
      */
     SimFuncMap _parse_function_list(nlohmann::json flist);
 

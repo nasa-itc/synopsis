@@ -28,7 +28,7 @@ namespace Synopsis {
 
             /**
              * Returns time in (fractional) seconds since the beginning of some
-             * arbitrary but consistent epoch.
+             * arbitrary but consistent epoch. Must return a positive value.
              *
              * @return: time in seconds since some epoch
              */

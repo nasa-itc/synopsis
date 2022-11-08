@@ -1,6 +1,13 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see DpMsg.hpp
+ */
 #include "synopsis.hpp"
 
 namespace Synopsis {
+
 
     DpMsg::DpMsg() :
         instrument_name(""),
@@ -47,5 +54,6 @@ namespace Synopsis {
     bool DpMsg::get_metadata_usage(void) {
         return this->meta_usage;
     }
+
 
 };

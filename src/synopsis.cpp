@@ -1,5 +1,8 @@
-/*
- * Public SYNOPSIS functionality
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see synopsis.hpp
  */
 #include <cstddef>
 #include <string>
@@ -49,9 +52,6 @@ namespace Synopsis {
     }
 
 
-    /*
-     * Implement library initialization
-     */
     Status Application::init(size_t bytes, void* memory) {
         Status status;
         void* pntr;
@@ -112,9 +112,6 @@ namespace Synopsis {
     }
 
 
-    /*
-     * Implement library deinitialization
-     */
     Status Application::deinit(void) {
         Status status;
 
@@ -159,7 +156,10 @@ namespace Synopsis {
 
 
     size_t Application::padding_nbytes(size_t block_size) {
-        return (MEM_ALIGN_SIZE - (block_size % MEM_ALIGN_SIZE)) % MEM_ALIGN_SIZE;
+        return (
+            (MEM_ALIGN_SIZE - (block_size % MEM_ALIGN_SIZE))
+            % MEM_ALIGN_SIZE
+        );
     }
 
     Status Application::accept_dp(DpMsg msg) {
@@ -201,25 +201,33 @@ namespace Synopsis {
     }
 
 
-    Status Application::update_downlink_state(int asdp_id, DownlinkState state) {
+    Status Application::update_downlink_state(
+        int asdp_id, DownlinkState state
+    ) {
         return _db->update_downlink_state(asdp_id, state);
     }
 
 
     template <>
-    Status Application::update_asdp_metadata(int asdp_id, std::string fieldname, int value) {
+    Status Application::update_asdp_metadata(
+        int asdp_id, std::string fieldname, int value
+    ) {
         return _db->update_metadata(asdp_id, fieldname, value);
     }
 
 
     template <>
-    Status Application::update_asdp_metadata(int asdp_id, std::string fieldname, double value) {
+    Status Application::update_asdp_metadata(
+        int asdp_id, std::string fieldname, double value
+    ) {
         return _db->update_metadata(asdp_id, fieldname, value);
     }
 
 
     template <>
-    Status Application::update_asdp_metadata(int asdp_id, std::string fieldname, std::string value) {
+    Status Application::update_asdp_metadata(
+        int asdp_id, std::string fieldname, std::string value
+    ) {
         return _db->update_metadata(asdp_id, fieldname, value);
     }
 

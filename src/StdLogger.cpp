@@ -1,9 +1,17 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see StdLogger.hpp
+ */
 #include <iostream>
 #include <cstdarg>
 
 #include "StdLogger.hpp"
 
+
 namespace Synopsis {
+
 
     void StdLogger::log(LogType type, const char* fmt, ...) {
         va_list args;
@@ -38,5 +46,6 @@ namespace Synopsis {
 
         va_end(args);
     }
+
 
 };

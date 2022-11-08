@@ -1,3 +1,9 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see MaxMarginalRelevanceDownlinkPlanner.hpp
+ */
 #include "MaxMarginalRelevanceDownlinkPlanner.hpp"
 #include "Timer.hpp"
 

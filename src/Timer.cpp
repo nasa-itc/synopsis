@@ -1,4 +1,11 @@
+/**
+ * @author Gary Doran (Gary.B.Doran.Jr@jpl.nasa.gov)
+ * @date 2022.11.07
+ *
+ * @see: Timer.hpp
+ */
 #include "Timer.hpp"
+
 
 namespace Synopsis {
 
@@ -11,11 +18,9 @@ namespace Synopsis {
 
     }
 
-
     void Timer::start(void) {
         this->start_time = this->_clock->get_time();
     }
-
 
     bool Timer::is_expired(void) {
 
