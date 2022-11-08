@@ -40,6 +40,7 @@ namespace Synopsis {
      */
     class Application {
 
+
         public:
 
             /**
@@ -201,6 +202,7 @@ namespace Synopsis {
                 std::vector<int> &prioritized_list
             );
 
+
         private:
 
             /**
@@ -255,6 +257,7 @@ namespace Synopsis {
              * @return: padding size in bytes
              */
             static size_t padding_nbytes(size_t block_size);
+
 
     };
 
