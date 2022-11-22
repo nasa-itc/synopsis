@@ -291,7 +291,7 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 
     // Get ID of inserted ASDP
-    asdp_ids = db.list_data_product_ids();
+    asdp_ids = app.list_data_product_ids();
     EXPECT_EQ(asdp_ids.size(), 1);
     asdp_id = asdp_ids[0];
 
@@ -335,7 +335,7 @@ TEST(SynopsisTest, TestApplicationASDPDBInterfaces) {
     EXPECT_EQ(Synopsis::Status::FAILURE, status);
 
     // Check values
-    status = db.get_data_product(asdp_id, msg);
+    status = app.get_data_product(asdp_id, msg);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
     EXPECT_EQ(new_sue, msg.get_science_utility_estimate());
     EXPECT_EQ(new_bin, msg.get_priority_bin());

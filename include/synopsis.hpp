@@ -14,6 +14,7 @@
 
 #include "synopsis_types.hpp"
 #include "DpMsg.hpp"
+#include "DpDbMsg.hpp"
 #include "ApplicationModule.hpp"
 #include "ASDS.hpp"
 #include "ASDPDB.hpp"
@@ -178,6 +179,25 @@ namespace Synopsis {
              */
             template <typename T>
             Status update_asdp_metadata(int asdp_id, std::string fieldname, T value);
+
+            /**
+             * Returns a list of all ASDPs within the database.
+             *
+             * @return: list of ASDP identifiers
+             */
+            std::vector<int> list_data_product_ids(void);
+
+            /**
+             * Fetches data product information from the database corresponding
+             * to a specific ASDP.
+             *
+             * @param[in] asdp_id: ASDP for which information should be fetched
+             * @param[out] msg: message that will be populated with ASDP
+             * information
+             *
+             * @return: SUCCESS if successfully fetched, or error code
+             */
+            Status get_data_product(int asdp_id, DpDbMsg& msg);
 
             /**
              * Prioritize the data products in the ASDP DB, given a set of

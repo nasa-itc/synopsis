@@ -238,6 +238,13 @@ namespace Synopsis {
         return _db->update_metadata(asdp_id, fieldname, value);
     }
 
+    std::vector<int> Application::list_data_product_ids(void) {
+        return _db->list_data_product_ids();
+    }
+
+    Status Application::get_data_product(int asdp_id, DpDbMsg& msg) {
+        return _db->get_data_product(asdp_id, msg);
+    }
 
     Status Application::prioritize(
         std::string rule_configuration_id,
