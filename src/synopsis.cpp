@@ -58,6 +58,20 @@ namespace Synopsis {
         size_t mem = 0;
         size_t offset = 0;
 
+        // Init ASDPDB
+        mem = _db->memory_requirement();
+        mem += Application::padding_nbytes(mem);
+        status = _db->init(
+            mem, (void*)((char*)memory + offset), this->_logger
+        );
+        if (status != SUCCESS) {
+            return status;
+        }
+        offset += mem;
+        if (offset > bytes) {
+            return FAILURE;
+        }
+
         // Init ASDSs
         for (int i = 0; i < this->n_asds; i++) {
             ASDS *asds = std::get<2>(this->asds[i]);
@@ -76,21 +90,6 @@ namespace Synopsis {
                 return FAILURE;
             }
         }
-
-        // Init ASDPDB
-        mem = _db->memory_requirement();
-        mem += Application::padding_nbytes(mem);
-        status = _db->init(
-            mem, (void*)((char*)memory + offset), this->_logger
-        );
-        if (status != SUCCESS) {
-            return status;
-        }
-        offset += mem;
-        if (offset > bytes) {
-            return FAILURE;
-        }
-
 
         // Init Planner
         mem = _planner->memory_requirement();
@@ -114,6 +113,14 @@ namespace Synopsis {
 
     Status Application::deinit(void) {
         Status status;
+
+        // De-initialize in the reverse order as initialized
+
+        // De-init Planner
+        status = _planner->deinit();
+        if (status != SUCCESS) {
+            return status;
+        }
 
         // De-init ASDSs
         for (int i = 0; i < this->n_asds; i++) {
