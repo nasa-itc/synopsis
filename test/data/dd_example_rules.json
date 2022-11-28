@@ -27,13 +27,7 @@
               }
             }
           },
-          "sum_field": {
-            "__type__": "Field",
-            "__contents__": {
-              "variable_name": "x",
-              "field_name": "size"
-            }
-          },
+          "sum_field": null,
           "constraint_value": 3.0
         }
       }

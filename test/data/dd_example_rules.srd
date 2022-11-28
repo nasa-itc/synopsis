@@ -2,5 +2,5 @@ BIN 0:
 
 CONSTRAINT(x):
 APPLIES x.instrument_name == "OWLS"
-SUM x.size
+COUNT
 LESS THAN 3;
