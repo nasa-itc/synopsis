@@ -19,10 +19,12 @@ namespace Synopsis {
      * `__type__` field.
      *
      * @param[in] j_obj: JSON object representation of AST element
+     * @param[out] status: reference to status variable that will be set to
+     * return status
      *
      * @return: string object type
      */
-    std::string _get_obj_type(nlohmann::json &j_obj);
+    std::string _get_obj_type(nlohmann::json &j_obj, Status& status);
 
     /**
      * Get JSON argument object from an AST element within the `__contents__`
@@ -47,12 +49,15 @@ namespace Synopsis {
      * @param[in] arg: string argument name
      * @param[out] exprs: vector of parsed expression shared pointers to
      * maintain persistence in memory
+     * @param[out] status: reference to status variable that will be set to
+     * return status
      *
      * @return: parsed argument value, or pointer to a sub-expression
      */
     template<class T> T _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     );
 
     /**
@@ -61,12 +66,15 @@ namespace Synopsis {
      * @param[in] j_rule: JSON object representation of a rule
      * @param[out] exprs: vector of parsed expression shared pointers to
      * maintain persistence in memory
+     * @param[out] status: reference to status variable that will be set to
+     * return status
      *
      * @return: parsed rule
      */
     Rule _parse_rule(
         nlohmann::json &j_rule,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     );
 
     /**
@@ -75,12 +83,15 @@ namespace Synopsis {
      * @param[in] j_constraint: JSON object representation of a constraint
      * @param[out] exprs: vector of parsed expression shared pointers to
      * maintain persistence in memory
+     * @param[out] status: reference to status variable that will be set to
+     * return status
      *
      * @return: parsed constraint
      */
     Constraint _parse_constraint(
         nlohmann::json &j_constraint,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     );
 
     /**
@@ -603,7 +614,8 @@ namespace Synopsis {
     }
 
 
-    std::string _get_obj_type(nlohmann::json &j_obj) {
+    std::string _get_obj_type(nlohmann::json &j_obj, Status& status) {
+        status = FAILURE;
         if (!j_obj.is_object()) {
             // TODO: log invalid object
             return "";
@@ -613,16 +625,18 @@ namespace Synopsis {
             // TODO: log invalid type
             return "";
         }
+        status = SUCCESS;
         return j_type.get<std::string>();
     }
 
     template<> std::vector<std::string> _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         std::vector<std::string> bad = {};
         nlohmann::json j_arg;
-        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        status = _get_argument_obj(&j_arg, j_obj, arg);
         if (status != SUCCESS) { return bad; }
 
         if (j_arg.is_array()) {
@@ -632,43 +646,51 @@ namespace Synopsis {
                     result.push_back(j_v.get<std::string>());
                 }
             }
+            status = SUCCESS;
             return result;
         }
 
+        status = FAILURE;
         return bad;
     }
 
 
     template<> std::string _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         std::string bad = "";
         nlohmann::json j_arg;
-        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        status = _get_argument_obj(&j_arg, j_obj, arg);
         if (status != SUCCESS) { return bad; }
 
         if (j_arg.is_string()) {
+            status = SUCCESS;
             return j_arg.get<std::string>();
         }
 
+        status = FAILURE;
         return bad;
     }
 
 
     template<> int _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         int bad = -1;
         nlohmann::json j_arg;
-        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        status = _get_argument_obj(&j_arg, j_obj, arg);
         if (status != SUCCESS) { return bad; }
 
         if (j_arg.is_number_integer()) {
+            status = SUCCESS;
             return j_arg.get<int>();
         } else {
             // TODO: log error
+            status = FAILURE;
             return bad;
         }
 
@@ -677,17 +699,20 @@ namespace Synopsis {
 
     template<> double _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         double bad = 0.0;
         nlohmann::json j_arg;
-        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        status = _get_argument_obj(&j_arg, j_obj, arg);
         if (status != SUCCESS) { return bad; }
 
         if (j_arg.is_number()) {
+            status = SUCCESS;
             return j_arg.get<double>();
         } else {
             // TODO: log error
+            status = FAILURE;
             return bad;
         }
 
@@ -696,17 +721,20 @@ namespace Synopsis {
 
     template<> bool _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         bool bad = false;
         nlohmann::json j_arg;
-        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        status = _get_argument_obj(&j_arg, j_obj, arg);
         if (status != SUCCESS) { return bad; }
 
         if (j_arg.is_boolean()) {
+            status = SUCCESS;
             return j_arg.get<bool>();
         } else {
             // TODO: log error
+            status = FAILURE;
             return bad;
         }
 
@@ -715,72 +743,116 @@ namespace Synopsis {
 
     template<> ValueExpression* _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         ValueExpression* bad = nullptr;
         nlohmann::json j_arg;
-        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        status = _get_argument_obj(&j_arg, j_obj, arg);
         if (status != SUCCESS) { return bad; }
 
-        std::string type = _get_obj_type(j_arg);
+        // Allow null entries for expressions to support `sum_field`
+        if(j_arg.is_null()) {
+            status = SUCCESS;
+            return nullptr;
+        }
+
+        std::string type = _get_obj_type(j_arg, status);
+        if (status != SUCCESS) { return bad; }
 
         std::shared_ptr<ValueExpression> ptr;
 
         if (type == "ConstExpression") {
-            double value = _parse_argument<double>(j_arg, "value", exprs);
+            double value = _parse_argument<double>(j_arg, "value", exprs, status);
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
             ptr = std::make_shared<ConstExpression>(
                 ConstExpression(value)
             );
 
         } else if (type == "StringConstant") {
             std::string value = _parse_argument<std::string>(
-                j_arg, "value", exprs
+                j_arg, "value", exprs, status
             );
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
             ptr = std::make_shared<StringConstant>(
                 StringConstant(value)
             );
 
         } else if (type == "MinusExpression") {
             ValueExpression *expr = _parse_argument<ValueExpression*>(
-                j_arg, "expression", exprs
+                j_arg, "expression", exprs, status
             );
-            if (!expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
             ptr = std::make_shared<MinusExpression>(
                 MinusExpression(expr)
             );
 
         } else if (type == "BinaryExpression") {
             std::string op = _parse_argument<std::string>(
-                j_arg, "operator", exprs
+                j_arg, "operator", exprs, status
             );
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ValueExpression *left_expr = _parse_argument<ValueExpression*>(
-                j_arg, "left_expression", exprs
+                j_arg, "left_expression", exprs, status
             );
-            if (!left_expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ValueExpression *right_expr = _parse_argument<ValueExpression*>(
-                j_arg, "right_expression", exprs
+                j_arg, "right_expression", exprs, status
             );
-            if (!right_expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ptr = std::make_shared<BinaryExpression>(
                 BinaryExpression(op, left_expr, right_expr)
             );
 
         } else if (type == "Field") {
             std::string var_name = _parse_argument<std::string>(
-                j_arg, "variable_name", exprs
+                j_arg, "variable_name", exprs, status
             );
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             std::string field_name = _parse_argument<std::string>(
-                j_arg, "field_name", exprs
+                j_arg, "field_name", exprs, status
             );
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ptr = std::make_shared<Field>(
                 Field(var_name, field_name)
             );
 
         } else {
+            status = FAILURE;
             return bad;
         }
 
 
+        status = SUCCESS;
         exprs.push_back(ptr);
         return ptr.get();
     }
@@ -788,80 +860,129 @@ namespace Synopsis {
 
     template<> BoolValueExpression* _parse_argument(
         nlohmann::json &j_obj, std::string arg,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         BoolValueExpression* bad = nullptr;
         nlohmann::json j_arg;
-        Status status = _get_argument_obj(&j_arg, j_obj, arg);
+        status = _get_argument_obj(&j_arg, j_obj, arg);
         if (status != SUCCESS) { return bad; }
 
-        std::string type = _get_obj_type(j_arg);
+        std::string type = _get_obj_type(j_arg, status);
+        if (status != SUCCESS) { return bad; }
 
         std::shared_ptr<BoolValueExpression> ptr;
 
         if (type == "LogicalConstant") {
-            bool value = _parse_argument<bool>(j_arg, "value", exprs);
+            bool value = _parse_argument<bool>(j_arg, "value", exprs, status);
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ptr = std::make_shared<LogicalConstant>(
                 LogicalConstant(value)
             );
 
         } else if (type == "LogicalNot") {
             BoolValueExpression *expr = _parse_argument<BoolValueExpression*>(
-                j_arg, "expression", exprs
+                j_arg, "expression", exprs, status
             );
-            if (!expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ptr = std::make_shared<LogicalNot>(
                 LogicalNot(expr)
             );
 
         } else if (type == "BinaryLogicalExpression") {
             std::string op = _parse_argument<std::string>(
-                j_arg, "operator", exprs
+                j_arg, "operator", exprs, status
             );
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             BoolValueExpression *left_expr = _parse_argument<BoolValueExpression*>(
-                j_arg, "left_expression", exprs
+                j_arg, "left_expression", exprs, status
             );
-            if (!left_expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             BoolValueExpression *right_expr = _parse_argument<BoolValueExpression*>(
-                j_arg, "right_expression", exprs
+                j_arg, "right_expression", exprs, status
             );
-            if (!right_expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ptr = std::make_shared<BinaryLogicalExpression>(
                 BinaryLogicalExpression(op, left_expr, right_expr)
             );
 
         } else if (type == "ComparatorExpression") {
             std::string comp = _parse_argument<std::string>(
-                j_arg, "comparator", exprs
+                j_arg, "comparator", exprs, status
             );
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ValueExpression *left_expr = _parse_argument<ValueExpression*>(
-                j_arg, "left_expression", exprs
+                j_arg, "left_expression", exprs, status
             );
-            if (!left_expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ValueExpression *right_expr = _parse_argument<ValueExpression*>(
-                j_arg, "right_expression", exprs
+                j_arg, "right_expression", exprs, status
             );
-            if (!right_expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ptr = std::make_shared<ComparatorExpression>(
                 ComparatorExpression(comp, left_expr, right_expr)
             );
 
         } else if (type == "ExistentialExpression") {
             std::string variable = _parse_argument<std::string>(
-                j_arg, "variable", exprs
+                j_arg, "variable", exprs, status
             );
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             BoolValueExpression *expr = _parse_argument<BoolValueExpression*>(
-                j_arg, "expression", exprs
+                j_arg, "expression", exprs, status
             );
-            if (!expr) { return bad; }
+            if (status != SUCCESS) {
+                status = FAILURE;
+                return bad;
+            }
+
             ptr = std::make_shared<ExistentialExpression>(
                 ExistentialExpression(variable, expr)
             );
 
         } else {
+
+            status = FAILURE;
             return bad;
         }
 
+        status = SUCCESS;
         exprs.push_back(ptr);
         return ptr.get();
     }
@@ -869,34 +990,55 @@ namespace Synopsis {
 
     Constraint _parse_constraint(
         nlohmann::json &j_constraint,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         Constraint bad = Constraint({}, nullptr, nullptr, 0.0);
 
-        std::string type = _get_obj_type(j_constraint);
-        if (type != "Constraint") {
+        std::string type = _get_obj_type(j_constraint, status);
+        if (status != SUCCESS || type != "Constraint") {
             // TODO: log warning
+            status = FAILURE;
             return bad;
         }
 
         auto variables = _parse_argument<std::vector<std::string>>(
-            j_constraint, "variables", exprs
+            j_constraint, "variables", exprs, status
         );
-        auto application = _parse_argument<BoolValueExpression*>(
-            j_constraint, "application", exprs
-        );
-        auto sum_field = _parse_argument<ValueExpression*>(
-            j_constraint, "sum_field", exprs
-        );
-        auto constraint_value = _parse_argument<double>(
-            j_constraint, "constraint_value", exprs
-        );
-
-        if (!application) {
-            // TODO: bad application expression
+        if (status != SUCCESS) {
+            // TODO: log warning
+            status = FAILURE;
             return bad;
         }
 
+        auto application = _parse_argument<BoolValueExpression*>(
+            j_constraint, "application", exprs, status
+        );
+        if (status != SUCCESS) {
+            // TODO: log warning
+            status = FAILURE;
+            return bad;
+        }
+
+        auto sum_field = _parse_argument<ValueExpression*>(
+            j_constraint, "sum_field", exprs, status
+        );
+        if (status != SUCCESS) {
+            // TODO: log warning
+            status = FAILURE;
+            return bad;
+        }
+
+        auto constraint_value = _parse_argument<double>(
+            j_constraint, "constraint_value", exprs, status
+        );
+        if (status != SUCCESS) {
+            // TODO: log warning
+            status = FAILURE;
+            return bad;
+        }
+
+        status = SUCCESS;
         return Constraint(
             variables, application, sum_field, constraint_value
         );
@@ -906,38 +1048,54 @@ namespace Synopsis {
 
     Rule _parse_rule(
         nlohmann::json &j_rule,
-        std::vector<std::shared_ptr<RuleExpression>> &exprs
+        std::vector<std::shared_ptr<RuleExpression>> &exprs,
+        Status& status
     ) {
         Rule bad = Rule({}, nullptr, nullptr, 0);
 
-        std::string type = _get_obj_type(j_rule);
-        if (type != "Rule") {
+        std::string type = _get_obj_type(j_rule, status);
+        if (status != SUCCESS || type != "Rule") {
             // TODO: log warning
+            status = FAILURE;
             return bad;
         }
 
         auto variables = _parse_argument<std::vector<std::string>>(
-            j_rule, "variables", exprs
+            j_rule, "variables", exprs, status
         );
+        if (status != SUCCESS) {
+            // TODO: log warning
+            status = FAILURE;
+            return bad;
+        }
+
         auto application = _parse_argument<BoolValueExpression*>(
-            j_rule, "application", exprs
+            j_rule, "application", exprs, status
         );
+        if (status != SUCCESS) {
+            // TODO: log warning
+            status = FAILURE;
+            return bad;
+        }
+
         auto adjustment = _parse_argument<ValueExpression*>(
-            j_rule, "adjustment", exprs
+            j_rule, "adjustment", exprs, status
         );
+        if (status != SUCCESS) {
+            // TODO: log warning
+            status = FAILURE;
+            return bad;
+        }
+
         auto max_applications = _parse_argument<int>(
-            j_rule, "max_applications", exprs
+            j_rule, "max_applications", exprs, status
         );
-
-        if (!application) {
-            // TODO: bad application expression
-            return bad;
-        }
-        if (!adjustment) {
-            // TODO: bad adjustment expression
-            return bad;
+        if (status != SUCCESS) {
+            // If there is no max_applications specified, use -1
+            max_applications = -1;
         }
 
+        status = SUCCESS;
         return Rule(
             variables, application, adjustment, max_applications
         );
@@ -950,17 +1108,20 @@ namespace Synopsis {
             nlohmann::json &j_bin,
             std::vector<std::shared_ptr<RuleExpression>> &exprs
     ) {
+        Status status = SUCCESS;
         RuleList rules;
         ConstraintList constraints;
-
-        // TODO: use zero variables to indicate invalid rules, and exclude
-        // these from lists?
 
         // TODO: check for key
         auto j_rules = j_bin["rules"];
         if (j_rules.is_array()) {
             for (auto j_rule : j_rules) {
-                rules.push_back(_parse_rule(j_rule, exprs));
+                Rule rule = _parse_rule(j_rule, exprs, status);
+                if (status == SUCCESS) {
+                    rules.push_back(rule);
+                } else {
+                    // TODO: log error
+                }
             }
         }
 
@@ -968,7 +1129,12 @@ namespace Synopsis {
         auto j_constraints = j_bin["constraints"];
         if (j_constraints.is_array()) {
             for (auto j_constraint : j_constraints) {
-                constraints.push_back(_parse_constraint(j_constraint, exprs));
+                Constraint constraint = _parse_constraint(j_constraint, exprs, status);
+                if (status == SUCCESS) {
+                    constraints.push_back(constraint);
+                } else {
+                    // TODO: log error
+                }
             }
         }
 
