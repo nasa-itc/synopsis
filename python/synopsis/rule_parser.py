@@ -473,3 +473,11 @@ def parse_str(srd_str):
 def parse_file(filename):
     with open(filename, 'r') as f:
         return parse_str(f.read())
+
+
+def get_grammar():
+    lines = []
+    for name, obj in globals().items():
+        if name.startswith('p_') and 'p_error' not in name:
+            lines.append(obj.__doc__.replace(' : ', ' = '))
+    return '\n'.join(lines)
