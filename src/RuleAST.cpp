@@ -390,11 +390,26 @@ namespace Synopsis {
             AsdpList asdps
         ) {
         bool left_value = this->_left_expr->get_value(assignments, asdps);
-        bool right_value = this->_right_expr->get_value(assignments, asdps);
         if (this->_op == "AND") {
-            return left_value && right_value;
+            if (left_value) {
+                // Evaluate right-hand expression only if left-hand expression
+                // evaluates to true
+                return this->_right_expr->get_value(assignments, asdps);
+            } else {
+                // If left-hand expression evaluates to false; short circuit
+                // expression evaluation
+                return false;
+            }
         } else if (this->_op == "OR") {
-            return left_value || right_value;
+            if (left_value) {
+                // If left-hand expression evaluates to true; short circuit
+                // expression evaluation
+                return true;
+            } else {
+                // Evaluate right-hand expression only if left-hand expression
+                // evaluates to false
+                return this->_right_expr->get_value(assignments, asdps);
+            }
         } else {
             // TODO: Log error
             return false;
