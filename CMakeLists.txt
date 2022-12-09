@@ -48,6 +48,18 @@ install(TARGETS synopsis
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
+# CLI
+
+add_executable(
+  synopsis_cli
+  bin/synopsis_cli.cpp
+)
+target_include_directories(synopsis_cli PRIVATE include)
+target_link_libraries(
+  synopsis_cli
+  synopsis
+)
+
 # Unit Testing
 
 enable_testing()
