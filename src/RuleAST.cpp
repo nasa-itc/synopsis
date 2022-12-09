@@ -1144,6 +1144,11 @@ namespace Synopsis {
 
     RuleSet parse_rule_config(std::string config_file) {
 
+        // If no config file provided, return default configuration
+        if (config_file.size() == 0) {
+            return RuleSet();
+        }
+
         std::ifstream file_input(config_file);
         auto j = nlohmann::json::parse(file_input);
 
