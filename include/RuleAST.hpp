@@ -13,6 +13,7 @@
 #include <vector>
 #include <map>
 #include <utility>
+#include <memory>
 
 #include "synopsis_types.hpp"
 #include "DpDbMsg.hpp"

@@ -10,6 +10,7 @@
 #define JPL_SYNOPSIS_DpDbMsg
 #include <string>
 #include <map>
+#include <vector>
 
 #include "synopsis_types.hpp"
 
