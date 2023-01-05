@@ -38,13 +38,20 @@ int main(int argc, char** argv) {
     );
     if (status != Synopsis::Status::SUCCESS) { return status; }
 
+    std::vector<std::string> prioritized_uris;
+    for (auto i : prioritized_list) {
+        Synopsis::DpDbMsg msg;
+        app.get_data_product(i, msg);
+        prioritized_uris.push_back(msg.get_uri());
+    }
+
     status = app.deinit();
     if (status != Synopsis::Status::SUCCESS) { return status; }
 
     std::ofstream out(output_file);
     if (out.is_open()) {
-        for (auto i : prioritized_list) {
-            out << i << std::endl;
+        for (auto uri : prioritized_uris) {
+            out << uri << std::endl;
         }
         out.close();
     } else {
