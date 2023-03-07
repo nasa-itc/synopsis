@@ -58,6 +58,7 @@ target_include_directories(synopsis_cli PRIVATE include)
 target_link_libraries(
   synopsis_cli
   synopsis
+  pthread
 )
 
 # Unit Testing
