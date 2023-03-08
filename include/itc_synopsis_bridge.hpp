@@ -1,9 +1,7 @@
 #ifndef __ITC_SYNOPSIS_BRIDGE_HPP__
 #define __ITC_SYNOPSIS_BRIDGE_HPP__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <gtest/gtest.h>
 #include <cmath>
 #include "synopsis.hpp"
 #include "SqliteASDPDB.hpp"
@@ -14,22 +12,20 @@ extern "C" {
 #include "RuleAST.hpp"
 #include "StdLogger.hpp"
 
-struct itc_asds;
-typedef struct itc_asds itc_asds_t;
-itc_asds_t *itc_asds_create();
-int itc_asds_invocations(itc_asds_t *itc_asds);
-
-struct itc_app;
-typedef struct itc_app itc_app_t;
-itc_app_t *itc_app_create();
-void itc_app_add(itc_app_t *itc_app, itc_asds_t *itc_asds, std::string instrument_name);
-void itc_app_add(itc_app_t *itc_app, itc_asds_t *itc_asds, std::string instrument_name, std::string dp_type);
-size_t itc_app_memory_requirement(itc_app_t *itc_app);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 struct itc_dpmsg;
 typedef struct itc_dpmsg itc_dpmsg_t;
-itc_dpmsg_t *itc_dpmsg_create();
-itc_dpmsg_t *itc_dpmsg_create(std::string instrument_name, std::string dp_type, std::string dp_uri, std::string meta_uri, bool meta_usage);
+itc_dpmsg_t* itc_create_dpmsg(std::string instrument_name, std::string dp_type,
+                std::string dp_uri, std::string meta_uri, bool meta_usage);
+void itc_setup_testasds();
+void itc_setup_ptasds();
+size_t itc_app_get_memory_requiremennt();
+void itc_app_init(size_t bytes, void* memory);
+int itc_app_get_invocations();
+void itc_app_accept_dpmsg();
 
 #ifdef __cplusplus
 }

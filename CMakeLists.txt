@@ -68,6 +68,7 @@ enable_testing()
 add_executable(
   synopsis_test
   test/synopsis_test.cpp
+  test/itc_synopsis_test.cpp
 )
 target_include_directories(synopsis_test PRIVATE include)
 target_link_libraries(
