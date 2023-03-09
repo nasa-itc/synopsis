@@ -19,8 +19,11 @@ build-synopsis-job:
     - mkdir build
     - pwd
     - ls
-    - cmake /builds/ITC/synopsis/synopsis -B /builds/ITC/synopsis/synopsis/build
-    - cmake --build /builds/ITC/synopsis/synopsis/build
+    - cd build
+    - cmake ..
+    #- cmake /builds/ITC/synopsis/synopsis -B /builds/ITC/synopsis/synopsis/build
+    #- cmake --build /builds/ITC/synopsis/synopsis/build
+    - make 
 
 test-synopsis-job:
   stage: test
