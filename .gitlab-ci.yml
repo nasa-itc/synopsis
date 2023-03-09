@@ -18,8 +18,8 @@ build-synopsis-job:
     - pwd
     - mkdir build
     - ls
-    - cmake -S . -B build
-    - cmake --build build
+    - cmake -S . -B ./build
+    - cmake --build ./build
 
 test-synopsis-job:
   stage: test
