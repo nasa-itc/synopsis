@@ -4,6 +4,9 @@ variables:
   GIT_SSL_NO_VERIFY: "true"
   CI_PROJECT_URL: "https://jstarbuild.ivv.nasa.gov"
 
+default:
+  image: ubuntu:latest
+
 stages:
   - build
   - test
