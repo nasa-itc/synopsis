@@ -17,12 +17,6 @@ build-synopsis-job:
     - apt-get install cmake -y
     - mkdir build
     - ls
-    - cd build
-    - ls
-    - cmake ../ .
-    - ls
-    - make
-    - ls
     - cmake -S . -B build
     - cmake --build build
 
