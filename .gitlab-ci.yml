@@ -13,6 +13,7 @@ build-synopsis-job:
   tags:
     - itc-inp
   script:
+    - apt update
     - apt-get install cmake -y
     - ls
     - cmake -S . -B build
