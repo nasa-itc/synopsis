@@ -17,8 +17,9 @@ build-synopsis-job:
     - apt-get install cmake -y
     - pwd
     - mkdir build
+    - pwd
     - ls
-    - cmake -S . -B ./build
+    - cmake . -B ./build
     - cmake --build ./build
 
 test-synopsis-job:
