@@ -8,11 +8,10 @@ default:
   image: ubuntu:latest
 
 stages:
-  - build
-  - test
+  - build_and_test
 
 build-and-test-synopsis:
-  stage: build
+  stage: build_and_test
   tags:
     - itc-inp
   script:
