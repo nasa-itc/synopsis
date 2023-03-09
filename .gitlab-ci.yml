@@ -9,8 +9,18 @@ stages:
   - test
 
 build-synopsis-job:
-    stage: build
-    tags:
-      - itc-inp
-    script:
-        - ls
+  stage: build
+  tags:
+    - itc-inp
+  script:
+    - apt-get install cmake -y
+    - ls
+    - cmake -S . -B build
+    - cmake --build build
+
+test-synopsis-job:
+  stage: test
+  script:
+    - cd build && ctest
+
+
