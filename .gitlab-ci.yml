@@ -17,7 +17,7 @@ build-synopsis-job:
     - itc-inp
   script:
     - apt update
-    - apt-get install cmake -y
+    - apt-get install cmake g++ make -y
     - pwd
     - mkdir build
     - pwd
