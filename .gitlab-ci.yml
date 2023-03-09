@@ -11,26 +11,18 @@ stages:
   - build
   - test
 
-build-synopsis-job:
+build-and-test-synopsis:
   stage: build
   tags:
     - itc-inp
   script:
     - apt update
     - apt-get install cmake g++ make -y
-    - pwd
     - mkdir build
-    - pwd
-    - ls
     - cd build
     - cmake ..
-    #- cmake /builds/ITC/synopsis/synopsis -B /builds/ITC/synopsis/synopsis/build
-    #- cmake --build /builds/ITC/synopsis/synopsis/build
     - make 
+    - make test
 
-test-synopsis-job:
-  stage: test
-  script:
-    - cd /builds/ITC/synopsis/synopsis/build && ctest
 
 
