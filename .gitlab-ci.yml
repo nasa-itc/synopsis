@@ -10,5 +10,7 @@ stages:
 
 build-synopsis-job:
     stage: build
+    tags:
+      - itc-inp
     script:
         - ls
