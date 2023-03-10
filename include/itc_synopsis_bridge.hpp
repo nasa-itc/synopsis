@@ -26,6 +26,22 @@ size_t itc_app_get_memory_requiremennt();
 void itc_app_init(size_t bytes, void* memory);
 int itc_app_get_invocations();
 void itc_app_accept_dpmsg();
+//void itc_app_accept_dpmsg(itc_dpmsg_t* msg);
+
+
+struct itc_dbdpmsg;
+typedef struct itc_dbdpmsg itc_dbdpmsg_t;
+
+typedef std::map <std::string, Synopsis::DpMetadataValue> Map;
+
+struct itc_dpmetavalue;
+typedef struct itc_dpmetavalue itc_dpmetavalue_t;
+
+struct itc_node;
+typedef struct itc_node itc_node_t;
+
+struct itc_dpids;
+typedef struct itc_dpids itc_dpids_t;
 
 #ifdef __cplusplus
 }
