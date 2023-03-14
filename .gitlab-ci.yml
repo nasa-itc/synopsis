@@ -16,7 +16,7 @@ build-and-test-synopsis:
     - itc-inp
   script:
     - apt update
-    - apt-get install software-properties-common
+    - apt-get install software-properties-common -y
     - apt-add-repository http://us.archive.ubunut.com/ubuntu
     - apt-get install cmake g++ g++-multilib gcc-multilib sqlite3 libsqllite3-dev libsqllite3-dev:i386 sqlite3:i386 make -y
     - mkdir build
