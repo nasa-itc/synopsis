@@ -6,6 +6,11 @@
 
 //msg.get functions?
 
+typedef enum {
+    E_SUCCESS = 0,
+    E_FAILURE = 1,
+    E_TIMEOUT = 2
+ }ITC_STATUS_MESSAGE;
 
 class TestASDS : public Synopsis::ASDS {
 
@@ -43,10 +48,11 @@ Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
 Synopsis::Application app(&db, &planner, &logger, &clock2);
 void* memory = malloc(128);
 
-void itc_setup_testasds(){
+int itc_setup_testasds(){
     Synopsis::Status status;
     status = app.add_asds("test_instrument", &itc_asds);
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    return status;
 }
 
 void itc_setup_ptasds(){
@@ -109,7 +115,7 @@ struct itc_dpmetavalue{
     Synopsis::DpMetadataValue *obj;
 };
 
-itc_dpmetavalue_t* itc_create_dpmetadatavalue(int int_value){
+itc_dpmetavalue_t* itc_create_dpmetadatavalue_int(int int_value){
     itc_dpmetavalue_t *value;
     Synopsis::DpMetadataValue *obj;
 
@@ -120,7 +126,7 @@ itc_dpmetavalue_t* itc_create_dpmetadatavalue(int int_value){
     return value;
 }
 
-itc_dpmetavalue_t* itc_create_dpmetadatavalue(double float_value){
+itc_dpmetavalue_t* itc_create_dpmetadatavalue_float(double float_value){
     itc_dpmetavalue_t *value;
     Synopsis::DpMetadataValue *obj;
 
@@ -131,7 +137,7 @@ itc_dpmetavalue_t* itc_create_dpmetadatavalue(double float_value){
     return value;
 }
 
-itc_dpmetavalue_t* itc_create_dpmetadatavalue(char* string_value){
+itc_dpmetavalue_t* itc_create_dpmetadatavalue_string(char* string_value){
     itc_dpmetavalue_t *value;
     Synopsis::DpMetadataValue *obj;
 
@@ -259,7 +265,7 @@ void itc_db_insert_dumb_data_product(){
     EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
-void itc_app_accept_dpmsg(){
+void itc_app_accept_dumb_dpmsg(){
     Synopsis::Status status;
     Synopsis::DpMsg msg(
         "test_instrument", "test_type",
@@ -343,10 +349,10 @@ TEST(SynopsisTest, TestCWrapper){
     itc_app_init(mem_req_bytes, memory);
     EXPECT_EQ(0, itc_app_get_invocations());
 
-    itc_app_accept_dpmsg();
+    itc_app_accept_dumb_dpmsg();
     EXPECT_EQ(1, itc_app_get_invocations());
     
-    itc_app_accept_dpmsg();
+    itc_app_accept_dumb_dpmsg();
     EXPECT_EQ(2, itc_app_get_invocations());
 
     itc_dpmsg_t *temp_dpmsg = itc_create_dpmsg((char *)"test_instrument", (char *)"test_type", (char *)"file::///data/file.dat", (char *)"file::///data/meta.dat", true);
@@ -354,9 +360,9 @@ TEST(SynopsisTest, TestCWrapper){
     EXPECT_EQ(3, itc_app_get_invocations());
 
     itc_node_t *start = NULL;
-    itc_node_push(start, (char *)"test_int", itc_create_dpmetadatavalue(123));
-    itc_node_push(start, (char *)"test_float", itc_create_dpmetadatavalue(123.456));
-    itc_node_push(start, (char *)"test_string", itc_create_dpmetadatavalue((char *)"test"));
+    itc_node_push(start, (char *)"test_int", itc_create_dpmetadatavalue_int(123));
+    itc_node_push(start, (char *)"test_float", itc_create_dpmetadatavalue_float(123.456));
+    itc_node_push(start, (char *)"test_string", itc_create_dpmetadatavalue_string((char *)"test"));
 
     itc_db_init(0, NULL);
 

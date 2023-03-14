@@ -1,5 +1,12 @@
  #include "itc_synopsis_bridge.hpp"
 
+ typedef enum {
+    E_SUCCESS = 0,
+    E_FAILURE = 1,
+    E_TIMEOUT = 2
+ }ITC_STATUS_MESSAGE;
+
+
 // TODO:  Full remove Expects - work in if and throws?
 
  class TestASDS : public Synopsis::ASDS {
@@ -72,9 +79,15 @@ struct itc_dpids{
  * ITC Function for setup of the TEST ASDS Class
  * @return: VOID
 */
-void itc_setup_testasds(){
+int itc_setup_testasds(){
     Synopsis::Status status;
     status = app.add_asds("test_instrument", &itc_asds);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
+    if (result != ITC_STATUS_MESSAGE::E_SUCCESS){
+        // TODO:  How would we like to handle these situations?
+        //        Do we just want to use status instead with no extras?
+    }
+    return result;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -85,6 +98,7 @@ void itc_setup_testasds(){
 void itc_setup_ptasds(){
     Synopsis::Status status;
     status = app.add_asds("test_instrument", "type", &pt_asds);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -108,6 +122,7 @@ size_t itc_app_get_memory_requiremennt(){
 void itc_app_init(size_t bytes, void* memory){ // Remember to free memory
     Synopsis::Status status;
     status = app.init(bytes, memory);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -121,6 +136,7 @@ void itc_app_deinit(){
     Synopsis::Status status;
     status = app.deinit();
     free(memory);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -245,7 +261,7 @@ void itc_node_push(itc_node_t* head, char* word, itc_dpmetavalue_t* metavalue){
 /**
  * ITC Function to create DPDBMsg
  * Utilizes Const Char* - Issue?  Maybe?
- * @return: itc-dbdpmsg_t* Structure hodling the DpDbMsg object
+ * @return: itc-dbdpmsg_t* Structure holding the DpDbMsg object
  * TODO:  Is there an issue with this function?
 */
 itc_dbdpmsg_t* itc_create_dbdpmsg(int dp_id, const char* instrument_name, const char* dp_type, const char* dp_uri, size_t dp_size, double science_utility_estimate, int priority_bin, int downlink_state, itc_node_t* meta_node){
@@ -306,6 +322,7 @@ itc_dbdpmsg_t* itc_create_dbdpmsg(int dp_id, const char* instrument_name, const 
 void itc_db_init(size_t bytes, void* memory){
     Synopsis::Status status;
     status = db.init(bytes, memory, &logger);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -325,6 +342,7 @@ void itc_db_insert_dumb_data_product(){
         }
     );
     status = db.insert_data_product(msg);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -332,7 +350,7 @@ void itc_db_insert_dumb_data_product(){
  * ITC Function for accepting dumb dpmsg for testing
  * @return: VOID
 */
-void itc_app_accept_dpmsg(){
+void itc_app_accept_dumb_dpmsg(){
     Synopsis::Status status;
     Synopsis::DpMsg msg(
         "test_instrument", "test_type",
@@ -342,6 +360,7 @@ void itc_app_accept_dpmsg(){
     );
 
     status = app.accept_dp(msg);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -353,6 +372,7 @@ void itc_app_accept_dpmsg(){
 void itc_app_accept_dpmsg(itc_dpmsg_t* msg){
     Synopsis::Status status;
     status = app.accept_dp(*(msg->obj));
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -363,6 +383,7 @@ void itc_app_accept_dpmsg(itc_dpmsg_t* msg){
 void itc_db_insert_data_product(itc_dbdpmsg_t *msg){
     Synopsis::Status status;
     status = db.insert_data_product(*(msg->obj));
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -410,6 +431,7 @@ itc_dbdpmsg_t* itc_db_get_data_product(int id, itc_dbdpmsg_t *msg){
     //msg = (typeof(msg))malloc(sizeof(*msg));
     Synopsis::DpDbMsg temp_msg2;
     status = db.get_data_product(id, temp_msg2);
+    ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
 
     printf("MESSAGE2: %s\n", temp_msg2.get_instrument_name().c_str());
     msg->obj = &temp_msg2;   
