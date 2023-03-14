@@ -17,7 +17,7 @@ build-and-test-synopsis:
   script:
     - dpkg --add-architecture i386
     - apt update
-    - apt-get install cmake g++ g++-multilib gcc-multilib sqlite3 libsqlite3-dev libsqlite3-dev:i386 sqlite3:i386 make -y
+    - apt-get install cmake g++ g++-multilib gcc-multilib libsqlite3-dev:i386 sqlite3:i386 make -y
     - mkdir build
     - cd build
     - cmake ..
