@@ -16,7 +16,7 @@ build-and-test-synopsis:
     - itc-inp
   script:
     - apt update
-    - apt-get install cmake g++ g++-multilib gcc-multilib make -y
+    - apt-get install cmake g++ g++-multilib gcc-multilib sqlite3:i386 make -y
     - mkdir build
     - cd build
     - cmake ..

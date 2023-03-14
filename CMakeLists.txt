@@ -3,7 +3,8 @@ project(synopsis VERSION 0.8.0 DESCRIPTION "Science Yield improvemeNt via Onboar
 
 # GoogleTest requires at least C++11
 set(CMAKE_CXX_STANDARD 11)
-set (CMAKE_CXX_FLAGS "-Wnon-virtual-dtor -m32")
+set(CMAKE_CXX_FLAGS "-Wnon-virtual-dtor -m32")
+set(CMAKE_C_FLAGS "-m32")
 
 include(FetchContent)
 FetchContent_Declare(

@@ -64,7 +64,7 @@ void itc_setup_ptasds(){
 size_t itc_app_get_memory_requiremennt(){
     size_t mem_req_bytes = 0;
     mem_req_bytes = app.memory_requirement();        
-    printf("REQ Bytes: %ld\n", mem_req_bytes);
+    printf("REQ Bytes: %d\n", mem_req_bytes);
     return mem_req_bytes;
 }
 
