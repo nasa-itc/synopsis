@@ -16,7 +16,7 @@ build-and-test-synopsis:
     - itc-inp
   script:
     - apt update
-    - apt-get install cmake g++ make -y
+    - apt-get install cmake g++ g++-multilib gcc-multilib make -y
     - mkdir build
     - cd build
     - cmake ..
