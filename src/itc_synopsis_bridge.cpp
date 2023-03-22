@@ -1,4 +1,14 @@
- #include "itc_synopsis_bridge.hpp"
+ #include "itc_synopsis_bridge.h"
+
+#include "synopsis.hpp"
+#include "SqliteASDPDB.hpp"
+#include "StdLogger.hpp"
+#include "LinuxClock.hpp"
+#include "MaxMarginalRelevanceDownlinkPlanner.hpp"
+#include "Timer.hpp"
+#include "RuleAST.hpp"
+#include "StdLogger.hpp"
+#include <cstring>
 
  typedef enum {
     E_SUCCESS = 0,
@@ -6,6 +16,10 @@
     E_TIMEOUT = 2
  }ITC_STATUS_MESSAGE;
 
+typedef std::map <std::string, Synopsis::DpMetadataValue> Map;
+#ifdef __cplusplus
+extern "C"   {
+#endif
 
 // TODO:  Full remove Expects - work in if and throws?
 
@@ -87,6 +101,7 @@ int itc_setup_testasds(){
         // TODO:  How would we like to handle these situations?
         //        Do we just want to use status instead with no extras?
     }
+    printf("itc_setup_testasds complete\n");
     return result;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
@@ -177,7 +192,7 @@ itc_dpmsg_t* itc_create_dpmsg(char* instrument_name, char* dp_type, char* dp_uri
  * ITC Function for creating a dpmetadata value
  * @return itc_dpmetavalue_t* - holds the dpmetadatavalue - INT Variant
 */
-itc_dpmetavalue_t* itc_create_dpmetadatavalue(int int_value){
+itc_dpmetavalue_t* itc_create_dpmetadatavalue_int(int int_value){
     itc_dpmetavalue_t *value;
     Synopsis::DpMetadataValue *obj;
 
@@ -192,7 +207,7 @@ itc_dpmetavalue_t* itc_create_dpmetadatavalue(int int_value){
  * ITC Function for creating a dpmetadata value
  * @return itc_dpmetavalue_t* - holds the dpmetadatavalue - FLOAT Variant
 */
-itc_dpmetavalue_t* itc_create_dpmetadatavalue(double float_value){
+itc_dpmetavalue_t* itc_create_dpmetadatavalue_float(double float_value){
     itc_dpmetavalue_t *value;
     Synopsis::DpMetadataValue *obj;
 
@@ -207,7 +222,7 @@ itc_dpmetavalue_t* itc_create_dpmetadatavalue(double float_value){
  * ITC Function for creating a dpmetadata value
  * @return itc_dpmetavalue_t* - holds the dpmetadatavalue - STRING Variant
 */
-itc_dpmetavalue_t* itc_create_dpmetadatavalue(char* string_value){
+itc_dpmetavalue_t* itc_create_dpmetadatavalue_string(char* string_value){
     itc_dpmetavalue_t *value;
     Synopsis::DpMetadataValue *obj;
 
@@ -441,3 +456,6 @@ itc_dbdpmsg_t* itc_db_get_data_product(int id, itc_dbdpmsg_t *msg){
     return msg;  
 }
 
+#ifdef __cplusplus
+}
+#endif

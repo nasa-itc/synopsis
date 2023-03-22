@@ -1,20 +1,14 @@
-#ifndef __ITC_SYNOPSIS_BRIDGE_HPP__
-#define __ITC_SYNOPSIS_BRIDGE_HPP__
-
-#include <gtest/gtest.h>
-#include <cmath>
-#include "synopsis.hpp"
-#include "SqliteASDPDB.hpp"
-#include "StdLogger.hpp"
-#include "LinuxClock.hpp"
-#include "MaxMarginalRelevanceDownlinkPlanner.hpp"
-#include "Timer.hpp"
-#include "RuleAST.hpp"
-#include "StdLogger.hpp"
+// #ifndef __ITC_SYNOPSIS_BRIDGE_H__
+// #define __ITC_SYNOPSIS_BRIDGE_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+//#include <gtest/gtest.h>
+///#include <cmath>
+
+#include <stdlib.h>
 
 struct itc_dpmsg;
 typedef struct itc_dpmsg itc_dpmsg_t;
@@ -22,7 +16,6 @@ typedef struct itc_dpmsg itc_dpmsg_t;
 struct itc_dbdpmsg;
 typedef struct itc_dbdpmsg itc_dbdpmsg_t;
 
-typedef std::map <std::string, Synopsis::DpMetadataValue> Map;
 
 struct itc_dpmetavalue;
 typedef struct itc_dpmetavalue itc_dpmetavalue_t;
@@ -43,13 +36,12 @@ int itc_app_get_invocations();
 void itc_app_accept_dumb_dpmsg();
 void itc_app_accept_dpmsg(itc_dpmsg_t* msg);
 
-itc_dpmsg_t* itc_create_dpmsg(std::string instrument_name, std::string dp_type,
-                std::string dp_uri, std::string meta_uri, bool meta_usage);
+itc_dpmsg_t* itc_create_dpmsg(char* instrument_name, char* dp_type, char* dp_uri, char* meta_uri, bool meta_usage);
 int itc_msg_get_dp_id(itc_dbdpmsg_t * msg);
 const char* itc_msg_get_instrument_name(itc_dbdpmsg_t* msg);
 
 itc_dpmetavalue_t* itc_create_dpmetadatavalue_int(int int_value);
-itc_dpmetavalue_t* itc_create_dpmetadatavalue_float(float float_value);
+itc_dpmetavalue_t* itc_create_dpmetadatavalue_float(double float_value);
 itc_dpmetavalue_t* itc_create_dpmetadatavalue_string(char* string_value);
 
 //Not In Use
@@ -73,4 +65,4 @@ itc_dbdpmsg_t* itc_db_get_data_product(int id, itc_dbdpmsg_t *msg);
 }
 #endif
 
-#endif /* __ITC_SYNOPSIS_BRIDGE_HPP__*/
+//#endif /* __ITC_SYNOPSIS_BRIDGE_HPP__*/

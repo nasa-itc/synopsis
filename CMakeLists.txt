@@ -37,6 +37,7 @@ add_library(synopsis SHARED
     src/DownlinkPlanner.cpp
     src/MaxMarginalRelevanceDownlinkPlanner.cpp
     src/Similarity.cpp
+    src/itc_synopsis_bridge.cpp
 )
 set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)
