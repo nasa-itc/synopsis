@@ -37,6 +37,7 @@ add_library(synopsis SHARED
     src/DownlinkPlanner.cpp
     src/MaxMarginalRelevanceDownlinkPlanner.cpp
     src/Similarity.cpp
+    src/itc_synopsis_bridge.cpp
 )
 set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)
@@ -82,3 +83,6 @@ include(GoogleTest)
 gtest_discover_tests(synopsis_test PROPERTIES ENVIRONMENT
   "SYNOPSIS_TEST_DATA=${CMAKE_CURRENT_LIST_DIR}/test/data"
 )
+
+message("!!!!!!!!!!! ${FSWBUILDDIR}/exe/cpu1/cf/")
+install(TARGETS synopsis DESTINATION ${CMAKE_INSTALL_PREFIX}/cpu${TGTSYS_${SYSVAR}}/${INSTALL_SUBDIR})
