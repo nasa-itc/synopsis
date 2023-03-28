@@ -17,8 +17,6 @@
  }ITC_STATUS_MESSAGE;
 
 typedef std::map <std::string, Synopsis::DpMetadataValue> Map;
-
-
 // TODO:  Full remove Expects - work in if and throws?
 
  class TestASDS : public Synopsis::ASDS {
