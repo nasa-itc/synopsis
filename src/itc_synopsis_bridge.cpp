@@ -80,10 +80,10 @@ struct itc_node {
 };
 
 // ITC Struct for holding the conversion from Vector
-struct itc_dpids{
-    int* values;
-    int size;
-};
+// struct itc_dpids{
+//     int* values;
+//     int size;
+// };
 
 /**
  * ITC Function for setup of the TEST ASDS Class
@@ -157,7 +157,7 @@ void itc_app_deinit(){
 */
 int itc_app_get_invocations(){
     int invocations = itc_asds.invocations;
-    printf("INVOCATIONS: %d\n", invocations);
+    //printf("INVOCATIONS: %d\n", invocations);
     return invocations;
 }
 
@@ -265,7 +265,7 @@ void itc_node_push(itc_node_t* head, char* word, itc_dpmetavalue_t* metavalue){
     strcpy(current->value_type, word);
     current->meta_data_value = metavalue;
     //printf("Word to be inserted %s\n", word);
-    printf("Word Inserted: %s\n", (char *)current->value_type);
+    //printf("Word Inserted: %s\n", (char *)current->value_type);
     current->next = NULL;
 }
 
@@ -315,7 +315,7 @@ itc_dbdpmsg_t* itc_create_dbdpmsg(int dp_id, const char* instrument_name, const 
         default:
             printf("This is an invalid downlink state must be 0-2!\n");
     }
-    printf("Tis is a test: %s\n", instrument_name);
+    //printf("Tis is a test: %s\n", instrument_name);
     std::string inst_name(instrument_name);
     std::string dptype(dp_type);
     std::string dpuri(dp_uri);
@@ -335,6 +335,12 @@ void itc_db_init(size_t bytes, void* memory){
     status = db.init(bytes, memory, &logger);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    if(result == E_SUCCESS){
+        printf("ITC DB INIT SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC DB INIT UNSUCCESSFUL!\n");
+    }
 }
 
 /**
@@ -372,6 +378,12 @@ void itc_app_accept_dumb_dpmsg(){
 
     status = app.accept_dp(msg);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
+    if(result == E_SUCCESS){
+        printf("ITC ACCEPT DUMB DPMSG SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC ACCEPT DUMB DPMSG UNSUCCESSFUL!\n");
+    }
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -384,6 +396,12 @@ void itc_app_accept_dpmsg(itc_dpmsg_t* msg){
     Synopsis::Status status;
     status = app.accept_dp(*(msg->obj));
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
+    if(result == E_SUCCESS){
+        printf("ITC ACCEPT DPMSG SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC ACCEPT DPMSG UNSUCCESSFUL!\n");
+    }
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -395,6 +413,12 @@ void itc_db_insert_data_product(itc_dbdpmsg_t *msg){
     Synopsis::Status status;
     status = db.insert_data_product(*(msg->obj));
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
+    if(result == E_SUCCESS){
+        printf("ITC DB INSERT DP SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC DB INSERT DP UNSUCCESSFUL!\n");
+    }
     //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
@@ -404,7 +428,7 @@ void itc_db_insert_data_product(itc_dbdpmsg_t *msg){
  * @return: INT
 */
 int itc_msg_get_dp_id(itc_dbdpmsg_t * msg){
-    Synopsis::DpDbMsg *tempdbmsg = static_cast<Synopsis::DpDbMsg *>(msg->obj);
+    Synopsis::DpDbMsg *tempdbmsg = msg->obj;
     return tempdbmsg->get_dp_id();
 }
 
@@ -412,16 +436,41 @@ int itc_msg_get_dp_id(itc_dbdpmsg_t * msg){
  * ITC Function to retreive the instrument name from a message
  * @param[in] msg: itc_dpdbmsg_t* from which to retreive the instrument name
  * @return const char* - The instrument Name
- * TODO:  Cause of issues?
 */
-const char* itc_msg_get_instrument_name(itc_dbdpmsg_t* msg){
+char* itc_msg_get_instrument_name(itc_dbdpmsg_t* msg){
     Synopsis::DpDbMsg *tempdbmsg = static_cast<Synopsis::DpDbMsg *>(msg->obj);
     std::string str = (tempdbmsg->get_instrument_name());
-    printf("RB: %s\n", str.c_str());
-    const char* retval = str.c_str();
+    printf("ITC Instrument Name: %s\n", str.c_str());
+    char* retval = const_cast<char *>(str.c_str());
     return retval;
 }
 
+// char* itc_msg_get_type(itc_dbdpmsg_t* msg){
+//     Synopsis::DpDbMsg *tempdbmsg = static_cast<Synopsis::DpDbMsg *>(msg->obj);
+//     std::string str = (tempdbmsg->get_type());
+//     char* retval = str.c_str();
+//     printf("ITC Instrument Type: %s\n", str);
+//     return retval; 
+// }
+void itc_assert_equality_dbdpmsg(itc_dbdpmsg_t* msg1, itc_dbdpmsg_t* msg2){
+    Synopsis::DpDbMsg *syn_msg1 = msg1->obj;
+    Synopsis::DpDbMsg *syn_msg2 = msg2->obj;
+
+    printf("1: %d\n", syn_msg1->get_dp_id());
+    //printf("2: %d\n", syn_msg2->get_dp_id());
+    // std::printf("1: %s\n", syn_msg1->get_instrument_name().c_str());
+    // std::printf("2: %s\n", syn_msg2->get_instrument_name().c_str());
+    
+    // EXPECT_EQ(msg.get_dp_id(), msg2.get_dp_id());
+    // EXPECT_EQ(msg.get_instrument_name(), msg2.get_instrument_name());
+    // EXPECT_EQ(msg.get_type(), msg2.get_type());
+    // EXPECT_EQ(msg.get_uri(), msg2.get_uri());
+    // EXPECT_EQ(msg.get_dp_size(), msg2.get_dp_size());
+    // EXPECT_EQ(msg.get_science_utility_estimate(),
+    //     msg2.get_science_utility_estimate());
+    // EXPECT_EQ(msg.get_priority_bin(), msg2.get_priority_bin());
+    // EXPECT_EQ(msg.get_downlink_state(), msg2.get_downlink_state());
+}
 
 //TODO -- Not sure what problem is being caused by this wrapping.  Requires some investigation
 
@@ -436,18 +485,26 @@ itc_dpids_t *itc_db_list_data_product_ids(){
     return array;
 }
 
-//FREE ME (When, Where, should this be reworked?)
-itc_dbdpmsg_t* itc_db_get_data_product(int id, itc_dbdpmsg_t *msg){
+//FREE ME 
+itc_dbdpmsg_t* itc_db_get_data_product(int id){
     Synopsis::Status status;
-    //msg = (typeof(msg))malloc(sizeof(*msg));
+    itc_dbdpmsg_t* msg = (typeof(msg))malloc(sizeof(*msg));
     Synopsis::DpDbMsg temp_msg2;
     status = db.get_data_product(id, temp_msg2);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
-
+    if(result == E_SUCCESS){
+        printf("ITC GET DB DP SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC GET DB DP UNSUCCESSFUL!\n");
+    }
     printf("MESSAGE2: %s\n", temp_msg2.get_instrument_name().c_str());
-    msg->obj = &temp_msg2;   
-
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);  
-
+    printf("MESSAGE2: %s\n", temp_msg2.get_type().c_str());
+    msg->obj = &(temp_msg2); 
     return msg;  
+}
+
+void random_test(itc_dbdpmsg_t* msg){
+    Synopsis::DpDbMsg *syn_msg = static_cast<Synopsis::DpDbMsg *>(msg->obj);
+    printf("ITC_TEST: %s\n", syn_msg->get_instrument_name().c_str());
 }

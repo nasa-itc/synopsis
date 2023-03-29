@@ -26,6 +26,11 @@ typedef struct itc_node itc_node_t;
 struct itc_dpids;
 typedef struct itc_dpids itc_dpids_t;
 
+struct itc_dpids{
+    int* values;
+    int size;
+};
+
 int itc_setup_testasds();
 void itc_setup_ptasds();
 
@@ -38,7 +43,9 @@ void itc_app_accept_dpmsg(itc_dpmsg_t* msg);
 
 itc_dpmsg_t* itc_create_dpmsg(char* instrument_name, char* dp_type, char* dp_uri, char* meta_uri, bool meta_usage);
 int itc_msg_get_dp_id(itc_dbdpmsg_t * msg);
-const char* itc_msg_get_instrument_name(itc_dbdpmsg_t* msg);
+void itc_assert_equality_dbdpmsg(itc_dbdpmsg_t* msg1, itc_dbdpmsg_t* msg2);
+char* itc_msg_get_instrument_name(itc_dbdpmsg_t* msg);
+char* itc_msg_get_type(itc_dbdpmsg_t* msg);
 
 itc_dpmetavalue_t* itc_create_dpmetadatavalue_int(int int_value);
 itc_dpmetavalue_t* itc_create_dpmetadatavalue_float(double float_value);
@@ -55,8 +62,8 @@ void itc_db_insert_dumb_data_product();
 void itc_db_insert_data_product(itc_dbdpmsg_t *msg);
 
 itc_dpids_t *itc_db_list_data_product_ids();
-itc_dbdpmsg_t* itc_db_get_data_product(int id, itc_dbdpmsg_t *msg);
-
+itc_dbdpmsg_t* itc_db_get_data_product(int id);
+void random_test(itc_dbdpmsg_t* msg);
 
 
 
