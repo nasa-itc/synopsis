@@ -445,34 +445,15 @@ char* itc_msg_get_instrument_name(itc_dbdpmsg_t* msg){
     return retval;
 }
 
-// char* itc_msg_get_type(itc_dbdpmsg_t* msg){
-//     Synopsis::DpDbMsg *tempdbmsg = static_cast<Synopsis::DpDbMsg *>(msg->obj);
-//     std::string str = (tempdbmsg->get_type());
-//     char* retval = str.c_str();
-//     printf("ITC Instrument Type: %s\n", str);
-//     return retval; 
-// }
-void itc_assert_equality_dbdpmsg(itc_dbdpmsg_t* msg1, itc_dbdpmsg_t* msg2){
-    Synopsis::DpDbMsg *syn_msg1 = msg1->obj;
-    Synopsis::DpDbMsg *syn_msg2 = msg2->obj;
-
-    printf("1: %d\n", syn_msg1->get_dp_id());
-    //printf("2: %d\n", syn_msg2->get_dp_id());
-    // std::printf("1: %s\n", syn_msg1->get_instrument_name().c_str());
-    // std::printf("2: %s\n", syn_msg2->get_instrument_name().c_str());
-    
-    // EXPECT_EQ(msg.get_dp_id(), msg2.get_dp_id());
-    // EXPECT_EQ(msg.get_instrument_name(), msg2.get_instrument_name());
-    // EXPECT_EQ(msg.get_type(), msg2.get_type());
-    // EXPECT_EQ(msg.get_uri(), msg2.get_uri());
-    // EXPECT_EQ(msg.get_dp_size(), msg2.get_dp_size());
-    // EXPECT_EQ(msg.get_science_utility_estimate(),
-    //     msg2.get_science_utility_estimate());
-    // EXPECT_EQ(msg.get_priority_bin(), msg2.get_priority_bin());
-    // EXPECT_EQ(msg.get_downlink_state(), msg2.get_downlink_state());
+char* itc_msg_get_type(itc_dbdpmsg_t* msg){
+    Synopsis::DpDbMsg *tempdbmsg = msg->obj;
+    std::string str = tempdbmsg->get_type();
+    char *returnval = (char *)malloc(sizeof(char) * (str.length() + 1));
+    str.copy(returnval, str.length() + 1, 0);
+    returnval[str.length()] = '\0';
+    //printf("ITC Instrument Type: %s\n", returnval);
+    return returnval; 
 }
-
-//TODO -- Not sure what problem is being caused by this wrapping.  Requires some investigation
 
 //FREE ME
 itc_dpids_t *itc_db_list_data_product_ids(){
@@ -489,8 +470,8 @@ itc_dpids_t *itc_db_list_data_product_ids(){
 itc_dbdpmsg_t* itc_db_get_data_product(int id){
     Synopsis::Status status;
     itc_dbdpmsg_t* msg = (typeof(msg))malloc(sizeof(*msg));
-    Synopsis::DpDbMsg temp_msg2;
-    status = db.get_data_product(id, temp_msg2);
+    Synopsis::DpDbMsg *temp_msg2 = new Synopsis::DpDbMsg();
+    status = db.get_data_product(id, *temp_msg2);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     if(result == E_SUCCESS){
         printf("ITC GET DB DP SUCCESSFUL!\n");
@@ -498,13 +479,8 @@ itc_dbdpmsg_t* itc_db_get_data_product(int id){
     else{
         printf("ITC GET DB DP UNSUCCESSFUL!\n");
     }
-    printf("MESSAGE2: %s\n", temp_msg2.get_instrument_name().c_str());
-    printf("MESSAGE2: %s\n", temp_msg2.get_type().c_str());
-    msg->obj = &(temp_msg2); 
+    // printf("MESSAGE2: %s\n", temp_msg2->get_instrument_name().c_str());
+    // printf("MESSAGE2: %s\n", temp_msg2->get_type().c_str());
+    msg->obj = temp_msg2; 
     return msg;  
-}
-
-void random_test(itc_dbdpmsg_t* msg){
-    Synopsis::DpDbMsg *syn_msg = static_cast<Synopsis::DpDbMsg *>(msg->obj);
-    printf("ITC_TEST: %s\n", syn_msg->get_instrument_name().c_str());
 }
