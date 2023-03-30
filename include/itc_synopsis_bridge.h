@@ -64,6 +64,14 @@ void itc_db_insert_data_product(itc_dbdpmsg_t *msg);
 itc_dpids_t *itc_db_list_data_product_ids();
 itc_dbdpmsg_t* itc_db_get_data_product(int id);
 
+void itc_db_destroy_data_product_ids(itc_dpids_t* dpids);
+void itc_db_destroy_data_product(itc_dbdpmsg_t *msg);
+void itc_destroy_dpmsg(itc_dpmsg_t *msg);
+void itc_destroy_dpmetadatavalue(itc_dpmetavalue_t *metavalue);
+void itc_destroy_nodes(itc_node_t *head);
+void itc_destroy_dbdpbmsg(itc_dbdpmsg_t *msg);
+
+
 
 
 

@@ -17,7 +17,6 @@
  }ITC_STATUS_MESSAGE;
 
 typedef std::map <std::string, Synopsis::DpMetadataValue> Map;
-// TODO:  Full remove Expects - work in if and throws?
 
  class TestASDS : public Synopsis::ASDS {
 
@@ -54,7 +53,6 @@ Synopsis::StdLogger logger;
 Synopsis::LinuxClock clock2;
 Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
 Synopsis::Application app(&db, &planner, &logger, &clock2);
-void* memory = malloc(128);
 
 // ITC Struct for holding DpMsg Objects
 struct itc_dpmsg {
@@ -79,12 +77,6 @@ struct itc_node {
 
 };
 
-// ITC Struct for holding the conversion from Vector
-// struct itc_dpids{
-//     int* values;
-//     int size;
-// };
-
 /**
  * ITC Function for setup of the TEST ASDS Class
  * @return: VOID
@@ -93,13 +85,13 @@ extern int itc_setup_testasds(){
     Synopsis::Status status;
     status = app.add_asds("test_instrument", &itc_asds);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
-    if (result != ITC_STATUS_MESSAGE::E_SUCCESS){
-        // TODO:  How would we like to handle these situations?
-        //        Do we just want to use status instead with no extras?
+    if(result == E_SUCCESS){
+        printf("ITC TESTASDS SETUP SUCCESSFUL!\n");
     }
-    printf("itc_setup_testasds complete\n");
+    else{
+        printf("ITC TESTASDS SETUP UNSUCCESSFUL!\n");
+    }
     return result;
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
 /**
@@ -110,7 +102,12 @@ void itc_setup_ptasds(){
     Synopsis::Status status;
     status = app.add_asds("test_instrument", "type", &pt_asds);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    if(result == E_SUCCESS){
+        printf("ITC PTASDS SETUP SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC PTASDS SETUP UNSUCCESSFUL!\n");
+    }
 }
 
 /**
@@ -130,25 +127,32 @@ size_t itc_app_get_memory_requiremennt(){
  * Makes use of a memory object that will need to be freed.
  * @return: VOID
 */
-void itc_app_init(size_t bytes, void* memory){ // Remember to free memory
+void itc_app_init(size_t bytes, void* memory){ 
     Synopsis::Status status;
     status = app.init(bytes, memory);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    if(result == E_SUCCESS){
+        printf("ITC APP INIT SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC APP INIT UNSUCCESSFUL!\n");
+    }
 }
 
 /**
  * ITC Function for De-Initialization of the App
- * NOTICE:  The memoery object that is used and passed about has been freed here
- * as I beleive this should be the last function used.
  * @return: VOID
 */
 void itc_app_deinit(){
     Synopsis::Status status;
     status = app.deinit();
-    free(memory);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
+    if(result == E_SUCCESS){
+        printf("ITC DEINIT SUCCESSFUL!\n");
+    }
+    else{
+        printf("ITC DEINIT UNSUCCESSFUL!\n");
+    }
 }
 
 /**
@@ -164,7 +168,7 @@ int itc_app_get_invocations(){
 /**
  * ITC Function for creating a dpMSG
  * This function accepts char* enlieu of std::str and converts as necessary
- * TODO:  These use of char* could cause issues maybe?
+ * NOTICE:  The user must use the itc_destroy_dpmsg function to free memory and objects
  * @return:  itc_dpmsg_t - structure which holds the dpmsg object
 */
 itc_dpmsg_t* itc_create_dpmsg(char* instrument_name, char* dp_type, char* dp_uri, char* meta_uri, bool meta_usage){
@@ -182,6 +186,16 @@ itc_dpmsg_t* itc_create_dpmsg(char* instrument_name, char* dp_type, char* dp_uri
     msg->obj = dpobj;
 
     return msg;
+}
+
+/**
+ * ITC Function for destruction of itc_dpmsg structure
+ * @param itc_dpmsg_t: DPMSG to be destroyed
+*/
+void itc_destroy_dpmsg(itc_dpmsg_t *msg){
+    Synopsis::DpMsg *tmp_msg = msg->obj;
+    delete tmp_msg;
+    free(msg);
 }
 
 /**
@@ -229,6 +243,15 @@ itc_dpmetavalue_t* itc_create_dpmetadatavalue_string(char* string_value){
     value->obj = obj;
     return value;
 }
+/**
+ * ITC Function for the destruction of itc_dpmetavalue
+ * @param itc_dpmetavalue_t: The itc_dpmetavalue structure to be destroyed
+*/
+void itc_destroy_dpmetadatavalue(itc_dpmetavalue_t *metavalue){
+    Synopsis::DpMetadataValue *tmp_value = metavalue->obj;
+    delete tmp_value;
+    free(metavalue);
+}
 
 // TODO:  Keeping this for now.  But it is not utilized.
 void itc_map_put(void* map, char* dp_string, itc_dpmetavalue_t* dpmetavalue){
@@ -252,28 +275,54 @@ void itc_map_put(void* map, char* dp_string, itc_dpmetavalue_t* dpmetavalue){
     m->insert(std::pair<std::string, Synopsis::DpMetadataValue>(dpstring, realvalue));
 }
 
-// TODO:  Keeping this for now.  But it is not utilized.
+/**
+ * ITC Function for creating a linked list of meta values and types
+ * This is used in replacement for vector/map objects C cannot create
+ * If there is a better way, let's do it
+ * @param itc_node_t: The head node of the linked list
+ * @param char*: value type to be inserted
+ * @param itc_dpmetavalue_t: DPmetavalue to be inserted
+*/
 void itc_node_push(itc_node_t* head, char* word, itc_dpmetavalue_t* metavalue){
     itc_node_t* current = head;
+    
+    itc_node_t* newnode = (itc_node_t*) malloc(sizeof(itc_node_t));
+    newnode->value_type = (char *)malloc(strlen(word));
+    strcpy(newnode->value_type, word);
+    newnode->meta_data_value = metavalue;
+    newnode->next = NULL;
+
     if(current != NULL){
         while(current->next != NULL){
             current = current->next;
         }
+        current->next = newnode;
     }
-    current = (itc_node_t*) malloc(sizeof(itc_node_t));
-    current->value_type = (char *)malloc(strlen(word));
-    strcpy(current->value_type, word);
-    current->meta_data_value = metavalue;
-    //printf("Word to be inserted %s\n", word);
-    //printf("Word Inserted: %s\n", (char *)current->value_type);
-    current->next = NULL;
+    else{
+        current = newnode;
+    }
+}
+
+/**
+ * ITC Function for the destruction of vector/map replacement linked list
+ * @param itc_node_t: The start of the list to be destroyed
+*/
+void itc_destroy_nodes(itc_node_t *head){
+    itc_node_t* current;
+    while(head != NULL){
+        current = head;
+        head = head->next;
+
+        free(current->value_type);
+        itc_destroy_dpmetadatavalue(current->meta_data_value);
+        free(current);
+    }
 }
 
 /**
  * ITC Function to create DPDBMsg
  * Utilizes Const Char* - Issue?  Maybe?
  * @return: itc-dbdpmsg_t* Structure holding the DpDbMsg object
- * TODO:  Is there an issue with this function?
 */
 itc_dbdpmsg_t* itc_create_dbdpmsg(int dp_id, const char* instrument_name, const char* dp_type, const char* dp_uri, size_t dp_size, double science_utility_estimate, int priority_bin, int downlink_state, itc_node_t* meta_node){
     itc_dbdpmsg_t *msg;
@@ -327,6 +376,16 @@ itc_dbdpmsg_t* itc_create_dbdpmsg(int dp_id, const char* instrument_name, const 
 }
 
 /**
+ * ITC Function for the destruction of DPDBMsg structures
+ * @param itc_dbdpmsg_t*: The message to be destroyed
+*/
+void itc_destroy_dbdpbmsg(itc_dbdpmsg_t *msg){
+    Synopsis::DpDbMsg *temp_msg = msg->obj;
+    delete temp_msg;
+    free(msg);
+}
+
+/**
  * ITC Function to initalize the DataBase
  * @return: VOID
 */
@@ -334,7 +393,6 @@ void itc_db_init(size_t bytes, void* memory){
     Synopsis::Status status;
     status = db.init(bytes, memory, &logger);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
     if(result == E_SUCCESS){
         printf("ITC DB INIT SUCCESSFUL!\n");
     }
@@ -384,7 +442,6 @@ void itc_app_accept_dumb_dpmsg(){
     else{
         printf("ITC ACCEPT DUMB DPMSG UNSUCCESSFUL!\n");
     }
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
 /**
@@ -402,7 +459,6 @@ void itc_app_accept_dpmsg(itc_dpmsg_t* msg){
     else{
         printf("ITC ACCEPT DPMSG UNSUCCESSFUL!\n");
     }
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
 /**
@@ -419,7 +475,6 @@ void itc_db_insert_data_product(itc_dbdpmsg_t *msg){
     else{
         printf("ITC DB INSERT DP UNSUCCESSFUL!\n");
     }
-    //EXPECT_EQ(Synopsis::Status::SUCCESS, status);
 }
 
 /**
@@ -436,26 +491,36 @@ int itc_msg_get_dp_id(itc_dbdpmsg_t * msg){
  * ITC Function to retreive the instrument name from a message
  * @param[in] msg: itc_dpdbmsg_t* from which to retreive the instrument name
  * @return const char* - The instrument Name
+ * NOTICE: User must free the resulting memory.
 */
 char* itc_msg_get_instrument_name(itc_dbdpmsg_t* msg){
-    Synopsis::DpDbMsg *tempdbmsg = static_cast<Synopsis::DpDbMsg *>(msg->obj);
+    Synopsis::DpDbMsg *tempdbmsg = msg->obj;
     std::string str = (tempdbmsg->get_instrument_name());
-    printf("ITC Instrument Name: %s\n", str.c_str());
-    char* retval = const_cast<char *>(str.c_str());
-    return retval;
+    char *returnval =  (char *)malloc(sizeof(char) * (str.length() + 1));
+    str.copy(returnval, str.length() + 1, 0);
+    returnval[str.length()] = '\0';
+    return returnval;
 }
 
+/**
+ * ITC Function to retrieve dbdpmsg type
+ * @param itc_dbdpmsg_t*: The message from which to retreive the type
+ * NOTICE: User must free the resulting memory.
+*/
 char* itc_msg_get_type(itc_dbdpmsg_t* msg){
     Synopsis::DpDbMsg *tempdbmsg = msg->obj;
     std::string str = tempdbmsg->get_type();
     char *returnval = (char *)malloc(sizeof(char) * (str.length() + 1));
     str.copy(returnval, str.length() + 1, 0);
     returnval[str.length()] = '\0';
-    //printf("ITC Instrument Type: %s\n", returnval);
     return returnval; 
 }
 
-//FREE ME
+/**
+ * ITC Function to retrieve dbdpmsg type
+ * @param itc_dbdpmsg_t*: The message from which to retreive the type
+ * NOTICE: Destruction function must be utilized to free this structure
+*/
 itc_dpids_t *itc_db_list_data_product_ids(){
     std::vector<int> asdp_ids = db.list_data_product_ids();
     itc_dpids_t *array = (itc_dpids_t *)malloc(sizeof(itc_dpids_t));
@@ -466,7 +531,19 @@ itc_dpids_t *itc_db_list_data_product_ids(){
     return array;
 }
 
-//FREE ME 
+/**
+ * ITC Function for the destruction of the dataproduct id structure
+ * @param itc_dpids_t*: The list to be destroyed
+*/
+void itc_db_destroy_data_product_ids(itc_dpids_t* dpids){
+    free(dpids->values);
+    free(dpids);
+}
+
+/**
+ * ITC Function to get data product from db based on dataproduct id
+ * @param int id: The ID from the database to create a copy against.
+*/
 itc_dbdpmsg_t* itc_db_get_data_product(int id){
     Synopsis::Status status;
     itc_dbdpmsg_t* msg = (typeof(msg))malloc(sizeof(*msg));
@@ -479,8 +556,15 @@ itc_dbdpmsg_t* itc_db_get_data_product(int id){
     else{
         printf("ITC GET DB DP UNSUCCESSFUL!\n");
     }
-    // printf("MESSAGE2: %s\n", temp_msg2->get_instrument_name().c_str());
-    // printf("MESSAGE2: %s\n", temp_msg2->get_type().c_str());
     msg->obj = temp_msg2; 
     return msg;  
+}
+/**
+ * ITC Function to destroy DBDP Msg structure
+ * @param itc_dbdpmsg_t*: The message structure to be destroyed
+*/
+void itc_db_destroy_data_product(itc_dbdpmsg_t *msg){
+    Synopsis::DpDbMsg *temp_msg = msg->obj;
+    delete temp_msg;
+    free(msg);
 }
