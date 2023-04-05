@@ -77,6 +77,22 @@ struct itc_node {
 
 };
 
+extern void itc_test_get_message(){
+    Synopsis::Status status;
+    std::vector<int> asdp_ids;
+    asdp_ids = db.list_data_product_ids();
+    Synopsis::DpDbMsg msg2;
+    status = db.get_data_product(asdp_ids[0], msg2);
+
+    //TODO:  Error Checking
+    printf("MESSAGE INFORMATION:\n");
+    printf("\tDPID: %d\n", msg2.get_dp_id());
+    printf("\tINSTRUMENT NAME: %s\n", msg2.get_instrument_name().c_str());
+    printf("\tTYPE: %s\n", msg2.get_type().c_str());
+    printf("\tURI: %s\n", msg2.get_uri().c_str());
+    printf("\tDPSIZE: %d\n", (int)msg2.get_dp_size());
+}
+
 /**
  * ITC Function for setup of the TEST ASDS Class
  * @return: VOID

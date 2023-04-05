@@ -31,6 +31,8 @@ struct itc_dpids{
     int size;
 };
 
+void itc_test_get_message();
+
 int itc_setup_testasds();
 void itc_setup_ptasds();
 
