@@ -74,8 +74,12 @@ void itc_destroy_nodes(itc_node_t *head);
 void itc_destroy_dbdpbmsg(itc_dbdpmsg_t *msg);
 
 
-
-
+int owls_test();//char* asdpdb_file, char* rule_config_file, char* similarity_config_file);
+int owls_display_prioritized_data();
+char* owls_get_prioritized_data();
+void owls_destroy_prioritized_data_string(char* deleteme);
+int owls_add_dpmsg();
+int owls_prioritize_data();
 
 #ifdef __cplusplus
 }
