@@ -506,3 +506,132 @@
 //     delete temp_msg;
 //     free(msg);
 // }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// printf("******************\n");
+    // int syn_app_status;
+    // syn_app_status = owls_add_dpmsg();
+    // printf("Owls Add Return0: %d\n", syn_app_status);
+
+    // syn_app_status = owls_add_dpmsg();
+    // printf("Owls Add Return1: %d\n", syn_app_status);
+
+    // syn_app_status = owls_add_dpmsg();
+    // printf("Owls Add Return2: %d\n", syn_app_status);
+
+    // syn_app_status = owls_add_dpmsg();
+    // printf("Owls Add Return3: %d\n", syn_app_status);
+
+    // syn_app_status = owls_add_dpmsg();
+    // printf("Owls Add Return4: %d\n", syn_app_status);
+
+    // syn_app_status = owls_add_dpmsg();
+    // printf("Owls Add Return5: %d\n", syn_app_status);
+
+    // syn_app_status = owls_add_dpmsg();
+    // printf("Owls Add Return6: %d\n", syn_app_status);
+
+    // syn_app_status = owls_prioritize_data();
+    // printf("Owls Prioritize Return: %d\n", syn_app_status);
+
+    // syn_app_status = itc_display_prioritized_data();
+    // printf("Data Return: %d\n", syn_app_status);
+
+    // char* test_string = itc_get_prioritized_data();
+    // printf("SYN_APP: TEST: %s\n", test_string);
+    // itc_destroy_prioritized_data_string(test_string);
+    // printf("\n");
+    
+    // syn_app_status = itc_display_prioritized_data();
+    // printf("Data Return: %d\n", syn_app_status);
+
+    // status2 = owls_test();//"/data/owls/owls_bundle_20221223T144226.db", "/data/owls/empty_rules.json", "/data/owls/owls_similarity_config.json");
+    // printf("RETURN CODE: %d\n", status2);
+    // itc_display_prioritized_data();
+    // char* test_string = itc_get_prioritized_data();
+    // printf("SYN_APP: TEST: %s\n", test_string);
+    // itc_destroy_prioritized_data_string(test_string);
+    // printf("\n");
+    // itc_display_prioritized_data();
+    // char* test_string2 = itc_get_prioritized_data();
+    // printf("SYN_APP: TEST2: %s\n", test_string2);
+    // itc_destroy_prioritized_data_string(test_string2);
+    
+    // Verify that invocations are at 0
+    // bool invocations = FALSE;
+    // invocations = verify_invocations(0, (char *)"APP INIT");
+
+    // //TODO:  Handle BOOL?
+
+    // // Test dumb, pre-configured dpmsg
+    // itc_app_accept_dumb_dpmsg();
+    // // Verify that invocations has increased
+    // verify_invocations(1, (char *)"DUMB DPMSG");
+    
+    // // Repeat the above test to validate invocation increase
+    // itc_app_accept_dumb_dpmsg();
+    // // Verify that invocations has increased
+    // verify_invocations(2, (char *)"DUMB DPMSG2");
+
+    // // Create DPMSG
+    // itc_dpmsg_t *temp_dpmsg = itc_create_dpmsg((char *)"test_instrument",(char *)"test_type", (char *)"file::///data/file.dat", (char *)"file::///data/meta.dat", true);
+
+    // // Accept DPMSG
+    // itc_app_accept_dpmsg(temp_dpmsg);
+    // // Verify that invocations has increased
+    // verify_invocations(3, (char *)"ITC DPMSG");
+    // itc_destroy_dpmsg(temp_dpmsg);
+    
+    // // Initalize Database with NULL memory, Logger currently built in (can move to our own control if necessary)
+    // itc_db_init(0, NULL);
+
+    // // Create DPDBMSG
+    // itc_node_t *start = NULL; // Build metadata linked list to be converted into vector
+    // itc_node_push(start, (char *)"test_int", itc_create_dpmetadatavalue_int(123));
+    // itc_node_push(start, (char *)"test_float", itc_create_dpmetadatavalue_float(123.456));
+    // itc_node_push(start, (char *)"test_string", itc_create_dpmetadatavalue_string((char *)"test"));
+
+    // itc_dbdpmsg_t *dpdbmsg = itc_create_dbdpmsg(-1, "test_instr", "test_type", "file:///data/file.dat", 101, 0.12345, 7, 0, start);
+
+    // // Insert the Data Product
+    // itc_db_insert_data_product(dpdbmsg);
+    // // Verify that DP ID is greater than 0
+    // if(itc_msg_get_dp_id(dpdbmsg) > 0){
+    //     printf("ITC DP ID > 0: SUCCESS!\n");
+    // }
+    // else{
+    //     printf("ITC DP ID > 0: UNSUCCESSFUL!\n");
+    // }
+    // // Verify that ASDP IDs size is 1
+    // itc_dpids_t* asdp_ids = itc_db_list_data_product_ids();
+    // if(asdp_ids->size == 1){
+    //     printf("ITC ASDP_IDs SIZE = 1: SUCCESS\n");
+    // }
+    // else{
+    //     printf("ITC ASDP_IDs SIZE = 1: UNSUCCESSFUL\n");
+    // }
+
+    // itc_dbdpmsg_t *copy_msg = NULL;
+    // copy_msg = itc_db_get_data_product(asdp_ids->values[0]);
+    // char *msg_type = NULL;
+    // msg_type = itc_msg_get_type(copy_msg);  // Verify that the copied message type remains the same
+    // printf("ITC GET MSG TYPE: %s\n", msg_type);
+    // free(msg_type);
+
+    // itc_destroy_nodes(start);
+    // itc_destroy_dbdpbmsg(dpdbmsg);
+    // itc_destroy_dbdpbmsg(copy_msg);
+    // itc_db_destroy_data_product_ids(asdp_ids);
