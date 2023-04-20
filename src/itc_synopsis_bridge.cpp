@@ -1,4 +1,4 @@
- #include "itc_synopsis_bridge.h"
+#include "itc_synopsis_bridge.h"
 
 #include "synopsis.hpp"
 #include "SqliteASDPDB.hpp"
@@ -28,7 +28,13 @@ Synopsis::PassthroughASDS pt_asds;
 
 int counter = 0; // Hacky way of adding OWLS Data
 std::vector<std::string> prioritized_uris;
+std::vector<int> prioritized_list;
 
+/**
+ * ITC Function for creation of dpmsg based on Owls pre-canned data
+ * Note:  This requires some setup and the existence of data or some erroneous behavior will occur.
+ * @return: Synopsis::Status resulting from the app.accept_dp wrapped within
+*/
 int owls_add_dpmsg(){
     Synopsis::Status status = Synopsis::Status::FAILURE;
     if (counter > 6){
@@ -48,7 +54,11 @@ int owls_add_dpmsg(){
     return status;
 }
 
-std::vector<int> prioritized_list;
+/**
+ * ITC Function for prioritization of pre-canned OWLs data
+ * Note:  This requires some setup and the existence of files or some erroneous behavior will occur.
+ * @return: Synopsis::Status resulting from the app.prioritize wrapped within
+*/
 int owls_prioritize_data(){
     if(prioritized_list.size() != 0) {prioritized_list.clear();}
     //std::string asdpdb("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_bundle_20221223T144226.db");
@@ -76,6 +86,11 @@ int owls_prioritize_data(){
     return Synopsis::Status::SUCCESS;
 }
 
+/**
+ * ITC Function displaying current prioritized data
+ * Note:  This requires some setup and the existence of data or some erroneous behavior will occur.
+ * @return: Synopsis::Status::SUCCESS
+*/
 int owls_display_prioritized_data(){
     for (auto uri: prioritized_uris){
         printf("URI: %s\n", uri.c_str());
@@ -83,6 +98,11 @@ int owls_display_prioritized_data(){
     return Synopsis::Status::SUCCESS;
 }
 
+/**
+ * ITC Function for retreiving the asdp_id from global lists
+ * @param: char* uri: The URI of the DpDbMsg from which to retreive the asdp_id
+ * @return: int: asdp_id
+*/
 int get_aspd_id(char* uri){
     int returnval = -1;
     
@@ -104,6 +124,13 @@ int get_aspd_id(char* uri){
     return returnval;
 }
 
+/**
+ * ITC Function for the simulation of dowlinking prioritized files
+ * Note:  This function retreives the highest priority file, and uses cFS OS calls
+ * to OS_mv the data to a simulated downlink location.  It then updates the downlink state
+ * within the DB so that it is no longer part of the prioritization list.
+ * @return: char*: The URI of the prioritized data to downlink
+*/
 char* owls_get_prioritized_data(){
     if(prioritized_uris.size() != 0 ){
         size_t len = strlen(prioritized_uris[0].c_str())+1;
@@ -130,6 +157,10 @@ char* owls_get_prioritized_data(){
     }
 }
 
+/**
+ * ITC Function for the destruction of data string
+ * Deletes the char array created by owls_get_prioritized_data
+*/
 void owls_destroy_prioritized_data_string(char* deleteme){
     delete[] deleteme;
 }
