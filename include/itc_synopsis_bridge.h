@@ -38,7 +38,7 @@ void itc_setup_ptasds();
 
 size_t itc_app_get_memory_requiremennt();
 void itc_app_init(size_t bytes, void* memory);
-void itc_app_deinit();
+void itc_app_deinit(void* memory);
 int itc_app_get_invocations();
 void itc_app_accept_dumb_dpmsg();
 void itc_app_accept_dpmsg(itc_dpmsg_t* msg);
@@ -76,7 +76,8 @@ void itc_destroy_dbdpbmsg(itc_dbdpmsg_t *msg);
 
 int owls_test();//char* asdpdb_file, char* rule_config_file, char* similarity_config_file);
 int owls_display_prioritized_data();
-char* owls_get_prioritized_data();
+char* owls_get_prioritized_data(int index);
+void owls_update_downlink_status(char* dpname);
 void owls_destroy_prioritized_data_string(char* deleteme);
 int owls_add_dpmsg();
 int owls_prioritize_data();
