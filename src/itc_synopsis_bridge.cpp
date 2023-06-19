@@ -10,6 +10,7 @@
 #include "StdLogger.hpp"
 #include <cstring>
 #include <vector>
+#include <algorithm>
 
  typedef enum {
     E_SUCCESS = 0,
@@ -26,7 +27,7 @@ Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
 Synopsis::Application app(&db, &planner, &logger, &clock2);
 Synopsis::PassthroughASDS pt_asds;
 
-int counter = 0; // Hacky way of adding OWLS Data
+
 std::vector<std::string> prioritized_uris;
 std::vector<int> prioritized_list;
 
@@ -35,22 +36,27 @@ std::vector<int> prioritized_list;
  * Note:  This requires some setup and the existence of data or some erroneous behavior will occur.
  * @return: Synopsis::Status resulting from the app.accept_dp wrapped within
 */
-int owls_add_dpmsg(){
+int owls_add_dpmsg(){ // Rename this to setup or reset database?
     Synopsis::Status status = Synopsis::Status::FAILURE;
-    if (counter > 6){
-        printf("No Data to receive!\n");
-    }
-    else{
-        printf("SYN_APP: Adding Data Product %d\n", counter);
-        std::string data_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/spacecraft/asdp00000000" + std::to_string(counter) + ".tgz");
-        std::string metadata_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/bundle/asdp00000000" + std::to_string(counter) + "_meta.json");
-        Synopsis::DpMsg msg("owls", "helm", data_path, metadata_path, true);
+    int counter = 0; // Hacky way of adding OWLS Data
+    while(counter < 7)
+    {
+        if (counter > 6){
+            printf("No Data to receive!\n");
+            break;
+        }
+        else{
+            printf("SYN_APP: Adding Data Product %d\n", counter);
+            std::string data_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/onboard/asdp00000000" + std::to_string(counter));
+            std::string metadata_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/bundle/asdp00000000" + std::to_string(counter) + "_meta.json");
+            Synopsis::DpMsg msg("owls", "helm", data_path, metadata_path, true);
 
-        status = app.accept_dp(msg);
-        if (status != Synopsis::Status::SUCCESS) { return status; }    
-        counter++;
-        return status;
+            status = app.accept_dp(msg);
+            if (status != Synopsis::Status::SUCCESS) { break; }    
+            counter++;
+        }
     }
+    
     return status;
 }
 
@@ -131,31 +137,33 @@ int get_aspd_id(char* uri){
  * within the DB so that it is no longer part of the prioritization list.
  * @return: char*: The URI of the prioritized data to downlink
 */
-char* owls_get_prioritized_data(){
-    if(prioritized_uris.size() != 0 ){
-        size_t len = strlen(prioritized_uris[0].c_str())+1;
+char* owls_get_prioritized_data(int index){
+    size_t uri_size = prioritized_uris.size();
+    if((uri_size != 0) && (0 <= index <= 7) && (index <= uri_size) ){
+        size_t len = strlen(prioritized_uris[index].c_str())+1;
         char* returnval = new char[len];
-        strcpy(returnval, (char*)prioritized_uris[0].c_str());
-        //printf("BRIDGE: %s\n", returnval);
+        strcpy(returnval, (char*)prioritized_uris[index].c_str());
         
-        int aspd_id = get_aspd_id(returnval);
-        //printf("ID: %d\n", aspd_id);
-        Synopsis::DpDbMsg temp_msg;
-        app.get_data_product(aspd_id, temp_msg);
-        //printf("DL STATE: %d\n", temp_msg.get_downlink_state());
-        //printf("URI: %s\n", temp_msg.get_uri().c_str());
-        Synopsis::Status status = db.update_downlink_state(aspd_id, Synopsis::DownlinkState::DOWNLINKED);
-        
-        //printf("UPDATE DL STATE STATUS: %d\n", status);
-        app.get_data_product(aspd_id, temp_msg);
-        //printf("DL STATE: %d\n", temp_msg.get_downlink_state());
-        prioritized_uris.erase(prioritized_uris.begin());
         return returnval;
         }
     else{
         return NULL;
     }
 }
+
+//TODO: Description
+void owls_update_downlink_status(char* dpname){
+    auto itr = std::find(prioritized_uris.begin(), prioritized_uris.end(), dpname);
+    if(itr != prioritized_uris.end()){
+        int aspd_id = get_aspd_id(dpname);
+        Synopsis::Status status = db.update_downlink_state(aspd_id, Synopsis::DownlinkState::DOWNLINKED);
+        //prioritized_uris.erase(itr);
+        printf("DP UPDATED\n");
+    }   
+    else{
+        printf("DP NOT FOUND!\n");
+    }
+}        
 
 /**
  * ITC Function for the destruction of data string
@@ -214,7 +222,7 @@ void itc_app_init(size_t bytes, void* memory){
  * ITC Function for De-Initialization of the App
  * @return: VOID
 */
-void itc_app_deinit(){
+void itc_app_deinit(void* memory){
     Synopsis::Status status;
     status = app.deinit();
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
