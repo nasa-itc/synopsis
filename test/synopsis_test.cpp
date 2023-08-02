@@ -433,10 +433,11 @@ TEST(SynopsisTest, TestPassThroughASDS) {
 
 TEST(SynopsisTest, TestStdLogger) {
 
-    Synopsis::StdLogger logger;
-    logger.log(Synopsis::LogType::INFO, "Test log info: %ld", 5);
-    logger.log(Synopsis::LogType::WARN, "Test log warn: %ld", 5);
-    logger.log(Synopsis::LogType::ERROR, "Test log error: %ld", 5);
+    Synopsis::StdLogger logger, *logger_ptr;
+    logger_ptr = &logger;
+    LOG(logger_ptr, Synopsis::LogType::INFO, "Test log info: %ld", 5);
+    LOG(logger_ptr, Synopsis::LogType::WARN, "Test log warn: %ld", 5);
+    LOG(logger_ptr, Synopsis::LogType::ERROR, "Test log error: %ld", 5);
 }
 
 TEST(SynopsisTest, TestLinuxClock) {
@@ -470,8 +471,9 @@ TEST(SynopsisTest, TestRuleAST) {
     Synopsis::StringConstant a_str_expr("a");
     Synopsis::StringConstant b_str_expr("b");
     int max_applications = 1;
+    Synopsis::StdLogger logger;
 
-    Synopsis::Rule rule(variables, &true_expr, &adj_expr, max_applications);
+    Synopsis::Rule rule(variables, &true_expr, &adj_expr, max_applications, &logger);
 
     std::vector<std::map<std::string, Synopsis::DpMetadataValue>> asdps = {
         {
@@ -569,11 +571,10 @@ TEST(SynopsisTest, TestRuleAST) {
     EXPECT_FALSE(ex_expr_zero.get_value({}, asdps));
     EXPECT_TRUE(ex_expr_one.get_value({}, asdps));
 
-
-    Synopsis::Constraint constraint_nosum_sat(variables, &ex_cond_expr_zero, NULL, 1.0);
-    Synopsis::Constraint constraint_nosum_unsat(variables, &ex_cond_expr_one, NULL, 1.0);
-    Synopsis::Constraint constraint_sum_sat(variables, &true_expr, &x_id_field, 4.0);
-    Synopsis::Constraint constraint_sum_unsat(variables, &true_expr, &x_id_field, 3.0);
+    Synopsis::Constraint constraint_nosum_sat(variables, &ex_cond_expr_zero, NULL, 1.0, &logger);
+    Synopsis::Constraint constraint_nosum_unsat(variables, &ex_cond_expr_one, NULL, 1.0, &logger);
+    Synopsis::Constraint constraint_sum_sat(variables, &true_expr, &x_id_field, 4.0, &logger);
+    Synopsis::Constraint constraint_sum_unsat(variables, &true_expr, &x_id_field, 3.0, &logger);
 
     EXPECT_TRUE(constraint_sum_sat.apply(asdps));
     EXPECT_FALSE(constraint_sum_unsat.apply(asdps));
@@ -613,7 +614,7 @@ TEST(SynopsisTest, TestPrioritizeInstPair) {
 
 TEST(SynopsisTest, TestPrioritizeDD) {
     std::string db_path = get_absolute_data_path("dd_example.db");
-    std::string dd_config_path = get_absolute_data_path("dd_example_config.json");
+    std::string dd_config_path = get_absolute_data_path("dd_example_similarity_config.json");
     std::string dd_rules_path = get_absolute_data_path("dd_example_rules.json");
 
     // Test initialization

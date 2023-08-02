@@ -32,14 +32,14 @@ namespace Synopsis {
         // Open database
         status= sqlite3_open(this->asdpdb_file.c_str(), &this->_db);
         if (status != SQLITE_OK) {
-            // TODO: Log error
+            LOG(logger, Synopsis::LogType::ERROR, "SQLite DB not opened"); 
             return FAILURE;
         }
 
         // Initialize schema
         status = sqlite3_exec(this->_db, SQL_SCHEMA, NULL, NULL, NULL);
         if (status != SQLITE_OK) {
-            // TODO: Log error
+            LOG(logger, Synopsis::LogType::ERROR, "SQLite DB schema not initialized");
             return FAILURE;
         }
 
@@ -104,7 +104,7 @@ namespace Synopsis {
             // Rollback transaction and return error
             sqlite3_exec(this->_db, "ROLLBACK", NULL, NULL, NULL);
 
-            // TODO: Log Error
+            LOG(this->_logger, Synopsis::LogType::ERROR, "Error inserting data product"); 
             return FAILURE;
         }
 
@@ -117,7 +117,7 @@ namespace Synopsis {
         stmt.bind(0, asdp_id);
 
         if (stmt.step() == SQLITE_DONE) {
-            // TODO: Log DP not found
+            LOG(this->_logger, Synopsis::LogType::ERROR, "Data product not found");
             return FAILURE;
         }
 
@@ -171,12 +171,12 @@ namespace Synopsis {
         stmt.bind(1, asdp_id);
 
         if (stmt.step() != SQLITE_DONE) {
-            // TODO: Log error
+            LOG(this->_logger, Synopsis::LogType::ERROR, "SQLite operation not completed while updating science utility");
             return FAILURE;
         }
 
         if (sqlite3_changes(this->_db) == 0) {
-            // TODO: Log DP not found
+            LOG(this->_logger, Synopsis::LogType::ERROR, "SQLite DB not found while updating science utility");
             return FAILURE;
         }
 
@@ -190,12 +190,12 @@ namespace Synopsis {
         stmt.bind(1, asdp_id);
 
         if (stmt.step() != SQLITE_DONE) {
-            // TODO: Log error
+            LOG(this->_logger, Synopsis::LogType::ERROR, "SQLite operation not completed while updating priority bin");
             return FAILURE;
         }
 
         if (sqlite3_changes(this->_db) == 0) {
-            // TODO: Log DP not found
+            LOG(this->_logger, Synopsis::LogType::ERROR,  "SQLite DB not found while updating priority bin");
             return FAILURE;
         }
 
@@ -209,12 +209,12 @@ namespace Synopsis {
         stmt.bind(1, asdp_id);
 
         if (stmt.step() != SQLITE_DONE) {
-            // TODO: Log error
+            LOG(this->_logger, Synopsis::LogType::ERROR, "SQLite operation not completed while updating downlink state");
             return FAILURE;
         }
 
         if (sqlite3_changes(this->_db) == 0) {
-            // TODO: Log DP not found
+            LOG(this->_logger, Synopsis::LogType::ERROR, "SQLite DB not found while updating downlink state");
             return FAILURE;
         }
 
@@ -240,12 +240,12 @@ namespace Synopsis {
         stmt.bind(5, fieldname);
 
         if (stmt.step() != SQLITE_DONE) {
-            // TODO: Log error
+            LOG(this->_logger, Synopsis::LogType::ERROR, "SQLite operation not completed while updating metadata");
             return FAILURE;
         }
 
         if (sqlite3_changes(this->_db) == 0) {
-            // TODO: Log DP not found
+            LOG(this->_logger, Synopsis::LogType::ERROR, "SQLite DB not found while updating metadata");
             return FAILURE;
         }
 

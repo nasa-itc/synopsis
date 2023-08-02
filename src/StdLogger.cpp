@@ -13,7 +13,16 @@
 namespace Synopsis {
 
 
-    void StdLogger::log(LogType type, const char* fmt, ...) {
+    // TODO: add a second constructor which takes a boolean for outputting to standard error stream, and update existing constructor
+    StdLogger::StdLogger(
+        bool output_all_to_stderr
+    ) :
+        output_all_to_stderr(output_all_to_stderr)
+    {
+
+    }
+
+    void StdLogger::log(LogType type, const char* file, const int line, const char* fmt,  ...) {
         va_list args;
         va_start(args, fmt);
 
@@ -23,24 +32,37 @@ namespace Synopsis {
         switch (type) {
 
             case LogType::INFO:
-                out = stdout;
-                prefix = "[INFO ]";
+                if (this->output_all_to_stderr){
+                    out = stderr;
+                } else {
+                    out = stdout;
+                }
+                prefix = "[INFO]";
                 break;
 
             case LogType::WARN:
-                out = stdout;
-                prefix = "[WARN ]";
+                if (this->output_all_to_stderr){
+                    out = stderr;
+                } else {
+                    out = stdout;
+                }
+                prefix = "[WARN]";
                 break;
 
             case LogType::ERROR:
             default:
-                prefix = "[ERROR]";
                 out = stderr;
+                prefix = "[ERROR]";
                 break;
 
         }
 
         fprintf(out, "%s", prefix.c_str());
+        fprintf(out, " ");
+        fprintf(out, "%s", file);
+        fprintf(out, ", line ");
+        fprintf(out, "%d", line);
+        fprintf(out, ": ");
         vfprintf(out, fmt, args);
         fprintf(out, "\n");
 

@@ -12,6 +12,11 @@
 #include <vector>
 #include <algorithm>
 
+#include <nlohmann/json.hpp>
+#include <fstream>
+
+using json = nlohmann::json;
+
  typedef enum {
     E_SUCCESS = 0,
     E_FAILURE = 1,
@@ -19,7 +24,13 @@
  }ITC_STATUS_MESSAGE;
 
 //Owls Test
-Synopsis::SqliteASDPDB db(":memory:");
+
+
+// This needs to be modified in order utilize a database, rather than build as we have been.
+// Perhaps it will be swapped back, but it is trivial to do so.
+//Synopsis::SqliteASDPDB db(":memory:");
+Synopsis::SqliteASDPDB db("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_bundle_20221223T144226.db");
+
 Synopsis::StdLogger logger;
 Synopsis::LinuxClock clock2;
 Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
@@ -60,6 +71,19 @@ int owls_add_dpmsg(){ // Rename this to setup or reset database?
     return status;
 }
 
+void owls_set_sigma(double sigma)
+{
+    printf("INCOMING SIGMA: %f\n", sigma);
+    std::string similarity("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_similarity_config.json");
+    std::ifstream json_in(similarity);
+    json j_sigma;
+    json_in >> j_sigma;
+    j_sigma["alphas"]["default"] = sigma;
+
+    std::ofstream json_out(similarity);
+    json_out << std::setw(4) << j_sigma << std::endl; 
+}
+
 /**
  * ITC Function for prioritization of pre-canned OWLs data
  * Note:  This requires some setup and the existence of files or some erroneous behavior will occur.
@@ -75,12 +99,14 @@ int owls_prioritize_data(){
     
     
     status = app.prioritize(rule_file, similarity, 1e9, prioritized_list);
+    //printf("LIST SIZE: %d\n", prioritized_list.size());
     if (status != Synopsis::Status::SUCCESS) { return status; }
 
     if(prioritized_uris.size() != 0) {prioritized_uris.clear();}
     
     for (auto i : prioritized_list) {
         Synopsis::DpDbMsg temp_msg;
+        //printf("I: %d\n", i);
         app.get_data_product(i, temp_msg);
         prioritized_uris.push_back(temp_msg.get_uri());
         //printf("NAME: %s\n", temp_msg.get_uri().c_str());

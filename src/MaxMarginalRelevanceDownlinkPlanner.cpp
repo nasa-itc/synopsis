@@ -143,11 +143,11 @@ namespace Synopsis {
         timer.start();
 
         // Parse/Load RuleSet
-        RuleSet ruleset = parse_rule_config(rule_configuration_id);
+        RuleSet ruleset = parse_rule_config(rule_configuration_id, this->_logger);
 
         // Load similarity configuration
         Similarity similarity = \
-            parse_similarity_config(similarity_configuration_id);
+            parse_similarity_config(similarity_configuration_id, this->_logger);
 
         // Load ASDPs
         std::vector<int> dp_ids = this->_db->list_data_product_ids();
@@ -166,7 +166,7 @@ namespace Synopsis {
             AsdpEntry asdp;
             status = _populate_asdp(msg, asdp);
             if (status != SUCCESS) {
-                // TODO: Log Error
+                LOG(this->_logger, Synopsis::LogType::ERROR, "Error populating ASDP for DP id: %ld", dp_id);
                 return status;
             }
 

@@ -22,6 +22,7 @@
 #include "Logger.hpp"
 #include "Clock.hpp"
 #include "DownlinkPlanner.hpp"
+// #include "Logger.hpp"
 
 /**
  * Maximum number of ASDSs that can be registered to an application instance
