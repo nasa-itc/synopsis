@@ -82,6 +82,8 @@ void owls_destroy_prioritized_data_string(char* deleteme);
 int owls_add_dpmsg();
 int owls_prioritize_data();
 void owls_set_sigma(double sigma);
+void reset_dp_counter();
+int get_dp_counter();
 
 #ifdef __cplusplus
 }

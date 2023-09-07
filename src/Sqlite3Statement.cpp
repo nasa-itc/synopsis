@@ -52,7 +52,7 @@ namespace Synopsis {
   void Sqlite3Statement::bind(int pos, const std::string& val)
   {
     int rc;
-    rc = sqlite3_bind_text(_stmt, pos+1, val.c_str(), val.length()+1, SQLITE_TRANSIENT);
+    rc = sqlite3_bind_text(_stmt, pos+1, val.c_str(), val.length()+1, SQLITE_TRANSIENT); // RB-ITC Change val.length()+1
     throwIfError(rc);
   }
 

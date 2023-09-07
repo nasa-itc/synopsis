@@ -29,7 +29,7 @@ using json = nlohmann::json;
 // This needs to be modified in order utilize a database, rather than build as we have been.
 // Perhaps it will be swapped back, but it is trivial to do so.
 //Synopsis::SqliteASDPDB db(":memory:");
-Synopsis::SqliteASDPDB db("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_bundle_20221223T144226.db");
+Synopsis::SqliteASDPDB db("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_asdpdb_20230815_copy.db");
 
 Synopsis::StdLogger logger;
 Synopsis::LinuxClock clock2;
@@ -38,42 +38,83 @@ Synopsis::MaxMarginalRelevanceDownlinkPlanner planner;
 Synopsis::Application app(&db, &planner, &logger, &clock2);
 Synopsis::PassthroughASDS pt_asds;
 
-
 std::vector<std::string> prioritized_uris;
 std::vector<int> prioritized_list;
 
+int dp_counter = 0;
+
+/**
+ * ITC Function to reset the value of the DP MSG Counter to 0
+*/
+void reset_dp_counter(){
+    dp_counter = 0;
+}
+
+/**
+ * ITC Function to get the value of the DP MSG Counter
+*/
+int get_dp_counter(){
+    return dp_counter;
+}
+
+
+std::string get_absolute_data_path(std::string relative_path_str) {
+    char sep = '/';
+    const char* env_p = std::getenv("SYNOPSIS_TEST_DATA");
+    //EXPECT_NE(nullptr, env_p);
+    std::string base_path(env_p);
+    if (base_path[base_path.length()] != sep) {
+        return base_path + sep + relative_path_str;
+    } else {
+        return base_path + relative_path_str;
+    }
+}
+
 /**
  * ITC Function for creation of dpmsg based on Owls pre-canned data
- * Note:  This requires some setup and the existence of data or some erroneous behavior will occur.
+ * Note:  This requires some asset directory setup and the existence of data or some erroneous behavior will occur.
  * @return: Synopsis::Status resulting from the app.accept_dp wrapped within
 */
-int owls_add_dpmsg(){ // Rename this to setup or reset database?
+int owls_add_dpmsg(){ 
     Synopsis::Status status = Synopsis::Status::FAILURE;
-    int counter = 0; // Hacky way of adding OWLS Data
-    while(counter < 7)
-    {
-        if (counter > 6){
-            printf("No Data to receive!\n");
-            break;
-        }
-        else{
-            printf("SYN_APP: Adding Data Product %d\n", counter);
-            std::string data_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/onboard/asdp00000000" + std::to_string(counter));
-            std::string metadata_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/bundle/asdp00000000" + std::to_string(counter) + "_meta.json");
-            Synopsis::DpMsg msg("owls", "helm", data_path, metadata_path, true);
 
-            status = app.accept_dp(msg);
-            if (status != Synopsis::Status::SUCCESS) { break; }    
-            counter++;
-        }
+    if (dp_counter > 7){
+        printf("*! Unable to add additional Data!\n");
+        status = Synopsis::Status::FAILURE;
     }
+    else{
+        printf("** SYN_APP: Adding Data Product %d\n", dp_counter);
+        std::string data_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + ".tgz");
+        std::string metadata_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + "_meta.json");
+        
+
+        printf("STRINGS: \n\t%s\n\t%s\n", data_path.c_str(), metadata_path.c_str());
+        std::string owls_string = "owls";
+        std::string helm_string = "helm";
+        
+        Synopsis::DpMsg msg("owls", "helm", data_path, metadata_path, true);
+
+        status = app.accept_dp(msg);
+    }    
     
+    if (status != Synopsis::Status::SUCCESS){
+        printf("*! Error Adding DPMSG to DB!\n");
+    }
+    else{
+        printf("** Adding DPMSG to DB!\n");
+        dp_counter++;
+    }
+
     return status;
 }
 
+/**
+ * ITC Function to update the Sigma Value
+ * Modifies the SImilarity Config
+*/
 void owls_set_sigma(double sigma)
 {
-    printf("INCOMING SIGMA: %f\n", sigma);
+    printf("* INCOMING SIGMA: %f\n", sigma);
     std::string similarity("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_similarity_config.json");
     std::ifstream json_in(similarity);
     json j_sigma;
@@ -112,7 +153,7 @@ int owls_prioritize_data(){
         //printf("NAME: %s\n", temp_msg.get_uri().c_str());
     }
     for (auto uri : prioritized_uris){
-        printf("URI: %s\n", uri.c_str());
+        printf("** SYNOPSIS URI: %s\n", uri.c_str());
     }
 
     return Synopsis::Status::SUCCESS;
@@ -165,7 +206,9 @@ int get_aspd_id(char* uri){
 */
 char* owls_get_prioritized_data(int index){
     size_t uri_size = prioritized_uris.size();
-    if((uri_size != 0) && (0 <= index <= 7) && (index <= uri_size) ){
+    //printf("URI SIZE: %d\n", uri_size);
+    if((uri_size != 0) && (0 <= index <= 8) && (index < uri_size) ){
+        //printf("INSIDE\n");
         size_t len = strlen(prioritized_uris[index].c_str())+1;
         char* returnval = new char[len];
         strcpy(returnval, (char*)prioritized_uris[index].c_str());
@@ -173,21 +216,25 @@ char* owls_get_prioritized_data(int index){
         return returnval;
         }
     else{
+        //printf("RETURNING NULL\n");
         return NULL;
     }
 }
 
-//TODO: Description
+/**
+ * ITC Function to update dataproduct status on successful downlink
+ * Modifies the DLState to DOWNLINKED
+*/
 void owls_update_downlink_status(char* dpname){
     auto itr = std::find(prioritized_uris.begin(), prioritized_uris.end(), dpname);
     if(itr != prioritized_uris.end()){
         int aspd_id = get_aspd_id(dpname);
         Synopsis::Status status = db.update_downlink_state(aspd_id, Synopsis::DownlinkState::DOWNLINKED);
         //prioritized_uris.erase(itr);
-        printf("DP UPDATED\n");
+        printf("** SYNOPSIS DP UPDATED\n");
     }   
     else{
-        printf("DP NOT FOUND!\n");
+        printf("*! SYNOPSIS DP NOT FOUND!\n");
     }
 }        
 
@@ -208,10 +255,10 @@ void itc_setup_ptasds(){
     status = app.add_asds("owls", "helm", &pt_asds);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     if(result == E_SUCCESS){
-        printf("ITC PTASDS SETUP SUCCESSFUL!\n");
+        printf("** SYNOPSIS PTASDS SETUP SUCCESSFUL!\n");
     }
     else{
-        printf("ITC PTASDS SETUP UNSUCCESSFUL!\n");
+        printf("*! SYNOPSIS PTASDS SETUP UNSUCCESSFUL!\n");
     }
 }
 
@@ -223,7 +270,7 @@ void itc_setup_ptasds(){
 size_t itc_app_get_memory_requiremennt(){
     size_t mem_req_bytes = 0;
     mem_req_bytes = app.memory_requirement();        
-    printf("REQ Bytes: %d\n", mem_req_bytes);
+    printf("** SYNOPSIS REQ Bytes: %d\n", mem_req_bytes);
     return mem_req_bytes;
 }
 
@@ -234,13 +281,14 @@ size_t itc_app_get_memory_requiremennt(){
 */
 void itc_app_init(size_t bytes, void* memory){ 
     Synopsis::Status status;
+    
     status = app.init(bytes, memory);
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     if(result == E_SUCCESS){
-        printf("ITC APP INIT SUCCESSFUL!\n");
+        printf("** SYNOPSIS APP INIT SUCCESSFUL!\n");
     }
     else{
-        printf("ITC APP INIT UNSUCCESSFUL!\n");
+        printf("*! SYNOPSIS APP INIT UNSUCCESSFUL!\n");
     }
 }
 
@@ -253,9 +301,9 @@ void itc_app_deinit(void* memory){
     status = app.deinit();
     ITC_STATUS_MESSAGE result = (ITC_STATUS_MESSAGE)status;
     if(result == E_SUCCESS){
-        printf("ITC DEINIT SUCCESSFUL!\n");
+        printf("** SYNOPSIS DEINIT SUCCESSFUL!\n");
     }
     else{
-        printf("ITC DEINIT UNSUCCESSFUL!\n");
+        printf("*! SYNOPSIS DEINIT UNSUCCESSFUL!\n");
     }
 }

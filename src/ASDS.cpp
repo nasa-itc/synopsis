@@ -6,11 +6,12 @@
  */
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <iostream>
+#include <sys/stat.h>
 
 #include "ASDS.hpp"
 
 namespace Synopsis {
-
 
     size_t get_file_size(std::string filename) {
         std::ifstream file(filename, std::ios::binary | std::ios::ate);
