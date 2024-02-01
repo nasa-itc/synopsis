@@ -15,6 +15,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
+
 using json = nlohmann::json;
 
  typedef enum {
@@ -29,7 +30,7 @@ using json = nlohmann::json;
 // This needs to be modified in order utilize a database, rather than build as we have been.
 // Perhaps it will be swapped back, but it is trivial to do so.
 //Synopsis::SqliteASDPDB db(":memory:");
-Synopsis::SqliteASDPDB db("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_asdpdb_20230815_copy.db");
+Synopsis::SqliteASDPDB db("./data/owls/owls_asdpdb_20230815_copy.db");
 
 Synopsis::StdLogger logger;
 Synopsis::LinuxClock clock2;
@@ -75,8 +76,10 @@ std::string get_absolute_data_path(std::string relative_path_str) {
  * Note:  This requires some asset directory setup and the existence of data or some erroneous behavior will occur.
  * @return: Synopsis::Status resulting from the app.accept_dp wrapped within
 */
+
 int owls_add_dpmsg(){ 
     Synopsis::Status status = Synopsis::Status::FAILURE;
+
 
     if (dp_counter > 7){
         printf("*! Unable to add additional Data!\n");
@@ -84,16 +87,18 @@ int owls_add_dpmsg(){
     }
     else{
         printf("** SYN_APP: Adding Data Product %d\n", dp_counter);
-        std::string data_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + ".tgz");
-        std::string metadata_path("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + "_meta.json");
+        std::string data_path("./data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + ".tgz");
+        std::string metadata_path("./data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + "_meta.json");
         
 
         printf("STRINGS: \n\t%s\n\t%s\n", data_path.c_str(), metadata_path.c_str());
         std::string owls_string = "owls";
         std::string helm_string = "helm";
         
+        printf("Here1\n");
         Synopsis::DpMsg msg("owls", "helm", data_path, metadata_path, true);
-
+        //Synopsis::DpMsg msg("owls", "helm", "/data/owls/bundle/asdp000000000.tgz", "/data/owls/bundle/asdp000000000_meta.json", true);
+        printf("Here2\n");
         status = app.accept_dp(msg);
     }    
     
@@ -133,8 +138,8 @@ void owls_set_sigma(double sigma)
 int owls_prioritize_data(){
     if(prioritized_list.size() != 0) {prioritized_list.clear();}
     //std::string asdpdb("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_bundle_20221223T144226.db");
-    std::string rule_file("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/empty_rules.json");
-    std::string similarity("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_similarity_config.json");
+    std::string rule_file("./data/owls/empty_rules.json");
+    std::string similarity("./data/owls/owls_similarity_config.json");
     
     Synopsis::Status status;
     

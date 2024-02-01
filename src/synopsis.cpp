@@ -171,8 +171,13 @@ namespace Synopsis {
 
     Status Application::accept_dp(DpMsg msg) {
 
+        printf("Here3\n");
         std::string iname = msg.get_instrument_name();
+        printf("String3: %s\n", iname.c_str());
+        
+        printf("Here4\n");
         std::string dp_type = msg.get_type();
+        printf("String4: %s\n", dp_type.c_str());
 
         Status status = SUCCESS;
         Status status_i;
