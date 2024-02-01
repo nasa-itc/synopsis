@@ -24,13 +24,14 @@ using json = nlohmann::json;
     E_TIMEOUT = 2
  }ITC_STATUS_MESSAGE;
 
-//Owls Test
+#define SYNOPSIS_DATA_PATH "./data/owls/"
+#define SYNOPSIS_DATABASE_PATH "./data/owls/owls_asdpdb_20230815_copy.db"
+#define SYNOPSIS_DATA_BUNDLE_PATH "./data/owls/bundle/asdp00000000"
+#define SYNOPSIS_SIMILARITY_CONFIG_PATH "/data/owls/owls_similarity_config.json"
+#define SYNOPSIS_RULES_PATH "./data/owls/empty_rules.json"
 
-
-// This needs to be modified in order utilize a database, rather than build as we have been.
-// Perhaps it will be swapped back, but it is trivial to do so.
 //Synopsis::SqliteASDPDB db(":memory:");
-Synopsis::SqliteASDPDB db("./data/owls/owls_asdpdb_20230815_copy.db");
+Synopsis::SqliteASDPDB db(SYNOPSIS_DATABASE_PATH);
 
 Synopsis::StdLogger logger;
 Synopsis::LinuxClock clock2;
@@ -62,7 +63,6 @@ int get_dp_counter(){
 std::string get_absolute_data_path(std::string relative_path_str) {
     char sep = '/';
     const char* env_p = std::getenv("SYNOPSIS_TEST_DATA");
-    //EXPECT_NE(nullptr, env_p);
     std::string base_path(env_p);
     if (base_path[base_path.length()] != sep) {
         return base_path + sep + relative_path_str;
@@ -80,25 +80,22 @@ std::string get_absolute_data_path(std::string relative_path_str) {
 int owls_add_dpmsg(){ 
     Synopsis::Status status = Synopsis::Status::FAILURE;
 
-
     if (dp_counter > 7){
         printf("*! Unable to add additional Data!\n");
         status = Synopsis::Status::FAILURE;
     }
     else{
-        printf("** SYN_APP: Adding Data Product %d\n", dp_counter);
-        std::string data_path("./data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + ".tgz");
-        std::string metadata_path("./data/owls/bundle/asdp00000000" + std::to_string(dp_counter) + "_meta.json");
+        printf("** SYNOPSIS: Adding Data Product %d\n", dp_counter);
+        std::string data_path(SYNOPSIS_DATA_BUNDLE_PATH + std::to_string(dp_counter) + ".tgz");
+        std::string metadata_path(SYNOPSIS_DATA_BUNDLE_PATH + std::to_string(dp_counter) + "_meta.json");
         
 
         printf("STRINGS: \n\t%s\n\t%s\n", data_path.c_str(), metadata_path.c_str());
         std::string owls_string = "owls";
         std::string helm_string = "helm";
         
-        printf("Here1\n");
         Synopsis::DpMsg msg("owls", "helm", data_path, metadata_path, true);
-        //Synopsis::DpMsg msg("owls", "helm", "/data/owls/bundle/asdp000000000.tgz", "/data/owls/bundle/asdp000000000_meta.json", true);
-        printf("Here2\n");
+
         status = app.accept_dp(msg);
     }    
     
@@ -120,7 +117,7 @@ int owls_add_dpmsg(){
 void owls_set_sigma(double sigma)
 {
     printf("* INCOMING SIGMA: %f\n", sigma);
-    std::string similarity("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_similarity_config.json");
+    std::string similarity(SYNOPSIS_SIMILARITY_CONFIG_PATH);
     std::ifstream json_in(similarity);
     json j_sigma;
     json_in >> j_sigma;
@@ -138,8 +135,8 @@ void owls_set_sigma(double sigma)
 int owls_prioritize_data(){
     if(prioritized_list.size() != 0) {prioritized_list.clear();}
     //std::string asdpdb("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_bundle_20221223T144226.db");
-    std::string rule_file("./data/owls/empty_rules.json");
-    std::string similarity("./data/owls/owls_similarity_config.json");
+    std::string rule_file(SYNOPSIS_RULES_PATH);
+    std::string similarity(SYNOPSIS_SIMILARITY_CONFIG_PATH);
     
     Synopsis::Status status;
     
