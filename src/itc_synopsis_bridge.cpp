@@ -15,7 +15,6 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-
 using json = nlohmann::json;
 
  typedef enum {
@@ -58,7 +57,6 @@ void reset_dp_counter(){
 int get_dp_counter(){
     return dp_counter;
 }
-
 
 std::string get_absolute_data_path(std::string relative_path_str) {
     char sep = '/';
@@ -134,25 +132,20 @@ void owls_set_sigma(double sigma)
 */
 int owls_prioritize_data(){
     if(prioritized_list.size() != 0) {prioritized_list.clear();}
-    //std::string asdpdb("/home/nos3/Desktop/github-nos3/fsw/build/exe/cpu1/data/owls/owls_bundle_20221223T144226.db");
     std::string rule_file(SYNOPSIS_RULES_PATH);
     std::string similarity(SYNOPSIS_SIMILARITY_CONFIG_PATH);
     
-    Synopsis::Status status;
-    
+    Synopsis::Status status;    
     
     status = app.prioritize(rule_file, similarity, 1e9, prioritized_list);
-    //printf("LIST SIZE: %d\n", prioritized_list.size());
     if (status != Synopsis::Status::SUCCESS) { return status; }
 
     if(prioritized_uris.size() != 0) {prioritized_uris.clear();}
     
     for (auto i : prioritized_list) {
         Synopsis::DpDbMsg temp_msg;
-        //printf("I: %d\n", i);
         app.get_data_product(i, temp_msg);
         prioritized_uris.push_back(temp_msg.get_uri());
-        //printf("NAME: %s\n", temp_msg.get_uri().c_str());
     }
     for (auto uri : prioritized_uris){
         printf("** SYNOPSIS URI: %s\n", uri.c_str());
@@ -182,15 +175,11 @@ int get_aspd_id(char* uri){
     int returnval = -1;
     
     std::string orig(uri);
-    //printf("ORIG: %s\n", orig.c_str());
     for (auto i : prioritized_list){
         Synopsis::DpDbMsg temp_msg;
         app.get_data_product(i, temp_msg);
-        //printf("INT I: %d\n", i);
         std::string comp(temp_msg.get_uri().c_str());
-        //printf("COMP: %s\n", comp.c_str());
         int match = orig.compare(temp_msg.get_uri());
-        //printf("MATCH: %d\n", match);
         if( match == 0){
             returnval = temp_msg.get_dp_id();
             break;
@@ -208,9 +197,7 @@ int get_aspd_id(char* uri){
 */
 char* owls_get_prioritized_data(int index){
     size_t uri_size = prioritized_uris.size();
-    //printf("URI SIZE: %d\n", uri_size);
     if((uri_size != 0) && (0 <= index <= 8) && (index < uri_size) ){
-        //printf("INSIDE\n");
         size_t len = strlen(prioritized_uris[index].c_str())+1;
         char* returnval = new char[len];
         strcpy(returnval, (char*)prioritized_uris[index].c_str());
@@ -218,7 +205,6 @@ char* owls_get_prioritized_data(int index){
         return returnval;
         }
     else{
-        //printf("RETURNING NULL\n");
         return NULL;
     }
 }
@@ -232,7 +218,6 @@ void owls_update_downlink_status(char* dpname){
     if(itr != prioritized_uris.end()){
         int aspd_id = get_aspd_id(dpname);
         Synopsis::Status status = db.update_downlink_state(aspd_id, Synopsis::DownlinkState::DOWNLINKED);
-        //prioritized_uris.erase(itr);
         printf("** SYNOPSIS DP UPDATED\n");
     }   
     else{
