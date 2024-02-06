@@ -29,7 +29,7 @@ using json = nlohmann::json;
 #define SYNOPSIS_SIMILARITY_CONFIG_PATH "./data/owls/owls_similarity_config.json"
 #define SYNOPSIS_RULES_PATH "./data/owls/empty_rules.json"
 
-//Synopsis::SqliteASDPDB db(":memory:");
+//Synopsis::SqliteASDPDB db(":memory:"); //Can just use in-memory
 Synopsis::SqliteASDPDB db(SYNOPSIS_DATABASE_PATH);
 
 Synopsis::StdLogger logger;
@@ -207,7 +207,9 @@ char* owls_get_prioritized_data(int index){
 }
 
 
-// Rework this to use an int instead of a string.
+/**
+ * ITC Function to convert the most prioritized file status to DONWLINKED
+*/
 void owls_update_downlink_status_prio1(){
     size_t uri_size = prioritized_uris.size();
     if(uri_size !=0) //change to list 
