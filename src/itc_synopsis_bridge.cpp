@@ -24,9 +24,9 @@ using json = nlohmann::json;
  }ITC_STATUS_MESSAGE;
 
 #define SYNOPSIS_DATA_PATH "./data/owls/"
-#define SYNOPSIS_DATABASE_PATH "./data/owls/owls_asdpdb_20230815_copy.db"
+#define SYNOPSIS_DATABASE_PATH "./data/owls/db_new.db"
 #define SYNOPSIS_DATA_BUNDLE_PATH "./data/owls/bundle/asdp00000000"
-#define SYNOPSIS_SIMILARITY_CONFIG_PATH "/data/owls/owls_similarity_config.json"
+#define SYNOPSIS_SIMILARITY_CONFIG_PATH "./data/owls/owls_similarity_config.json"
 #define SYNOPSIS_RULES_PATH "./data/owls/empty_rules.json"
 
 //Synopsis::SqliteASDPDB db(":memory:");
@@ -42,7 +42,7 @@ Synopsis::PassthroughASDS pt_asds;
 std::vector<std::string> prioritized_uris;
 std::vector<int> prioritized_list;
 
-int dp_counter = 0;
+int dp_counter = 0;  // This is a dumb counter for this example.  Users need to handle how their data will be managed.
 
 /**
  * ITC Function to reset the value of the DP MSG Counter to 0
@@ -85,12 +85,9 @@ int owls_add_dpmsg(){
     else{
         printf("** SYNOPSIS: Adding Data Product %d\n", dp_counter);
         std::string data_path(SYNOPSIS_DATA_BUNDLE_PATH + std::to_string(dp_counter) + ".tgz");
-        std::string metadata_path(SYNOPSIS_DATA_BUNDLE_PATH + std::to_string(dp_counter) + "_meta.json");
-        
+        std::string metadata_path(SYNOPSIS_DATA_BUNDLE_PATH + std::to_string(dp_counter) + "_meta.json");        
 
         printf("STRINGS: \n\t%s\n\t%s\n", data_path.c_str(), metadata_path.c_str());
-        std::string owls_string = "owls";
-        std::string helm_string = "helm";
         
         Synopsis::DpMsg msg("owls", "helm", data_path, metadata_path, true);
 
@@ -190,14 +187,14 @@ int get_aspd_id(char* uri){
 
 /**
  * ITC Function for the simulation of dowlinking prioritized files
- * Note:  This function retreives the highest priority file, and uses cFS OS calls
+ * Note:  This function retreives the highest priority file, and returns its name.uses cFS OS calls
  * to OS_mv the data to a simulated downlink location.  It then updates the downlink state
  * within the DB so that it is no longer part of the prioritization list.
  * @return: char*: The URI of the prioritized data to downlink
 */
 char* owls_get_prioritized_data(int index){
     size_t uri_size = prioritized_uris.size();
-    if((uri_size != 0) && (0 <= index <= 8) && (index < uri_size) ){
+    if((uri_size != 0) && (0 <= index <= 8) && (index < uri_size) ){ // 8 in this case as example data only contains 7 data products
         size_t len = strlen(prioritized_uris[index].c_str())+1;
         char* returnval = new char[len];
         strcpy(returnval, (char*)prioritized_uris[index].c_str());
@@ -206,6 +203,27 @@ char* owls_get_prioritized_data(int index){
         }
     else{
         return NULL;
+    }
+}
+
+
+// Rework this to use an int instead of a string.
+void owls_update_downlink_status_prio1(){
+    size_t uri_size = prioritized_uris.size();
+    if(uri_size !=0) //change to list 
+    {
+        printf("prioritized list\n");
+        for(int i: prioritized_list)
+            std::cout << i << ' ';
+        
+        int aspd_id = prioritized_list[0];
+        db.update_downlink_state(aspd_id, Synopsis::DownlinkState::DOWNLINKED);
+
+        // //char* dpmsg_name = (char *)prioritized_uris[0].c_str();
+        // owls_update_downlink_status(dpmsg_name);
+        printf("** SYNOPSIS DP Updated\n");
+        owls_prioritize_data();
+        printf("** SYNOPSIS Priotization Complete\n");
     }
 }
 

@@ -85,6 +85,8 @@ void owls_set_sigma(double sigma);
 void reset_dp_counter();
 int get_dp_counter();
 
+void owls_update_downlink_status_prio1();
+
 #ifdef __cplusplus
 }
 #endif
