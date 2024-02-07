@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(synopsis VERSION 0.8.0 DESCRIPTION "Science Yield improvemeNt via Onboard Prioritization and Summary of Information System")
+project(synopsis DESCRIPTION "Science Yield improvemeNt via Onboard Prioritization and Summary of Information System")
 
 # GoogleTest requires at least C++11
 set(CMAKE_CXX_STANDARD 11)
@@ -40,7 +40,6 @@ src/MaxMarginalRelevanceDownlinkPlanner.cpp
 src/Similarity.cpp
 src/itc_synopsis_bridge.cpp
 )
-set_target_properties(synopsis PROPERTIES VERSION ${PROJECT_VERSION})
 set_target_properties(synopsis PROPERTIES PUBLIC_HEADER include/synopsis.hpp)
 target_include_directories(synopsis PRIVATE include)
 target_include_directories(synopsis PRIVATE src)
