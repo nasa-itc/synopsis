@@ -7,7 +7,8 @@ option(SYNOPSIS_TEST "Synopsis Test" OFF)
 # GoogleTest requires at least C++11
 set(CMAKE_CXX_STANDARD 11)
 #set(CMAKE_CXX_FLAGS "-Wnon-virtual-dtor")
-#set(CMAKE_C_FLAGS "")
+set(CMAKE_C_FLAGS "-Wno-format")
+set(CMAKE_CXX_FLAGS "-Wno-format")
 
 #FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
 #FetchContent_MakeAvailable(json)
