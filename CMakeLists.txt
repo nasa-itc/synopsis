@@ -6,12 +6,14 @@ option(SYNOPSIS_TEST "Synopsis Test" OFF)
 
 # GoogleTest requires at least C++11
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_FLAGS "-Wnon-virtual-dtor -m32")
-set(CMAKE_C_FLAGS "-m32")
+#set(CMAKE_CXX_FLAGS "-Wnon-virtual-dtor")
+set(CMAKE_C_FLAGS "-Wno-format")
+set(CMAKE_CXX_FLAGS "-Wno-format")
 
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
-FetchContent_MakeAvailable(json)
+#FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz)
+#FetchContent_MakeAvailable(json)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(json)
 
 if(SYNOPSIS_TEST)
     FetchContent_Declare(googletest URL https://github.com/google/googletest/archive/609281088cfefc76f9d0ce82e1ff6c30cc3591e5.zip)
